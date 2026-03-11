@@ -38,8 +38,9 @@ FROM alpine:3.22
 
 ARG ENABLE_SANDBOX=false
 ARG ENABLE_PYTHON=false
+ARG ENABLE_NODE=false
 
-# Install ca-certificates + wget (healthcheck) + optionally docker-cli (sandbox) + python3
+# Install ca-certificates + wget (healthcheck) + optionally docker-cli (sandbox) + python3 + nodejs
 RUN set -eux; \
     apk add --no-cache ca-certificates wget; \
     if [ "$ENABLE_SANDBOX" = "true" ]; then \
@@ -47,6 +48,9 @@ RUN set -eux; \
     fi; \
     if [ "$ENABLE_PYTHON" = "true" ]; then \
         apk add --no-cache python3 py3-pip; \
+    fi; \
+    if [ "$ENABLE_NODE" = "true" ]; then \
+        apk add --no-cache nodejs npm; \
     fi
 
 # Non-root user
