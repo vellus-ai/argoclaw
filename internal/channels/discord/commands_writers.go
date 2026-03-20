@@ -89,13 +89,15 @@ func (c *Channel) handleWriterCommand(m *discordgo.MessageCreate, action string)
 		return
 	}
 
-	// Guild-wide wildcard scope: matches any user context (guild:{guildID}:user:{userID})
-	// via matchWildcard in CheckPermission.
+	// Guild-wide wildcard scope for grant/revoke/list operations.
 	scope := fmt.Sprintf("guild:%s:*", m.GuildID)
 	senderID := m.Author.ID
 
-	// Only existing writers can manage the list.
-	isWriter, err := c.configPermStore.CheckPermission(ctx, agentID, scope, "file_writer", senderID)
+	// Check sender's writer status using per-user scope. This matches both:
+	// - Auto-bootstrapped per-user perms (guild:{guildID}:user:{senderID}) via exact match
+	// - Guild-wide perms (guild:{guildID}:*) via matchWildcard
+	senderScope := fmt.Sprintf("guild:%s:user:%s", m.GuildID, senderID)
+	isWriter, err := c.configPermStore.CheckPermission(ctx, agentID, senderScope, "file_writer", senderID)
 	if err != nil {
 		slog.Warn("discord writer check failed", "error", err, "sender", senderID)
 		send("Failed to check permissions. Please try again.")
