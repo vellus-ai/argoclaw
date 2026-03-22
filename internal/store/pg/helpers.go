@@ -174,6 +174,8 @@ var allowedTables = map[string]bool{
 	"api_keys": true, "paired_devices": true, "team_messages": true,
 	"delegation_history": true, "agent_shares": true, "user_agent_profiles": true,
 	"team_tasks_comments": true, "team_task_events": true, "team_task_attachments": true,
+	"tenants": true, "tenant_users": true, "tenant_branding": true,
+	"users": true, "user_sessions": true, "password_history": true, "login_audit": true,
 }
 
 // validTableName returns true only if the table is in the strict whitelist.
@@ -228,6 +230,7 @@ var tablesWithUpdatedAt = map[string]bool{
 	"user_agent_overrides": true, "config_secrets": true,
 	"memory_documents": true, "memory_chunks": true, "embedding_cache": true,
 	"secure_cli_binaries": true,
+	"tenants": true, "tenant_branding": true, "users": true,
 }
 
 func tableHasUpdatedAt(table string) bool {
