@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/store/pg"
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/store/pg"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 // SystemSkillStore is the minimal interface needed by the seeder.

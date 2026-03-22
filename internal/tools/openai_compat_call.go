@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // callOpenAICompatJSON sends a raw JSON body to an OpenAI-compatible chat/completions endpoint

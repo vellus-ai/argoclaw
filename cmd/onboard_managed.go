@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/internal/store/pg"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store/pg"
 )
 
 // testPostgresConnection verifies connectivity to Postgres with a 5s timeout.

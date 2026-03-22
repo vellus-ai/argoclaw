@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/agent"
+	"github.com/vellus-ai/argoclaw/internal/agent"
 )
 
 func TestLane_ConcurrencyLimit(t *testing.T) {

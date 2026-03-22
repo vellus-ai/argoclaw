@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/providers/acp"
+	"github.com/vellus-ai/argoclaw/internal/providers/acp"
 )
 
 // ACPProvider implements Provider by orchestrating ACP-compatible agent subprocesses.

@@ -12,7 +12,7 @@ import (
 
 	"tailscale.com/tsnet"
 
-	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/config"
 )
 
 // initTailscale starts an additional Tailscale listener alongside the main gateway.

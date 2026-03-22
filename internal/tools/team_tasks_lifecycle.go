@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 func (t *TeamTasksTool) executeClaim(ctx context.Context, args map[string]any) *Result {

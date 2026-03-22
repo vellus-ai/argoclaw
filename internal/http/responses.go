@@ -9,11 +9,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/agent"
-	"github.com/vellus-ai/arargoclaw/internal/permissions"
-	"github.com/vellus-ai/arargoclaw/internal/sessions"
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/agent"
+	"github.com/vellus-ai/argoclaw/internal/permissions"
+	"github.com/vellus-ai/argoclaw/internal/sessions"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/tools"
 )
 
 // ResponsesHandler handles POST /v1/responses (OpenResponses protocol).

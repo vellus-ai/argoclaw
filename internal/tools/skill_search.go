@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/skills"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/skills"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // SkillSearchTool implements the skill_search tool with BM25 search

@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/cron"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/cron"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 const defaultCronCacheTTL = 2 * time.Minute

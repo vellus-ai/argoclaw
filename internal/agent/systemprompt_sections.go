@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/bootstrap"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/bootstrap"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // mcpToolDescMaxLen is the max character length for MCP tool descriptions

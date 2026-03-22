@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/vellus-ai/arargoclaw/internal/channels"
+	"github.com/vellus-ai/argoclaw/internal/channels"
 )
 
 // GroupMemberLister abstracts listing members of a group chat.

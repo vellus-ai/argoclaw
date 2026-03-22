@@ -14,8 +14,8 @@ import (
 
 	"github.com/mymmrac/telego"
 
-	"github.com/vellus-ai/arargoclaw/internal/channels/media"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/channels/media"
+	"github.com/vellus-ai/argoclaw/internal/tools"
 )
 
 const (

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/config"
 )
 
 // sttTestResponse mirrors the STT proxy JSON response for test assertions.

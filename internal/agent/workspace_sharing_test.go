@@ -3,7 +3,7 @@ package agent
 import (
 	"testing"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 func TestShouldShareWorkspace_NilConfig(t *testing.T) {

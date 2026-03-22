@@ -7,9 +7,9 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/vellus-ai/arargoclaw/internal/cache"
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/cache"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // initRedisClient creates a Redis client when built with -tags redis.

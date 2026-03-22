@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/channels"
+	"github.com/vellus-ai/argoclaw/internal/channels"
 )
 
 // Matching TS pi-embedded-helpers/errors.ts error classification.

@@ -15,7 +15,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // Config configures the OpenTelemetry OTLP exporter.
@@ -53,6 +53,13 @@ func New(ctx context.Context, cfg Config) (*Exporter, error) {
 	)
 	if err != nil {
 		return nil, fmt.Errorf("otel resource: %w", err)
+	}
+
+	// SECURITY: Warn when TLS verification is disabled.
+	if cfg.Insecure {
+		slog.Warn("security.tls_verification_disabled",
+			"endpoint", cfg.Endpoint,
+			"msg", "OTLP TLS verification disabled — use only for local development")
 	}
 
 	var exporter sdktrace.SpanExporter

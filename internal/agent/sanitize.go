@@ -21,7 +21,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // SanitizeAssistantContent applies the full sanitization pipeline to assistant

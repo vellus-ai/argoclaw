@@ -5,9 +5,9 @@ package cmd
 import (
 	"log/slog"
 
-	"github.com/vellus-ai/arargoclaw/internal/cache"
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/cache"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // initRedisClient is a no-op when built without the "redis" tag.

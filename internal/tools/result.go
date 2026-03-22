@@ -1,8 +1,8 @@
 package tools
 
 import (
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // Result is the unified return type from tool execution.

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/agent"
+	"github.com/vellus-ai/argoclaw/internal/agent"
 )
 
 // QueueMode determines how incoming messages are handled when an agent

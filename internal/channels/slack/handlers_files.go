@@ -14,7 +14,7 @@ import (
 
 	slackapi "github.com/slack-go/slack"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/bus"
 )
 
 // --- Message debounce/batching ---

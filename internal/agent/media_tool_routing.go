@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"log/slog"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/providers"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/tools"
 )
 
 // hasReadImageProvider checks if the read_image builtin tool has a dedicated provider configured.

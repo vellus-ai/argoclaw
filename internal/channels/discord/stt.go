@@ -3,7 +3,7 @@ package discord
 import (
 	"context"
 
-	"github.com/vellus-ai/arargoclaw/internal/channels/media"
+	"github.com/vellus-ai/argoclaw/internal/channels/media"
 )
 
 // transcribeAudio calls the shared STT proxy service with the given audio file.

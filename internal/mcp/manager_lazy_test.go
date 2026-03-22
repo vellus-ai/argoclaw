@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	mcpgo "github.com/mark3labs/mcp-go/mcp"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/tools"
 )
 
 // makeBridgeTool creates a minimal BridgeTool for testing without a real MCP connection.

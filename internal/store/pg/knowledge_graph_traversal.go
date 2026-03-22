@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/lib/pq"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // Traverse walks the knowledge graph from startEntityID up to maxDepth hops

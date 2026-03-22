@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	httpapi "github.com/vellus-ai/arargoclaw/internal/http"
-	"github.com/vellus-ai/arargoclaw/internal/providers"
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/internal/store/pg"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	httpapi "github.com/vellus-ai/argoclaw/internal/http"
+	"github.com/vellus-ai/argoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store/pg"
+	"github.com/vellus-ai/argoclaw/internal/tools"
 )
 
 // wireHTTP creates HTTP handlers (agents + skills + traces + MCP + custom tools + channel instances + providers + delegations + builtin tools + pending messages).

@@ -54,14 +54,15 @@ RUN set -eux; \
     if [ "$ENABLE_FULL_SKILLS" = "true" ]; then \
         apk add --no-cache python3 py3-pip nodejs npm pandoc github-cli poppler-utils bash; \
         pip3 install --no-cache-dir --break-system-packages \
-            pypdf openpyxl pandas python-pptx markitdown defusedxml lxml \
-            pdfplumber pdf2image anthropic; \
+            pypdf==5.4.0 openpyxl==3.1.5 pandas==2.2.3 python-pptx==1.0.2 \
+            markitdown==0.1.1 defusedxml==0.7.1 lxml==5.3.1 \
+            pdfplumber==0.11.6 pdf2image==1.17.0 anthropic==0.52.0; \
         npm install -g --cache /tmp/npm-cache docx pptxgenjs; \
         rm -rf /tmp/npm-cache /root/.cache /var/cache/apk/*; \
     else \
         if [ "$ENABLE_PYTHON" = "true" ]; then \
             apk add --no-cache python3 py3-pip; \
-            pip3 install --no-cache-dir --break-system-packages edge-tts; \
+            pip3 install --no-cache-dir --break-system-packages edge-tts==7.0.2; \
         fi; \
         if [ "$ENABLE_NODE" = "true" ]; then \
             apk add --no-cache nodejs npm; \

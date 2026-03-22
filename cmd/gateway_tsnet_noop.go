@@ -6,7 +6,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/config"
 )
 
 // initTailscale is a no-op when built without the "tsnet" tag.

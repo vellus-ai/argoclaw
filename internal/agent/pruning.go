@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"unicode/utf8"
 
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // Context pruning defaults matching TS DEFAULT_CONTEXT_PRUNING_SETTINGS.

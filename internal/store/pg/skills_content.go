@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // skillFrontmatterRe matches YAML frontmatter (--- delimited) at the start of a file.

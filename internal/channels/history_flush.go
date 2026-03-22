@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // StartFlusher starts the background DB flush goroutine. No-op if RAM-only.

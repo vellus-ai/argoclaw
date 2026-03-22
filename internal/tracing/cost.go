@@ -1,8 +1,8 @@
 package tracing
 
 import (
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // CalculateCost computes the USD cost for a single LLM call based on token usage and pricing.

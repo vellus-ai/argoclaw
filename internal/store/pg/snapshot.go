@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // PGSnapshotStore implements store.SnapshotStore backed by Postgres.
@@ -182,6 +183,7 @@ func (s *PGSnapshotStore) GetBreakdown(ctx context.Context, q store.SnapshotQuer
 		orderExpr = "SUM(CASE WHEN provider != '' THEN input_tokens ELSE 0 END) DESC"
 		extraFilter = ""
 	default:
+		slog.Warn("security.invalid_groupby_value", "groupBy", groupBy)
 		groupCol = "provider"
 		orderExpr = "SUM(input_tokens) DESC"
 		extraFilter = " AND provider != '' AND model != ''"

@@ -6,10 +6,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
-// Version is set at build time via -ldflags "-X github.com/vellus-ai/arargoclaw/cmd.Version=v1.0.0"
+// Version is set at build time via -ldflags "-X github.com/vellus-ai/argoclaw/cmd.Version=v1.0.0"
 var Version = "dev"
 
 var (

@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // geminiNativeDocumentCall sends a document to Gemini's native generateContent API.

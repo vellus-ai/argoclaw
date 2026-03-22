@@ -3,8 +3,8 @@ package cmd
 import (
 	"context"
 
-	"github.com/vellus-ai/arargoclaw/internal/agent"
-	"github.com/vellus-ai/arargoclaw/internal/scheduler"
+	"github.com/vellus-ai/argoclaw/internal/agent"
+	"github.com/vellus-ai/argoclaw/internal/scheduler"
 )
 
 // makeHeartbeatRunFn creates a function that routes a heartbeat run through the scheduler's cron lane.

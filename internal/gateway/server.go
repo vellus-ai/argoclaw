@@ -15,16 +15,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 
-	"github.com/vellus-ai/arargoclaw/internal/agent"
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	httpapi "github.com/vellus-ai/arargoclaw/internal/http"
-	mcpbridge "github.com/vellus-ai/arargoclaw/internal/mcp"
-	"github.com/vellus-ai/arargoclaw/internal/permissions"
-	"github.com/vellus-ai/arargoclaw/internal/providers"
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/internal/agent"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	httpapi "github.com/vellus-ai/argoclaw/internal/http"
+	mcpbridge "github.com/vellus-ai/argoclaw/internal/mcp"
+	"github.com/vellus-ai/argoclaw/internal/permissions"
+	"github.com/vellus-ai/argoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 // Server is the main gateway server handling WebSocket and HTTP connections.

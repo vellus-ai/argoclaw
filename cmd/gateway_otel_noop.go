@@ -5,8 +5,8 @@ package cmd
 import (
 	"context"
 
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/tracing"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/tracing"
 )
 
 // initOTelExporter is a no-op when built without the "otel" tag.

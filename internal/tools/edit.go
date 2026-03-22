@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/sandbox"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/sandbox"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // EditTool performs search-and-replace edits on files.

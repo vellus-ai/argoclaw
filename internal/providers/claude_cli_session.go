@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/config"
 )
 
 // validCLIModels lists accepted model aliases for the Claude CLI.

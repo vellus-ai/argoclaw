@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/channels"
-	"github.com/vellus-ai/arargoclaw/internal/channels/media"
-	"github.com/vellus-ai/arargoclaw/internal/channels/typing"
-	"github.com/vellus-ai/arargoclaw/internal/channels/zalo/personal/protocol"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/channels"
+	"github.com/vellus-ai/argoclaw/internal/channels/media"
+	"github.com/vellus-ai/argoclaw/internal/channels/typing"
+	"github.com/vellus-ai/argoclaw/internal/channels/zalo/personal/protocol"
+	"github.com/vellus-ai/argoclaw/internal/tools"
 )
 
 func (c *Channel) handleMessage(msg protocol.Message) {

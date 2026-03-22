@@ -7,11 +7,11 @@ import (
 	"log/slog"
 	"time"
 
-	httpapi "github.com/vellus-ai/arargoclaw/internal/http"
-	"github.com/vellus-ai/arargoclaw/internal/i18n"
-	"github.com/vellus-ai/arargoclaw/internal/permissions"
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	httpapi "github.com/vellus-ai/argoclaw/internal/http"
+	"github.com/vellus-ai/argoclaw/internal/i18n"
+	"github.com/vellus-ai/argoclaw/internal/permissions"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 // MethodHandler processes a single RPC method request.
@@ -127,7 +127,11 @@ func (r *MethodRouter) handleConnect(ctx context.Context, client *Client, req *p
 	}
 
 	// Path 2: No token configured → operator (backward compat)
+	// SECURITY: Log warning — production deployments MUST set ARGOCLAW_GATEWAY_TOKEN.
 	if configToken == "" {
+		slog.Warn("security.no_gateway_token_configured",
+			"client", client.id,
+			"msg", "gateway running without token — all clients get operator role. Set ARGOCLAW_GATEWAY_TOKEN for production.")
 		client.role = permissions.RoleOperator
 		client.authenticated = true
 		client.userID = params.UserID
@@ -187,6 +191,11 @@ func (r *MethodRouter) handleConnect(ctx context.Context, client *Client, req *p
 	}
 
 	// Path 4: Fallback → viewer (wrong token or pairing not available)
+	// SECURITY: Log all viewer fallbacks — helps detect brute-force or misconfiguration.
+	slog.Warn("security.auth_fallback_to_viewer",
+		"client", client.id,
+		"token_provided", params.Token != "",
+		"sender_id", params.SenderID)
 	client.role = permissions.RoleViewer
 	client.authenticated = true
 	client.userID = params.UserID

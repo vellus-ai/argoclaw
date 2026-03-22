@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/crypto"
+	"github.com/vellus-ai/argoclaw/internal/crypto"
 )
 
 // PGConfigSecretsStore implements store.ConfigSecretsStore backed by Postgres.

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/agent"
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/scheduler"
+	"github.com/vellus-ai/argoclaw/internal/agent"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/scheduler"
 )
 
 // makeSchedulerRunFunc creates the RunFunc for the scheduler.
