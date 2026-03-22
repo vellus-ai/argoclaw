@@ -1,4 +1,4 @@
-module github.com/nextlevelbuilder/goclaw
+module github.com/vellus-ai/argoclaw
 
 go 1.26.0
 

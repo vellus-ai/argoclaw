@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/nextlevelbuilder/goclaw/internal/i18n"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/i18n"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 func (h *MemoryHandler) handleListAllDocuments(w http.ResponseWriter, r *http.Request) {

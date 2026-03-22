@@ -7,11 +7,11 @@ import (
 	"log/slog"
 	"time"
 
-	httpapi "github.com/nextlevelbuilder/goclaw/internal/http"
-	"github.com/nextlevelbuilder/goclaw/internal/i18n"
-	"github.com/nextlevelbuilder/goclaw/internal/permissions"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
-	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
+	httpapi "github.com/vellus-ai/arargoclaw/internal/http"
+	"github.com/vellus-ai/arargoclaw/internal/i18n"
+	"github.com/vellus-ai/arargoclaw/internal/permissions"
+	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/pkg/protocol"
 )
 
 // MethodHandler processes a single RPC method request.
@@ -178,7 +178,7 @@ func (r *MethodRouter) handleConnect(ctx context.Context, client *Client, req *p
 				"pairing_code": code,
 				"sender_id":    client.id,
 				"server": map[string]any{
-					"name":    "goclaw",
+					"name":    "argoclaw",
 					"version": "0.2.0",
 				},
 			}))
@@ -199,7 +199,7 @@ func (r *MethodRouter) sendConnectResponse(client *Client, reqID string) {
 		"role":     string(client.role),
 		"user_id":  client.userID,
 		"server": map[string]any{
-			"name":    "goclaw",
+			"name":    "argoclaw",
 			"version": "0.2.0",
 		},
 	}))

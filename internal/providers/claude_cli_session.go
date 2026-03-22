@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/config"
 )
 
 // validCLIModels lists accepted model aliases for the Claude CLI.
@@ -61,7 +61,7 @@ func (p *ClaudeCLIProvider) buildArgs(model, workDir, mcpConfigPath string, cliS
 		args = append(args, "--disallowedTools", "Bash,Edit,Read,Write,Glob,Grep,WebFetch,WebSearch,TodoRead,TodoWrite,NotebookRead,NotebookEdit")
 	} else if mcpConfigPath != "" {
 		// Chat with MCP bridge: disable CLI built-in tools, only allow MCP bridge tools.
-		// This ensures all tool execution goes through GoClaw's controlled MCP bridge.
+		// This ensures all tool execution goes through ArgoClaw's controlled MCP bridge.
 		args = append(args, "--disallowedTools", "Bash,Edit,Read,Write,Glob,Grep,WebFetch,WebSearch,TodoRead,TodoWrite,NotebookRead,NotebookEdit")
 	}
 

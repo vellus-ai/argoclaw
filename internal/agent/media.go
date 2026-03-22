@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
 )
 
 // maxImageBytes is the safety limit for reading image files (10MB).

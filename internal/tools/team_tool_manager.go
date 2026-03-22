@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 const teamCacheTTL = 5 * time.Minute

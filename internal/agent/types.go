@@ -3,7 +3,7 @@ package agent
 import (
 	"context"
 
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
 )
 
 // Agent is the core abstraction for an AI agent execution loop.

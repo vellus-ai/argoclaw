@@ -25,7 +25,7 @@ export function TokenForm({ onSubmit }: TokenFormProps) {
       const res = await fetch("/v1/agents", {
         headers: {
           Authorization: `Bearer ${token.trim()}`,
-          "X-GoClaw-User-Id": userId.trim(),
+          "X-ArgoClaw-User-Id": userId.trim(),
         },
       });
 

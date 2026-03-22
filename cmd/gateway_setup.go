@@ -9,21 +9,21 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bootstrap"
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	mcpbridge "github.com/nextlevelbuilder/goclaw/internal/mcp"
-	"github.com/nextlevelbuilder/goclaw/internal/permissions"
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
-	"github.com/nextlevelbuilder/goclaw/internal/sandbox"
-	"github.com/nextlevelbuilder/goclaw/internal/skills"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
-	"github.com/nextlevelbuilder/goclaw/internal/store/pg"
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
-	"github.com/nextlevelbuilder/goclaw/internal/tracing"
-	"github.com/nextlevelbuilder/goclaw/internal/tts"
-	"github.com/nextlevelbuilder/goclaw/pkg/browser"
-	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/bootstrap"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	mcpbridge "github.com/vellus-ai/arargoclaw/internal/mcp"
+	"github.com/vellus-ai/arargoclaw/internal/permissions"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/sandbox"
+	"github.com/vellus-ai/arargoclaw/internal/skills"
+	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/store/pg"
+	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/arargoclaw/internal/tracing"
+	"github.com/vellus-ai/arargoclaw/internal/tts"
+	"github.com/vellus-ai/arargoclaw/pkg/browser"
+	"github.com/vellus-ai/arargoclaw/pkg/protocol"
 )
 
 // setupToolRegistry creates the tool registry and registers all tools.
@@ -194,14 +194,14 @@ func setupToolRegistry(
 	dataDir = cfg.ResolvedDataDir()
 	os.MkdirAll(dataDir, 0755)
 
-	// Block exec from accessing sensitive directories (data dir, .goclaw, config file).
+	// Block exec from accessing sensitive directories (data dir, .argoclaw, config file).
 	// Prevents `cp /app/data/config.json workspace/` and similar exfiltration.
-	// Exception: .goclaw/skills-store/ is allowed (skills may contain executable scripts).
+	// Exception: .argoclaw/skills-store/ is allowed (skills may contain executable scripts).
 	if execTool, ok := toolsReg.Get("exec"); ok {
 		if et, ok := execTool.(*tools.ExecTool); ok {
-			et.DenyPaths(dataDir, ".goclaw/")
-			et.AllowPathExemptions(".goclaw/skills-store/")
-			if cfgPath := os.Getenv("GOCLAW_CONFIG"); cfgPath != "" {
+			et.DenyPaths(dataDir, ".argoclaw/")
+			et.AllowPathExemptions(".argoclaw/skills-store/")
+			if cfgPath := os.Getenv("ARGOCLAW_CONFIG"); cfgPath != "" {
 				et.DenyPaths(cfgPath)
 			}
 		}
@@ -249,7 +249,7 @@ func setupStoresAndTracing(
 ) (*store.Stores, *tracing.Collector, *tracing.SnapshotWorker) {
 	// --- Store creation (Postgres) ---
 	if cfg.Database.PostgresDSN == "" {
-		slog.Error("GOCLAW_POSTGRES_DSN is required. Set it in your environment or .env.local file.")
+		slog.Error("ARGOCLAW_POSTGRES_DSN is required. Set it in your environment or .env.local file.")
 		os.Exit(1)
 	}
 
@@ -263,7 +263,7 @@ func setupStoresAndTracing(
 
 	storeCfg := store.StoreConfig{
 		PostgresDSN:      cfg.Database.PostgresDSN,
-		EncryptionKey:    os.Getenv("GOCLAW_ENCRYPTION_KEY"),
+		EncryptionKey:    os.Getenv("ARGOCLAW_ENCRYPTION_KEY"),
 		SkillsStorageDir: filepath.Join(dataDir, "skills-store"),
 	}
 	pgStores, pgErr := pg.NewPGStores(storeCfg)
@@ -454,14 +454,14 @@ func setupSkillsSystem(
 	msgBus *bus.MessageBus,
 ) (*skills.Loader, *tools.SkillSearchTool, string) {
 	// Skills loader + search tool
-	// Global skills live under ~/.goclaw/skills/ (user-managed), not data/skills/.
-	globalSkillsDir := os.Getenv("GOCLAW_SKILLS_DIR")
+	// Global skills live under ~/.argoclaw/skills/ (user-managed), not data/skills/.
+	globalSkillsDir := os.Getenv("ARGOCLAW_SKILLS_DIR")
 	if globalSkillsDir == "" {
 		globalSkillsDir = filepath.Join(dataDir, "skills")
 	}
 	// Bundled skills: shipped with the Docker image at /app/bundled-skills/.
 	// Lowest priority — managed (skills-store) and user-uploaded skills override these.
-	builtinSkillsDir := os.Getenv("GOCLAW_BUILTIN_SKILLS_DIR")
+	builtinSkillsDir := os.Getenv("ARGOCLAW_BUILTIN_SKILLS_DIR")
 	if builtinSkillsDir == "" {
 		builtinSkillsDir = "/app/bundled-skills"
 	}
@@ -480,7 +480,7 @@ func setupSkillsSystem(
 			slog.Info("skills-store directory wired into loader", "dir", storeDirs[0])
 
 			// Seed system/bundled skills into DB
-			bundledSkillsDir := os.Getenv("GOCLAW_BUNDLED_SKILLS_DIR")
+			bundledSkillsDir := os.Getenv("ARGOCLAW_BUNDLED_SKILLS_DIR")
 			if bundledSkillsDir == "" {
 				// Check common locations: Docker default, then local dev
 				for _, candidate := range []string{"bundled-skills", "/app/bundled-skills", "skills"} {

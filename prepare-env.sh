@@ -44,7 +44,7 @@ set_env_val() {
 # --- main ---
 
 echo ""
-echo "=== GoClaw Environment Preparation ==="
+echo "=== ArgoClaw Environment Preparation ==="
 echo ""
 
 # 1. Create .env from .env.example if it doesn't exist
@@ -61,24 +61,24 @@ else
   echo "  [exists]    .env"
 fi
 
-# 2. Auto-generate GOCLAW_ENCRYPTION_KEY if missing
-current_enc="$(get_env_val GOCLAW_ENCRYPTION_KEY)"
+# 2. Auto-generate ARGOCLAW_ENCRYPTION_KEY if missing
+current_enc="$(get_env_val ARGOCLAW_ENCRYPTION_KEY)"
 if [ -z "$current_enc" ]; then
   new_key="$(gen_hex 32)"
-  set_env_val "GOCLAW_ENCRYPTION_KEY" "$new_key"
-  echo "  [generated] GOCLAW_ENCRYPTION_KEY"
+  set_env_val "ARGOCLAW_ENCRYPTION_KEY" "$new_key"
+  echo "  [generated] ARGOCLAW_ENCRYPTION_KEY"
 else
-  echo "  [exists]    GOCLAW_ENCRYPTION_KEY"
+  echo "  [exists]    ARGOCLAW_ENCRYPTION_KEY"
 fi
 
-# 3. Auto-generate GOCLAW_GATEWAY_TOKEN if missing
-current_tok="$(get_env_val GOCLAW_GATEWAY_TOKEN)"
+# 3. Auto-generate ARGOCLAW_GATEWAY_TOKEN if missing
+current_tok="$(get_env_val ARGOCLAW_GATEWAY_TOKEN)"
 if [ -z "$current_tok" ]; then
   new_tok="$(gen_hex 16)"
-  set_env_val "GOCLAW_GATEWAY_TOKEN" "$new_tok"
-  echo "  [generated] GOCLAW_GATEWAY_TOKEN"
+  set_env_val "ARGOCLAW_GATEWAY_TOKEN" "$new_tok"
+  echo "  [generated] ARGOCLAW_GATEWAY_TOKEN"
 else
-  echo "  [exists]    GOCLAW_GATEWAY_TOKEN"
+  echo "  [exists]    ARGOCLAW_GATEWAY_TOKEN"
 fi
 
 echo ""

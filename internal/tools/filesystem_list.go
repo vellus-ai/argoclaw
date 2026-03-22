@@ -7,14 +7,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/nextlevelbuilder/goclaw/internal/sandbox"
+	"github.com/vellus-ai/arargoclaw/internal/sandbox"
 )
 
 // ListFilesTool lists files in a directory, optionally through a sandbox container.
 type ListFilesTool struct {
 	workspace       string
 	restrict        bool
-	deniedPrefixes  []string // path prefixes to deny access to (e.g. .goclaw)
+	deniedPrefixes  []string // path prefixes to deny access to (e.g. .argoclaw)
 	sandboxMgr      sandbox.Manager
 	contextFileIntc *ContextFileInterceptor // unused, satisfies InterceptorAware
 	memIntc         *MemoryInterceptor      // nil = no memory routing

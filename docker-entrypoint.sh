@@ -9,14 +9,14 @@ RUNTIME_DIR="/app/data/.runtime"
 # The app starts fine without .runtime; package installs will fail gracefully.
 mkdir -p "$RUNTIME_DIR/pip" "$RUNTIME_DIR/npm-global/lib" "$RUNTIME_DIR/pip-cache" || true
 
-# Fix .runtime ownership for split root/goclaw access.
+# Fix .runtime ownership for split root/argoclaw access.
 # .runtime itself must be root-owned so pkg-helper (root) can write apk-packages.
-# Subdirs pip/, npm-global/, pip-cache/ must be goclaw-owned for runtime installs.
-# This also handles upgrades from older images where .runtime was fully goclaw-owned.
+# Subdirs pip/, npm-global/, pip-cache/ must be argoclaw-owned for runtime installs.
+# This also handles upgrades from older images where .runtime was fully argoclaw-owned.
 if [ "$(id -u)" = "0" ] && [ -d "$RUNTIME_DIR" ]; then
-  chown root:goclaw "$RUNTIME_DIR" 2>/dev/null || true
+  chown root:argoclaw "$RUNTIME_DIR" 2>/dev/null || true
   chmod 0750 "$RUNTIME_DIR" 2>/dev/null || true
-  chown -R goclaw:goclaw "$RUNTIME_DIR/pip" "$RUNTIME_DIR/npm-global" "$RUNTIME_DIR/pip-cache" 2>/dev/null || true
+  chown -R argoclaw:argoclaw "$RUNTIME_DIR/pip" "$RUNTIME_DIR/npm-global" "$RUNTIME_DIR/pip-cache" 2>/dev/null || true
 fi
 
 # Python: allow agent to pip install to writable target dir
@@ -36,7 +36,7 @@ export PATH="$RUNTIME_DIR/npm-global/bin:$RUNTIME_DIR/pip/bin:$PATH"
 APK_LIST="$RUNTIME_DIR/apk-packages"
 if [ "$(id -u)" = "0" ]; then
   touch "$APK_LIST" 2>/dev/null || true
-  chown root:goclaw "$APK_LIST" 2>/dev/null || true
+  chown root:argoclaw "$APK_LIST" 2>/dev/null || true
   chmod 0640 "$APK_LIST" 2>/dev/null || true
 fi
 if [ -f "$APK_LIST" ] && [ -s "$APK_LIST" ]; then
@@ -73,9 +73,9 @@ if [ -x /app/pkg-helper ] && [ "$(id -u)" = "0" ]; then
 fi
 
 # Run command with privilege drop (su-exec in Docker, direct otherwise).
-run_as_goclaw() {
+run_as_argoclaw() {
   if command -v su-exec >/dev/null 2>&1 && [ "$(id -u)" = "0" ]; then
-    exec su-exec goclaw "$@"
+    exec su-exec argoclaw "$@"
   else
     exec "$@"
   fi
@@ -84,33 +84,33 @@ run_as_goclaw() {
 case "${1:-serve}" in
   serve)
     # Auto-upgrade (schema migrations + data hooks) before starting.
-    if [ -n "$GOCLAW_POSTGRES_DSN" ]; then
+    if [ -n "$ARGOCLAW_POSTGRES_DSN" ]; then
       echo "Running database upgrade..."
       if command -v su-exec >/dev/null 2>&1 && [ "$(id -u)" = "0" ]; then
-        su-exec goclaw /app/goclaw upgrade || \
+        su-exec argoclaw /app/argoclaw upgrade || \
           echo "Upgrade warning (may already be up-to-date)"
       else
-        /app/goclaw upgrade || \
+        /app/argoclaw upgrade || \
           echo "Upgrade warning (may already be up-to-date)"
       fi
     fi
-    run_as_goclaw /app/goclaw
+    run_as_argoclaw /app/argoclaw
     ;;
   upgrade)
     shift
-    run_as_goclaw /app/goclaw upgrade "$@"
+    run_as_argoclaw /app/argoclaw upgrade "$@"
     ;;
   migrate)
     shift
-    run_as_goclaw /app/goclaw migrate "$@"
+    run_as_argoclaw /app/argoclaw migrate "$@"
     ;;
   onboard)
-    run_as_goclaw /app/goclaw onboard
+    run_as_argoclaw /app/argoclaw onboard
     ;;
   version)
-    run_as_goclaw /app/goclaw version
+    run_as_argoclaw /app/argoclaw version
     ;;
   *)
-    run_as_goclaw /app/goclaw "$@"
+    run_as_argoclaw /app/argoclaw "$@"
     ;;
 esac

@@ -70,24 +70,24 @@ func FormatError(s *SchemaStatus) string {
 		return fmt.Sprintf(
 			"Database schema is in a dirty state (version %d).\n"+
 				"This usually means a migration failed partway.\n\n"+
-				"  Fix:  ./goclaw migrate force %d\n"+
-				"  Then: ./goclaw upgrade\n",
+				"  Fix:  ./argoclaw migrate force %d\n"+
+				"  Then: ./argoclaw upgrade\n",
 			s.CurrentVersion, s.CurrentVersion-1,
 		)
 	}
 	if s.CurrentVersion > s.RequiredVersion {
 		return fmt.Sprintf(
 			"Database schema (v%d) is newer than this binary (requires v%d).\n"+
-				"You may be running an older version of goclaw.\n\n"+
-				"  Fix: upgrade your goclaw binary to the latest version.\n",
+				"You may be running an older version of argoclaw.\n\n"+
+				"  Fix: upgrade your argoclaw binary to the latest version.\n",
 			s.CurrentVersion, s.RequiredVersion,
 		)
 	}
 	return fmt.Sprintf(
 		"Database schema is outdated: current v%d, required v%d.\n\n"+
-			"  Run:  ./goclaw upgrade\n"+
-			"  Or:   ./goclaw migrate up   (SQL-only, no data hooks)\n\n"+
-			"  Docker/CI: set GOCLAW_AUTO_UPGRADE=true to upgrade automatically on startup.\n",
+			"  Run:  ./argoclaw upgrade\n"+
+			"  Or:   ./argoclaw migrate up   (SQL-only, no data hooks)\n\n"+
+			"  Docker/CI: set ARGOCLAW_AUTO_UPGRADE=true to upgrade automatically on startup.\n",
 		s.CurrentVersion, s.RequiredVersion,
 	)
 }

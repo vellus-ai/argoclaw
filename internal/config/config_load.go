@@ -16,10 +16,10 @@ import (
 // Default returns a Config with sensible defaults.
 func Default() *Config {
 	return &Config{
-		DataDir: "~/.goclaw/data",
+		DataDir: "~/.argoclaw/data",
 		Agents: AgentsConfig{
 			Defaults: AgentDefaults{
-				Workspace:           "~/.goclaw/workspace",
+				Workspace:           "~/.argoclaw/workspace",
 				RestrictToWorkspace: true,
 				Provider:            "anthropic",
 				Model:               "claude-sonnet-4-5-20250929",
@@ -94,44 +94,44 @@ func (c *Config) applyEnvOverrides() {
 			*dst = v
 		}
 	}
-	envStr("GOCLAW_ANTHROPIC_API_KEY", &c.Providers.Anthropic.APIKey)
-	envStr("GOCLAW_ANTHROPIC_BASE_URL", &c.Providers.Anthropic.APIBase)
-	envStr("GOCLAW_OPENAI_API_KEY", &c.Providers.OpenAI.APIKey)
-	envStr("GOCLAW_OPENAI_BASE_URL", &c.Providers.OpenAI.APIBase)
-	envStr("GOCLAW_OPENROUTER_API_KEY", &c.Providers.OpenRouter.APIKey)
-	envStr("GOCLAW_GROQ_API_KEY", &c.Providers.Groq.APIKey)
-	envStr("GOCLAW_DEEPSEEK_API_KEY", &c.Providers.DeepSeek.APIKey)
-	envStr("GOCLAW_GEMINI_API_KEY", &c.Providers.Gemini.APIKey)
-	envStr("GOCLAW_MISTRAL_API_KEY", &c.Providers.Mistral.APIKey)
-	envStr("GOCLAW_XAI_API_KEY", &c.Providers.XAI.APIKey)
-	envStr("GOCLAW_MINIMAX_API_KEY", &c.Providers.MiniMax.APIKey)
-	envStr("GOCLAW_COHERE_API_KEY", &c.Providers.Cohere.APIKey)
-	envStr("GOCLAW_PERPLEXITY_API_KEY", &c.Providers.Perplexity.APIKey)
-	envStr("GOCLAW_DASHSCOPE_API_KEY", &c.Providers.DashScope.APIKey)
-	envStr("GOCLAW_BAILIAN_API_KEY", &c.Providers.Bailian.APIKey)
-	envStr("GOCLAW_ZAI_API_KEY", &c.Providers.Zai.APIKey)
-	envStr("GOCLAW_ZAI_CODING_API_KEY", &c.Providers.ZaiCoding.APIKey)
-	envStr("GOCLAW_OLLAMA_HOST", &c.Providers.Ollama.Host)
-	envStr("GOCLAW_OLLAMA_CLOUD_API_KEY", &c.Providers.OllamaCloud.APIKey)
-	envStr("GOCLAW_OLLAMA_CLOUD_API_BASE", &c.Providers.OllamaCloud.APIBase)
-	envStr("GOCLAW_GATEWAY_TOKEN", &c.Gateway.Token)
-	envStr("GOCLAW_TELEGRAM_TOKEN", &c.Channels.Telegram.Token)
-	envStr("GOCLAW_DISCORD_TOKEN", &c.Channels.Discord.Token)
-	envStr("GOCLAW_ZALO_TOKEN", &c.Channels.Zalo.Token)
-	envStr("GOCLAW_LARK_APP_ID", &c.Channels.Feishu.AppID)
-	envStr("GOCLAW_LARK_APP_SECRET", &c.Channels.Feishu.AppSecret)
-	envStr("GOCLAW_LARK_ENCRYPT_KEY", &c.Channels.Feishu.EncryptKey)
-	envStr("GOCLAW_LARK_VERIFICATION_TOKEN", &c.Channels.Feishu.VerificationToken)
-	envStr("GOCLAW_WHATSAPP_BRIDGE_URL", &c.Channels.WhatsApp.BridgeURL)
-	envStr("GOCLAW_SLACK_BOT_TOKEN", &c.Channels.Slack.BotToken)
-	envStr("GOCLAW_SLACK_APP_TOKEN", &c.Channels.Slack.AppToken)
-	envStr("GOCLAW_SLACK_USER_TOKEN", &c.Channels.Slack.UserToken)
+	envStr("ARGOCLAW_ANTHROPIC_API_KEY", &c.Providers.Anthropic.APIKey)
+	envStr("ARGOCLAW_ANTHROPIC_BASE_URL", &c.Providers.Anthropic.APIBase)
+	envStr("ARGOCLAW_OPENAI_API_KEY", &c.Providers.OpenAI.APIKey)
+	envStr("ARGOCLAW_OPENAI_BASE_URL", &c.Providers.OpenAI.APIBase)
+	envStr("ARGOCLAW_OPENROUTER_API_KEY", &c.Providers.OpenRouter.APIKey)
+	envStr("ARGOCLAW_GROQ_API_KEY", &c.Providers.Groq.APIKey)
+	envStr("ARGOCLAW_DEEPSEEK_API_KEY", &c.Providers.DeepSeek.APIKey)
+	envStr("ARGOCLAW_GEMINI_API_KEY", &c.Providers.Gemini.APIKey)
+	envStr("ARGOCLAW_MISTRAL_API_KEY", &c.Providers.Mistral.APIKey)
+	envStr("ARGOCLAW_XAI_API_KEY", &c.Providers.XAI.APIKey)
+	envStr("ARGOCLAW_MINIMAX_API_KEY", &c.Providers.MiniMax.APIKey)
+	envStr("ARGOCLAW_COHERE_API_KEY", &c.Providers.Cohere.APIKey)
+	envStr("ARGOCLAW_PERPLEXITY_API_KEY", &c.Providers.Perplexity.APIKey)
+	envStr("ARGOCLAW_DASHSCOPE_API_KEY", &c.Providers.DashScope.APIKey)
+	envStr("ARGOCLAW_BAILIAN_API_KEY", &c.Providers.Bailian.APIKey)
+	envStr("ARGOCLAW_ZAI_API_KEY", &c.Providers.Zai.APIKey)
+	envStr("ARGOCLAW_ZAI_CODING_API_KEY", &c.Providers.ZaiCoding.APIKey)
+	envStr("ARGOCLAW_OLLAMA_HOST", &c.Providers.Ollama.Host)
+	envStr("ARGOCLAW_OLLAMA_CLOUD_API_KEY", &c.Providers.OllamaCloud.APIKey)
+	envStr("ARGOCLAW_OLLAMA_CLOUD_API_BASE", &c.Providers.OllamaCloud.APIBase)
+	envStr("ARGOCLAW_GATEWAY_TOKEN", &c.Gateway.Token)
+	envStr("ARGOCLAW_TELEGRAM_TOKEN", &c.Channels.Telegram.Token)
+	envStr("ARGOCLAW_DISCORD_TOKEN", &c.Channels.Discord.Token)
+	envStr("ARGOCLAW_ZALO_TOKEN", &c.Channels.Zalo.Token)
+	envStr("ARGOCLAW_LARK_APP_ID", &c.Channels.Feishu.AppID)
+	envStr("ARGOCLAW_LARK_APP_SECRET", &c.Channels.Feishu.AppSecret)
+	envStr("ARGOCLAW_LARK_ENCRYPT_KEY", &c.Channels.Feishu.EncryptKey)
+	envStr("ARGOCLAW_LARK_VERIFICATION_TOKEN", &c.Channels.Feishu.VerificationToken)
+	envStr("ARGOCLAW_WHATSAPP_BRIDGE_URL", &c.Channels.WhatsApp.BridgeURL)
+	envStr("ARGOCLAW_SLACK_BOT_TOKEN", &c.Channels.Slack.BotToken)
+	envStr("ARGOCLAW_SLACK_APP_TOKEN", &c.Channels.Slack.AppToken)
+	envStr("ARGOCLAW_SLACK_USER_TOKEN", &c.Channels.Slack.UserToken)
 
 	// TTS secrets
-	envStr("GOCLAW_TTS_OPENAI_API_KEY", &c.Tts.OpenAI.APIKey)
-	envStr("GOCLAW_TTS_ELEVENLABS_API_KEY", &c.Tts.ElevenLabs.APIKey)
-	envStr("GOCLAW_TTS_MINIMAX_API_KEY", &c.Tts.MiniMax.APIKey)
-	envStr("GOCLAW_TTS_MINIMAX_GROUP_ID", &c.Tts.MiniMax.GroupID)
+	envStr("ARGOCLAW_TTS_OPENAI_API_KEY", &c.Tts.OpenAI.APIKey)
+	envStr("ARGOCLAW_TTS_ELEVENLABS_API_KEY", &c.Tts.ElevenLabs.APIKey)
+	envStr("ARGOCLAW_TTS_MINIMAX_API_KEY", &c.Tts.MiniMax.APIKey)
+	envStr("ARGOCLAW_TTS_MINIMAX_GROUP_ID", &c.Tts.MiniMax.GroupID)
 
 	// Auto-enable channels if credentials are provided via env
 	if c.Channels.Telegram.Token != "" {
@@ -154,9 +154,9 @@ func (c *Config) applyEnvOverrides() {
 	}
 
 	// Claude CLI provider
-	envStr("GOCLAW_CLAUDE_CLI_PATH", &c.Providers.ClaudeCLI.CLIPath)
-	envStr("GOCLAW_CLAUDE_CLI_MODEL", &c.Providers.ClaudeCLI.Model)
-	envStr("GOCLAW_CLAUDE_CLI_WORK_DIR", &c.Providers.ClaudeCLI.BaseWorkDir)
+	envStr("ARGOCLAW_CLAUDE_CLI_PATH", &c.Providers.ClaudeCLI.CLIPath)
+	envStr("ARGOCLAW_CLAUDE_CLI_MODEL", &c.Providers.ClaudeCLI.Model)
+	envStr("ARGOCLAW_CLAUDE_CLI_WORK_DIR", &c.Providers.ClaudeCLI.BaseWorkDir)
 
 	// Default provider/model: env is fallback only (applied when config has no value).
 	// The onboard wizard sets these in .env for initial bootstrap; once the user
@@ -168,50 +168,50 @@ func (c *Config) applyEnvOverrides() {
 			}
 		}
 	}
-	envFallback("GOCLAW_PROVIDER", &c.Agents.Defaults.Provider)
-	envFallback("GOCLAW_MODEL", &c.Agents.Defaults.Model)
+	envFallback("ARGOCLAW_PROVIDER", &c.Agents.Defaults.Provider)
+	envFallback("ARGOCLAW_MODEL", &c.Agents.Defaults.Model)
 
 	// Data directory, workspace & sessions
-	envStr("GOCLAW_DATA_DIR", &c.DataDir)
-	envStr("GOCLAW_WORKSPACE", &c.Agents.Defaults.Workspace)
+	envStr("ARGOCLAW_DATA_DIR", &c.DataDir)
+	envStr("ARGOCLAW_WORKSPACE", &c.Agents.Defaults.Workspace)
 
 	// Gateway host/port
-	envStr("GOCLAW_HOST", &c.Gateway.Host)
-	if v := os.Getenv("GOCLAW_PORT"); v != "" {
+	envStr("ARGOCLAW_HOST", &c.Gateway.Host)
+	if v := os.Getenv("ARGOCLAW_PORT"); v != "" {
 		if port, err := strconv.Atoi(v); err == nil && port > 0 {
 			c.Gateway.Port = port
 		}
 	}
 
 	// Database
-	envStr("GOCLAW_POSTGRES_DSN", &c.Database.PostgresDSN)
-	envStr("GOCLAW_REDIS_DSN", &c.Database.RedisDSN)
+	envStr("ARGOCLAW_POSTGRES_DSN", &c.Database.PostgresDSN)
+	envStr("ARGOCLAW_REDIS_DSN", &c.Database.RedisDSN)
 
-	// Deprecation warning for GOCLAW_MODE (removed — PostgreSQL is always active)
-	if v := os.Getenv("GOCLAW_MODE"); v != "" {
-		slog.Warn("GOCLAW_MODE is deprecated; managed mode is now the only mode", "value", v)
+	// Deprecation warning for ARGOCLAW_MODE (removed — PostgreSQL is always active)
+	if v := os.Getenv("ARGOCLAW_MODE"); v != "" {
+		slog.Warn("ARGOCLAW_MODE is deprecated; managed mode is now the only mode", "value", v)
 	}
 
 	// Telemetry
-	envStr("GOCLAW_TELEMETRY_ENDPOINT", &c.Telemetry.Endpoint)
-	envStr("GOCLAW_TELEMETRY_PROTOCOL", &c.Telemetry.Protocol)
-	envStr("GOCLAW_TELEMETRY_SERVICE_NAME", &c.Telemetry.ServiceName)
-	if v := os.Getenv("GOCLAW_TELEMETRY_ENABLED"); v != "" {
+	envStr("ARGOCLAW_TELEMETRY_ENDPOINT", &c.Telemetry.Endpoint)
+	envStr("ARGOCLAW_TELEMETRY_PROTOCOL", &c.Telemetry.Protocol)
+	envStr("ARGOCLAW_TELEMETRY_SERVICE_NAME", &c.Telemetry.ServiceName)
+	if v := os.Getenv("ARGOCLAW_TELEMETRY_ENABLED"); v != "" {
 		c.Telemetry.Enabled = v == "true" || v == "1"
 	}
-	if v := os.Getenv("GOCLAW_TELEMETRY_INSECURE"); v != "" {
+	if v := os.Getenv("ARGOCLAW_TELEMETRY_INSECURE"); v != "" {
 		c.Telemetry.Insecure = v == "true" || v == "1"
 	}
 
 	// Owner IDs from env (comma-separated)
-	if v := os.Getenv("GOCLAW_OWNER_IDS"); v != "" {
+	if v := os.Getenv("ARGOCLAW_OWNER_IDS"); v != "" {
 		c.Gateway.OwnerIDs = strings.Split(v, ",")
 	}
 
 	// Tailscale (tsnet)
-	envStr("GOCLAW_TSNET_HOSTNAME", &c.Tailscale.Hostname)
-	envStr("GOCLAW_TSNET_AUTH_KEY", &c.Tailscale.AuthKey)
-	envStr("GOCLAW_TSNET_DIR", &c.Tailscale.StateDir)
+	envStr("ARGOCLAW_TSNET_HOSTNAME", &c.Tailscale.Hostname)
+	envStr("ARGOCLAW_TSNET_AUTH_KEY", &c.Tailscale.AuthKey)
+	envStr("ARGOCLAW_TSNET_DIR", &c.Tailscale.StateDir)
 
 	// Sandbox (for Docker-compose sandbox overlay)
 	ensureSandbox := func() {
@@ -219,47 +219,47 @@ func (c *Config) applyEnvOverrides() {
 			c.Agents.Defaults.Sandbox = &SandboxConfig{}
 		}
 	}
-	if v := os.Getenv("GOCLAW_SANDBOX_MODE"); v != "" {
+	if v := os.Getenv("ARGOCLAW_SANDBOX_MODE"); v != "" {
 		ensureSandbox()
 		c.Agents.Defaults.Sandbox.Mode = v
 	}
-	if v := os.Getenv("GOCLAW_SANDBOX_IMAGE"); v != "" {
+	if v := os.Getenv("ARGOCLAW_SANDBOX_IMAGE"); v != "" {
 		ensureSandbox()
 		c.Agents.Defaults.Sandbox.Image = v
 	}
-	if v := os.Getenv("GOCLAW_SANDBOX_WORKSPACE_ACCESS"); v != "" {
+	if v := os.Getenv("ARGOCLAW_SANDBOX_WORKSPACE_ACCESS"); v != "" {
 		ensureSandbox()
 		c.Agents.Defaults.Sandbox.WorkspaceAccess = v
 	}
-	if v := os.Getenv("GOCLAW_SANDBOX_SCOPE"); v != "" {
+	if v := os.Getenv("ARGOCLAW_SANDBOX_SCOPE"); v != "" {
 		ensureSandbox()
 		c.Agents.Defaults.Sandbox.Scope = v
 	}
-	if v := os.Getenv("GOCLAW_SANDBOX_MEMORY_MB"); v != "" {
+	if v := os.Getenv("ARGOCLAW_SANDBOX_MEMORY_MB"); v != "" {
 		ensureSandbox()
 		if mb, err := strconv.Atoi(v); err == nil && mb > 0 {
 			c.Agents.Defaults.Sandbox.MemoryMB = mb
 		}
 	}
-	if v := os.Getenv("GOCLAW_SANDBOX_CPUS"); v != "" {
+	if v := os.Getenv("ARGOCLAW_SANDBOX_CPUS"); v != "" {
 		ensureSandbox()
 		if cpus, err := strconv.ParseFloat(v, 64); err == nil && cpus > 0 {
 			c.Agents.Defaults.Sandbox.CPUs = cpus
 		}
 	}
-	if v := os.Getenv("GOCLAW_SANDBOX_TIMEOUT_SEC"); v != "" {
+	if v := os.Getenv("ARGOCLAW_SANDBOX_TIMEOUT_SEC"); v != "" {
 		ensureSandbox()
 		if sec, err := strconv.Atoi(v); err == nil && sec > 0 {
 			c.Agents.Defaults.Sandbox.TimeoutSec = sec
 		}
 	}
-	if v := os.Getenv("GOCLAW_SANDBOX_NETWORK"); v != "" {
+	if v := os.Getenv("ARGOCLAW_SANDBOX_NETWORK"); v != "" {
 		ensureSandbox()
 		c.Agents.Defaults.Sandbox.NetworkEnabled = v == "true" || v == "1"
 	}
 
 	// Browser (for Docker-compose browser sidecar overlay)
-	envStr("GOCLAW_BROWSER_REMOTE_URL", &c.Tools.Browser.RemoteURL)
+	envStr("ARGOCLAW_BROWSER_REMOTE_URL", &c.Tools.Browser.RemoteURL)
 	if c.Tools.Browser.RemoteURL != "" {
 		c.Tools.Browser.Enabled = true
 	}
@@ -323,13 +323,13 @@ func (c *Config) ResolvedDataDir() string {
 	return ExpandHome(c.DataDir)
 }
 
-// ResolvedDataDirFromEnv returns the data dir from GOCLAW_DATA_DIR env or default.
+// ResolvedDataDirFromEnv returns the data dir from ARGOCLAW_DATA_DIR env or default.
 // Use this in packages that don't have access to a Config instance.
 func ResolvedDataDirFromEnv() string {
-	if v := os.Getenv("GOCLAW_DATA_DIR"); v != "" {
+	if v := os.Getenv("ARGOCLAW_DATA_DIR"); v != "" {
 		return ExpandHome(v)
 	}
-	return ExpandHome("~/.goclaw/data")
+	return ExpandHome("~/.argoclaw/data")
 }
 
 // WorkspacePath returns the expanded workspace path.
@@ -397,14 +397,14 @@ func (c *Config) ResolveDefaultAgentID() string {
 }
 
 // ResolveDisplayName returns the display name for an agent.
-// Falls back to "GoClaw" if not configured.
+// Falls back to "ArgoClaw" if not configured.
 func (c *Config) ResolveDisplayName(agentID string) string {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	if spec, ok := c.Agents.List[agentID]; ok && spec.DisplayName != "" {
 		return spec.DisplayName
 	}
-	return "GoClaw"
+	return "ArgoClaw"
 }
 
 // ApplyEnvOverrides re-applies environment variable overrides onto the config.

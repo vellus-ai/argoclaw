@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bootstrap"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/bootstrap"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // mcpToolDescMaxLen is the max character length for MCP tool descriptions

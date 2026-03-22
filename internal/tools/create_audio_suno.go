@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
 )
 
 // callSunoMusicGen generates music via the Suno API.

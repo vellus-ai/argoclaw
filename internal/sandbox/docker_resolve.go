@@ -13,8 +13,8 @@ import (
 
 // resolveHostWorkspacePath maps a container-local path to its host-side
 // equivalent for Docker-out-of-Docker (DooD) sibling container mounts.
-// When GoClaw runs inside a container and spawns sandbox containers, the
-// workspace path (e.g., /app/workspace) only exists inside the GoClaw
+// When ArgoClaw runs inside a container and spawns sandbox containers, the
+// workspace path (e.g., /app/workspace) only exists inside the ArgoClaw
 // container — the sandbox needs the corresponding host path or volume name
 // to mount it correctly.
 //

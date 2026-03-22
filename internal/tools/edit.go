@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/nextlevelbuilder/goclaw/internal/sandbox"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/sandbox"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // EditTool performs search-and-replace edits on files.
@@ -16,7 +16,7 @@ import (
 type EditTool struct {
 	workspace        string
 	restrict         bool
-	deniedPrefixes   []string // path prefixes to deny access to (e.g. .goclaw)
+	deniedPrefixes   []string // path prefixes to deny access to (e.g. .argoclaw)
 	sandboxMgr       sandbox.Manager
 	contextFileIntc  *ContextFileInterceptor
 	memIntc          *MemoryInterceptor

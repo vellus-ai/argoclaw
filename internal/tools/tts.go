@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/tts"
+	"github.com/vellus-ai/arargoclaw/internal/tts"
 )
 
 // TtsTool is an agent tool that converts text to speech audio.

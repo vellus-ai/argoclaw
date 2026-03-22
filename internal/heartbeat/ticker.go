@@ -13,11 +13,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/nextlevelbuilder/goclaw/internal/agent"
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/scheduler"
-	"github.com/nextlevelbuilder/goclaw/internal/sessions"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/agent"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/scheduler"
+	"github.com/vellus-ai/arargoclaw/internal/sessions"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 const (

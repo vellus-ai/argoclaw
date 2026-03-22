@@ -9,11 +9,11 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/channels"
-	"github.com/nextlevelbuilder/goclaw/internal/channels/typing"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/channels"
+	"github.com/vellus-ai/arargoclaw/internal/channels/typing"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 const pairingDebounceTime = 60 * time.Second

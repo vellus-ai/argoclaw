@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/sandbox"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/sandbox"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // Dangerous command patterns organized into configurable deny groups.
@@ -131,7 +131,7 @@ func (t *ExecTool) Execute(ctx context.Context, args map[string]any) *Result {
 	// Check for dangerous commands (applies to both host and sandbox).
 	for _, pattern := range allPatterns {
 		if pattern.MatchString(command) {
-			// Check if any exemption applies (e.g. skills-store within .goclaw)
+			// Check if any exemption applies (e.g. skills-store within .argoclaw)
 			exempt := false
 			for _, ex := range t.denyExemptions {
 				if strings.Contains(command, ex) {

@@ -1,8 +1,8 @@
 package tools
 
 import (
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
 )
 
 // Result is the unified return type from tool execution.

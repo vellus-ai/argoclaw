@@ -6,9 +6,9 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/channels"
-	"github.com/nextlevelbuilder/goclaw/internal/channels/media"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/channels"
+	"github.com/vellus-ai/arargoclaw/internal/channels/media"
 )
 
 // messageContext holds parsed information from a Feishu message event.

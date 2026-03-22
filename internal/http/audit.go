@@ -3,9 +3,9 @@ package http
 import (
 	"net/http"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
-	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/pkg/protocol"
 )
 
 // emitAudit broadcasts an audit event via msgBus for async persistence.

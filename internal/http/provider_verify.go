@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/nextlevelbuilder/goclaw/internal/i18n"
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/i18n"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // handleVerifyProvider tests a provider+model combination with a minimal LLM call.

@@ -8,17 +8,17 @@ import (
 	"path/filepath"
 
 	"github.com/google/uuid"
-	"github.com/nextlevelbuilder/goclaw/internal/bootstrap"
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	mcpbridge "github.com/nextlevelbuilder/goclaw/internal/mcp"
-	"github.com/nextlevelbuilder/goclaw/internal/media"
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
-	"github.com/nextlevelbuilder/goclaw/internal/sandbox"
-	"github.com/nextlevelbuilder/goclaw/internal/skills"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
-	"github.com/nextlevelbuilder/goclaw/internal/tracing"
+	"github.com/vellus-ai/arargoclaw/internal/bootstrap"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	mcpbridge "github.com/vellus-ai/arargoclaw/internal/mcp"
+	"github.com/vellus-ai/arargoclaw/internal/media"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/sandbox"
+	"github.com/vellus-ai/arargoclaw/internal/skills"
+	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/arargoclaw/internal/tracing"
 )
 
 // ResolverDeps holds shared dependencies for the agent resolver.

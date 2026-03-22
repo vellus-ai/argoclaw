@@ -140,7 +140,7 @@ func tryPublicIPService(ctx context.Context, client *http.Client, svcURL string)
 	if err != nil {
 		return ""
 	}
-	req.Header.Set("User-Agent", "goclaw/ip-check")
+	req.Header.Set("User-Agent", "argoclaw/ip-check")
 
 	resp, err := client.Do(req)
 	if err != nil {

@@ -3,7 +3,7 @@ package agent
 import (
 	"testing"
 
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
 )
 
 func TestLimitHistoryTurns_NoLimit(t *testing.T) {

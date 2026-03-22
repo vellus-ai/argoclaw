@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/nextlevelbuilder/goclaw/internal/agent"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	"github.com/nextlevelbuilder/goclaw/internal/gateway"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
-	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/agent"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/gateway"
+	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/pkg/protocol"
 )
 
 // ---- stub AgentStore that captures Create calls ----

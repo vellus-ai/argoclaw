@@ -3,7 +3,7 @@ package telegram
 import (
 	"context"
 
-	"github.com/nextlevelbuilder/goclaw/internal/channels/media"
+	"github.com/vellus-ai/arargoclaw/internal/channels/media"
 )
 
 // transcribeAudio calls the configured STT proxy service with the given audio file and returns

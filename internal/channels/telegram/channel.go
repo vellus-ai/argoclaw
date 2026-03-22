@@ -13,10 +13,10 @@ import (
 
 	"github.com/mymmrac/telego"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/channels"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/channels"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // Channel connects to Telegram via the Bot API using long polling.

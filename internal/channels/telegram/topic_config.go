@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nextlevelbuilder/goclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/config"
 )
 
 // resolvedTopicConfig holds the merged config for a specific group+topic combination.

@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	httpapi "github.com/nextlevelbuilder/goclaw/internal/http"
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
-	"github.com/nextlevelbuilder/goclaw/internal/store/pg"
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	httpapi "github.com/vellus-ai/arargoclaw/internal/http"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/store/pg"
+	"github.com/vellus-ai/arargoclaw/internal/tools"
 )
 
 // wireHTTP creates HTTP handlers (agents + skills + traces + MCP + custom tools + channel instances + providers + delegations + builtin tools + pending messages).

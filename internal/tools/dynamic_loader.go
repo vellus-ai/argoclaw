@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // DynamicToolLoader loads custom tools from the database and registers them into tool registries.

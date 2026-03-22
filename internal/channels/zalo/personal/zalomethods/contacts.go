@@ -10,11 +10,11 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/nextlevelbuilder/goclaw/internal/channels"
-	"github.com/nextlevelbuilder/goclaw/internal/channels/zalo/personal/protocol"
-	"github.com/nextlevelbuilder/goclaw/internal/gateway"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
-	goclawprotocol "github.com/nextlevelbuilder/goclaw/pkg/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/channels"
+	"github.com/vellus-ai/arargoclaw/internal/channels/zalo/personal/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/gateway"
+	"github.com/vellus-ai/arargoclaw/internal/store"
+	argoclawprotocol "github.com/vellus-ai/arargoclaw/pkg/protocol"
 )
 
 // ContactsMethods handles fetching Zalo friends/groups for the picker UI.
@@ -28,10 +28,10 @@ func NewContactsMethods(s store.ChannelInstanceStore) *ContactsMethods {
 }
 
 func (m *ContactsMethods) Register(router *gateway.MethodRouter) {
-	router.Register(goclawprotocol.MethodZaloPersonalContacts, m.handleContacts)
+	router.Register(argoclawprotocol.MethodZaloPersonalContacts, m.handleContacts)
 }
 
-func (m *ContactsMethods) handleContacts(ctx context.Context, client *gateway.Client, req *goclawprotocol.RequestFrame) {
+func (m *ContactsMethods) handleContacts(ctx context.Context, client *gateway.Client, req *argoclawprotocol.RequestFrame) {
 	var params struct {
 		InstanceID string `json:"instance_id"`
 	}
@@ -41,24 +41,24 @@ func (m *ContactsMethods) handleContacts(ctx context.Context, client *gateway.Cl
 
 	instID, err := uuid.Parse(params.InstanceID)
 	if err != nil {
-		client.SendResponse(goclawprotocol.NewErrorResponse(req.ID, goclawprotocol.ErrInvalidRequest, "invalid instance_id"))
+		client.SendResponse(argoclawprotocol.NewErrorResponse(req.ID, argoclawprotocol.ErrInvalidRequest, "invalid instance_id"))
 		return
 	}
 
 	inst, err := m.instanceStore.Get(ctx, instID)
 	if err != nil || inst.ChannelType != channels.TypeZaloPersonal {
-		client.SendResponse(goclawprotocol.NewErrorResponse(req.ID, goclawprotocol.ErrNotFound, "zalo_personal instance not found"))
+		client.SendResponse(argoclawprotocol.NewErrorResponse(req.ID, argoclawprotocol.ErrNotFound, "zalo_personal instance not found"))
 		return
 	}
 
 	if len(inst.Credentials) == 0 {
-		client.SendResponse(goclawprotocol.NewErrorResponse(req.ID, goclawprotocol.ErrInvalidRequest, "instance has no credentials — complete QR login first"))
+		client.SendResponse(argoclawprotocol.NewErrorResponse(req.ID, argoclawprotocol.ErrInvalidRequest, "instance has no credentials — complete QR login first"))
 		return
 	}
 
 	// Prevent concurrent fetches for same instance
 	if _, loaded := m.activeFetches.LoadOrStore(params.InstanceID, struct{}{}); loaded {
-		client.SendResponse(goclawprotocol.NewErrorResponse(req.ID, goclawprotocol.ErrInvalidRequest, "contacts fetch already in progress"))
+		client.SendResponse(argoclawprotocol.NewErrorResponse(req.ID, argoclawprotocol.ErrInvalidRequest, "contacts fetch already in progress"))
 		return
 	}
 	defer m.activeFetches.Delete(params.InstanceID)
@@ -71,7 +71,7 @@ func (m *ContactsMethods) handleContacts(ctx context.Context, client *gateway.Cl
 		Language  *string              `json:"language,omitempty"`
 	}
 	if err := json.Unmarshal(inst.Credentials, &creds); err != nil {
-		client.SendResponse(goclawprotocol.NewErrorResponse(req.ID, goclawprotocol.ErrInternal, "failed to parse credentials"))
+		client.SendResponse(argoclawprotocol.NewErrorResponse(req.ID, argoclawprotocol.ErrInternal, "failed to parse credentials"))
 		return
 	}
 
@@ -89,7 +89,7 @@ func (m *ContactsMethods) handleContacts(ctx context.Context, client *gateway.Cl
 	sess := protocol.NewSession()
 	if err := protocol.LoginWithCredentials(fetchCtx, sess, *protoCred); err != nil {
 		slog.Warn("Zalo Personal contacts: login failed", "instance", params.InstanceID, "error", err)
-		client.SendResponse(goclawprotocol.NewErrorResponse(req.ID, goclawprotocol.ErrInternal, "Zalo login failed — credentials may be expired, try QR login again"))
+		client.SendResponse(argoclawprotocol.NewErrorResponse(req.ID, argoclawprotocol.ErrInternal, "Zalo login failed — credentials may be expired, try QR login again"))
 		return
 	}
 
@@ -117,11 +117,11 @@ func (m *ContactsMethods) handleContacts(ctx context.Context, client *gateway.Cl
 
 	if err := g.Wait(); err != nil {
 		slog.Warn("Zalo Personal contacts: fetch failed", "instance", params.InstanceID, "error", err)
-		client.SendResponse(goclawprotocol.NewErrorResponse(req.ID, goclawprotocol.ErrInternal, "failed to fetch contacts"))
+		client.SendResponse(argoclawprotocol.NewErrorResponse(req.ID, argoclawprotocol.ErrInternal, "failed to fetch contacts"))
 		return
 	}
 
-	client.SendResponse(goclawprotocol.NewOKResponse(req.ID, map[string]any{
+	client.SendResponse(argoclawprotocol.NewOKResponse(req.ID, map[string]any{
 		"friends": friends,
 		"groups":  groups,
 	}))

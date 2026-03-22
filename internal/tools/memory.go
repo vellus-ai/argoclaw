@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // MemorySearchTool implements the memory_search tool for hybrid semantic + FTS search.

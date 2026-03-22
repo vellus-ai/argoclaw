@@ -30,7 +30,7 @@ const OptPeerKind = "peer_kind"
 
 // ClaudeCLIProvider implements Provider by shelling out to the `claude` CLI binary.
 // It acts as a thin proxy: CLI manages session history, tool execution, and context.
-// GoClaw only forwards the latest user message and streams back the response.
+// ArgoClaw only forwards the latest user message and streams back the response.
 type ClaudeCLIProvider struct {
 	cliPath            string // path to claude binary (default: "claude")
 	defaultModel       string // default: "sonnet"
@@ -82,7 +82,7 @@ func WithClaudeCLIPermMode(mode string) ClaudeCLIOption {
 	}
 }
 
-// WithClaudeCLISecurityHooks enables GoClaw security hooks for CLI tool calls.
+// WithClaudeCLISecurityHooks enables ArgoClaw security hooks for CLI tool calls.
 // Generates a settings file with PreToolUse hooks that enforce shell deny patterns
 // and workspace path restrictions.
 func WithClaudeCLISecurityHooks(workspace string, restrictToWorkspace bool) ClaudeCLIOption {

@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // KnowledgeGraphSearchTool provides graph-based search for agents.
@@ -28,7 +28,7 @@ func (t *KnowledgeGraphSearchTool) SetKGStore(ks store.KnowledgeGraphStore) {
 func (t *KnowledgeGraphSearchTool) Name() string { return "knowledge_graph_search" }
 
 func (t *KnowledgeGraphSearchTool) Description() string {
-	return "Search the knowledge graph to find people, projects, organizations, and how they connect. Better than memory_search when you need: who works with whom, what projects someone is involved in, dependencies between tasks, or any multi-hop relationship question. Use specific names (e.g. 'Minh', 'GoClaw') — not generic words. Use query='*' to list all known entities. Use entity_id to traverse connections from a specific entity."
+	return "Search the knowledge graph to find people, projects, organizations, and how they connect. Better than memory_search when you need: who works with whom, what projects someone is involved in, dependencies between tasks, or any multi-hop relationship question. Use specific names (e.g. 'Minh', 'ArgoClaw') — not generic words. Use query='*' to list all known entities. Use entity_id to traverse connections from a specific entity."
 }
 
 func (t *KnowledgeGraphSearchTool) Parameters() map[string]any {

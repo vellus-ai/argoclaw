@@ -10,7 +10,7 @@ permissions:
 
 env:
   GHCR_IMAGE: ghcr.io/${{ github.repository }}
-  DOCKERHUB_IMAGE: digitop/goclaw
+  DOCKERHUB_IMAGE: digitop/argoclaw
 
 jobs:
   release:
@@ -60,16 +60,16 @@ jobs:
           VERSION: v${{ needs.release.outputs.version }}
         run: |
           CGO_ENABLED=0 go build \
-            -ldflags="-s -w -X github.com/nextlevelbuilder/goclaw/cmd.Version=${VERSION}" \
-            -o goclaw .
-          tar -czf "goclaw-${{ needs.release.outputs.version }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz" goclaw migrations/
+            -ldflags="-s -w -X github.com/nextlevelbuilder/argoclaw/cmd.Version=${VERSION}" \
+            -o argoclaw .
+          tar -czf "argoclaw-${{ needs.release.outputs.version }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz" argoclaw migrations/
 
       - name: Upload to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload "v${{ needs.release.outputs.version }}" \
-            "goclaw-${{ needs.release.outputs.version }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz" \
+            "argoclaw-${{ needs.release.outputs.version }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz" \
             --clobber
 
   # Build and push Docker images to GHCR + Docker Hub
@@ -248,11 +248,11 @@ jobs:
           curl -fsSL -H "Content-Type: application/json" \
             -d "{
               \"embeds\": [{
-                \"title\": \"GoClaw ${VERSION} Released\",
+                \"title\": \"ArgoClaw ${VERSION} Released\",
                 \"url\": \"https://github.com/${{ github.repository }}/releases/tag/${VERSION}\",
                 \"color\": 5814783,
                 \"fields\": [
-                  {\"name\": \"Docker\", \"value\": \"\`docker pull digitop/goclaw:latest\`\", \"inline\": false},
+                  {\"name\": \"Docker\", \"value\": \"\`docker pull digitop/argoclaw:latest\`\", \"inline\": false},
                   {\"name\": \"Install\", \"value\": \"\`curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/install.sh | bash\`\", \"inline\": false}
                 ],
                 \"footer\": {\"text\": \"${{ github.repository }}\"},

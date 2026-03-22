@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/permissions"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/permissions"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // cacheEntry holds a cached API key lookup result.

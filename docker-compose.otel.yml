@@ -16,16 +16,16 @@ services:
       - COLLECTOR_OTLP_ENABLED=true
     restart: unless-stopped
 
-  goclaw:
+  argoclaw:
     build:
       args:
         ENABLE_OTEL: "true"
     environment:
-      - GOCLAW_TELEMETRY_ENABLED=true
-      - GOCLAW_TELEMETRY_ENDPOINT=jaeger:4317
-      - GOCLAW_TELEMETRY_PROTOCOL=grpc
-      - GOCLAW_TELEMETRY_INSECURE=true
-      - GOCLAW_TELEMETRY_SERVICE_NAME=goclaw-gateway
+      - ARGOCLAW_TELEMETRY_ENABLED=true
+      - ARGOCLAW_TELEMETRY_ENDPOINT=jaeger:4317
+      - ARGOCLAW_TELEMETRY_PROTOCOL=grpc
+      - ARGOCLAW_TELEMETRY_INSECURE=true
+      - ARGOCLAW_TELEMETRY_SERVICE_NAME=argoclaw-gateway
     depends_on:
       jaeger:
         condition: service_started

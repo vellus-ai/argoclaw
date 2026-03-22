@@ -1,6 +1,6 @@
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
-LDFLAGS  = -s -w -X github.com/nextlevelbuilder/goclaw/cmd.Version=$(VERSION)
-BINARY   = goclaw
+LDFLAGS  = -s -w -X github.com/nextlevelbuilder/argoclaw/cmd.Version=$(VERSION)
+BINARY   = argoclaw
 
 .PHONY: build run clean version net up down logs reset test vet check-web dev migrate setup ci
 
@@ -30,7 +30,7 @@ down:
 	$(COMPOSE) down
 
 logs:
-	$(COMPOSE) logs -f goclaw
+	$(COMPOSE) logs -f argoclaw
 
 reset: net
 	$(COMPOSE) down -v
@@ -49,7 +49,7 @@ dev:
 	cd ui/web && pnpm dev
 
 migrate:
-	$(COMPOSE) run --rm goclaw migrate up
+	$(COMPOSE) run --rm argoclaw migrate up
 
 setup:
 	go mod download

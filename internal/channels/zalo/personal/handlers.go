@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/channels"
-	"github.com/nextlevelbuilder/goclaw/internal/channels/media"
-	"github.com/nextlevelbuilder/goclaw/internal/channels/typing"
-	"github.com/nextlevelbuilder/goclaw/internal/channels/zalo/personal/protocol"
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
+	"github.com/vellus-ai/arargoclaw/internal/channels"
+	"github.com/vellus-ai/arargoclaw/internal/channels/media"
+	"github.com/vellus-ai/arargoclaw/internal/channels/typing"
+	"github.com/vellus-ai/arargoclaw/internal/channels/zalo/personal/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/tools"
 )
 
 func (c *Channel) handleMessage(msg protocol.Message) {
@@ -250,7 +250,7 @@ func downloadFile(ctx context.Context, fileURL string) (string, error) {
 		ext = ".bin"
 	}
 
-	tmpFile, err := os.CreateTemp("", "goclaw_zca_*"+ext)
+	tmpFile, err := os.CreateTemp("", "argoclaw_zca_*"+ext)
 	if err != nil {
 		return "", fmt.Errorf("create temp: %w", err)
 	}

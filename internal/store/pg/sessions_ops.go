@@ -3,7 +3,7 @@ package pg
 import (
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
 )
 
 func (s *PGSessionStore) TruncateHistory(key string, keepLast int) {

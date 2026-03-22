@@ -15,16 +15,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 
-	"github.com/nextlevelbuilder/goclaw/internal/agent"
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	httpapi "github.com/nextlevelbuilder/goclaw/internal/http"
-	mcpbridge "github.com/nextlevelbuilder/goclaw/internal/mcp"
-	"github.com/nextlevelbuilder/goclaw/internal/permissions"
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
-	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/agent"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	httpapi "github.com/vellus-ai/arargoclaw/internal/http"
+	mcpbridge "github.com/vellus-ai/arargoclaw/internal/mcp"
+	"github.com/vellus-ai/arargoclaw/internal/permissions"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/arargoclaw/pkg/protocol"
 )
 
 // Server is the main gateway server handling WebSocket and HTTP connections.
@@ -309,7 +309,7 @@ func (s *Server) BuildMux() *http.ServeMux {
 		s.oauthHandler.RegisterRoutes(mux)
 	}
 
-	// MCP bridge: expose GoClaw tools to Claude CLI via streamable-http.
+	// MCP bridge: expose ArgoClaw tools to Claude CLI via streamable-http.
 	// Only listens on localhost (CLI runs on the same machine).
 	// Protected by gateway token when configured.
 	// Agent context (X-Agent-ID, X-User-ID) is injected from request headers.

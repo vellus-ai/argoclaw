@@ -11,7 +11,7 @@ import (
 	"github.com/slack-go/slack/slackevents"
 	"github.com/slack-go/slack/socketmode"
 
-	"github.com/nextlevelbuilder/goclaw/internal/channels"
+	"github.com/vellus-ai/arargoclaw/internal/channels"
 )
 
 func (c *Channel) handleEventsAPI(evt socketmode.Event) {

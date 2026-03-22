@@ -1,4 +1,4 @@
-// Package tts provides text-to-speech functionality for GoClaw.
+// Package tts provides text-to-speech functionality for ArgoClaw.
 // Matching TS src/tts/tts-core.ts + src/tts/tts.ts.
 //
 // Supported providers: OpenAI, ElevenLabs, Edge (Microsoft).

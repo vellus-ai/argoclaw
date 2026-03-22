@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/channels/media"
+	"github.com/vellus-ai/arargoclaw/internal/channels/media"
 )
 
 // resolveMediaFromMessage extracts and downloads media from a Feishu message.

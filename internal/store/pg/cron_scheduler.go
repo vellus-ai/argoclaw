@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/nextlevelbuilder/goclaw/internal/cron"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/cron"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 func (s *PGCronStore) GetDueJobs(now time.Time) []store.CronJob {

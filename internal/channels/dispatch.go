@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
 )
 
 // WebhookRoute holds a path and handler pair for mounting on the main gateway mux.

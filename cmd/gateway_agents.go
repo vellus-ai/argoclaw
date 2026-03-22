@@ -4,13 +4,13 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	"github.com/nextlevelbuilder/goclaw/internal/memory"
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
-	"github.com/nextlevelbuilder/goclaw/internal/sandbox"
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
-	"github.com/nextlevelbuilder/goclaw/internal/tts"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/memory"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/sandbox"
+	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/arargoclaw/internal/tts"
 )
 
 // resolveEmbeddingProvider auto-selects an embedding provider based on config and available API keys.

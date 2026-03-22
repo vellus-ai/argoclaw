@@ -9,8 +9,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	"github.com/nextlevelbuilder/goclaw/internal/skills"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/skills"
 )
 
 func skillsCmd() *cobra.Command {
@@ -90,11 +90,11 @@ func loadSkillsLoader() *skills.Loader {
 	cfgPath := resolveConfigPath()
 	cfg, _ := config.Load(cfgPath)
 	workspace := config.ExpandHome(cfg.Agents.Defaults.Workspace)
-	globalSkillsDir := os.Getenv("GOCLAW_SKILLS_DIR")
+	globalSkillsDir := os.Getenv("ARGOCLAW_SKILLS_DIR")
 	if globalSkillsDir == "" {
 		globalSkillsDir = filepath.Join(cfg.ResolvedDataDir(), "skills")
 	}
-	builtinSkillsDir := os.Getenv("GOCLAW_BUILTIN_SKILLS_DIR")
+	builtinSkillsDir := os.Getenv("ARGOCLAW_BUILTIN_SKILLS_DIR")
 	if builtinSkillsDir == "" {
 		builtinSkillsDir = "/app/bundled-skills"
 	}

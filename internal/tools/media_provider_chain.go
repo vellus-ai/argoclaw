@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
 )
 
 // MediaProviderEntry represents a single provider in an ordered fallback chain.

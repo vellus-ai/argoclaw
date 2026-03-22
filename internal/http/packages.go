@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/nextlevelbuilder/goclaw/internal/permissions"
-	"github.com/nextlevelbuilder/goclaw/internal/skills"
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
+	"github.com/vellus-ai/arargoclaw/internal/permissions"
+	"github.com/vellus-ai/arargoclaw/internal/skills"
+	"github.com/vellus-ai/arargoclaw/internal/tools"
 )
 
 // validPkgName allows alphanumeric, hyphens, underscores, dots, @, / (for scoped npm).

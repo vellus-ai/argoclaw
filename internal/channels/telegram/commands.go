@@ -10,7 +10,7 @@ import (
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
 )
 
 // resolveAgentUUID looks up the agent UUID from the channel's agent key.

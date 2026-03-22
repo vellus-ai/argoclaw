@@ -15,8 +15,8 @@ import (
 	"github.com/google/uuid"
 	shellwords "github.com/mattn/go-shellwords"
 
-	"github.com/nextlevelbuilder/goclaw/internal/sandbox"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/sandbox"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // shellOperatorPattern detects shell metacharacters that indicate command chaining.
@@ -219,7 +219,7 @@ func buildCredentialedEnv(envMap map[string]string) []string {
 		"PATH=" + getenvDefault("PATH", "/usr/local/bin:/usr/bin:/bin"),
 		"HOME=" + getenvDefault("HOME", "/tmp"),
 		"LANG=" + getenvDefault("LANG", "en_US.UTF-8"),
-		"USER=" + getenvDefault("USER", "goclaw"),
+		"USER=" + getenvDefault("USER", "argoclaw"),
 	}
 	for k, v := range envMap {
 		env = append(env, k+"="+v)

@@ -11,11 +11,11 @@ import (
 	mcpgo "github.com/mark3labs/mcp-go/mcp"
 	mcpserver "github.com/mark3labs/mcp-go/server"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/tools"
 )
 
-// BridgeToolNames is the subset of GoClaw tools exposed via the MCP bridge.
+// BridgeToolNames is the subset of ArgoClaw tools exposed via the MCP bridge.
 // Excluded: spawn (agent loop), create_forum_topic (channels).
 var BridgeToolNames = map[string]bool{
 	// Filesystem
@@ -50,17 +50,17 @@ var BridgeToolNames = map[string]bool{
 	"team_tasks": true,
 }
 
-// NewBridgeServer creates a StreamableHTTPServer that exposes GoClaw tools as MCP tools.
+// NewBridgeServer creates a StreamableHTTPServer that exposes ArgoClaw tools as MCP tools.
 // It reads tools from the registry, filters to BridgeToolNames, and serves them
 // over streamable-http transport (stateless mode).
 // msgBus is optional; when non-nil, tools that produce media (deliver:true) will
 // publish file attachments directly to the outbound bus.
 func NewBridgeServer(reg *tools.Registry, version string, msgBus *bus.MessageBus) *mcpserver.StreamableHTTPServer {
-	srv := mcpserver.NewMCPServer("goclaw-bridge", version,
+	srv := mcpserver.NewMCPServer("argoclaw-bridge", version,
 		mcpserver.WithToolCapabilities(false),
 	)
 
-	// Register each safe tool from the GoClaw registry
+	// Register each safe tool from the ArgoClaw registry
 	var registered int
 	for name := range BridgeToolNames {
 		t, ok := reg.Get(name)
@@ -81,7 +81,7 @@ func NewBridgeServer(reg *tools.Registry, version string, msgBus *bus.MessageBus
 	)
 }
 
-// convertToMCPTool converts a GoClaw tools.Tool into an mcp-go Tool.
+// convertToMCPTool converts a ArgoClaw tools.Tool into an mcp-go Tool.
 func convertToMCPTool(t tools.Tool) mcpgo.Tool {
 	schema, err := json.Marshal(t.Parameters())
 	if err != nil {
@@ -91,7 +91,7 @@ func convertToMCPTool(t tools.Tool) mcpgo.Tool {
 	return mcpgo.NewToolWithRawSchema(t.Name(), t.Description(), schema)
 }
 
-// makeToolHandler creates a ToolHandlerFunc that delegates to the GoClaw tool registry.
+// makeToolHandler creates a ToolHandlerFunc that delegates to the ArgoClaw tool registry.
 // When msgBus is non-nil and a tool result contains Media paths, the handler publishes
 // them as outbound media attachments so files reach the user (e.g. Telegram document).
 func makeToolHandler(reg *tools.Registry, toolName string, msgBus *bus.MessageBus) mcpserver.ToolHandlerFunc {
@@ -106,7 +106,7 @@ func makeToolHandler(reg *tools.Registry, toolName string, msgBus *bus.MessageBu
 
 		// Forward media files to the outbound bus so they reach the user as attachments.
 		// This is necessary because Claude CLI processes tool results internally —
-		// GoClaw's agent loop never sees result.Media from bridge tool calls.
+		// ArgoClaw's agent loop never sees result.Media from bridge tool calls.
 		forwardMediaToOutbound(ctx, msgBus, toolName, result)
 
 		return mcpgo.NewToolResultText(result.ForLLM), nil

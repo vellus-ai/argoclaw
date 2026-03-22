@@ -125,9 +125,9 @@ func (p *ClaudeCLIProvider) ChatStream(ctx context.Context, req ChatRequest, onC
 		return nil, fmt.Errorf("claude-cli start: %w", err)
 	}
 
-	// Debug log file: only enabled when GOCLAW_DEBUG=1
+	// Debug log file: only enabled when ARGOCLAW_DEBUG=1
 	var debugFile *os.File
-	if os.Getenv("GOCLAW_DEBUG") == "1" {
+	if os.Getenv("ARGOCLAW_DEBUG") == "1" {
 		debugLogPath := filepath.Join(workDir, "cli-debug.log")
 		debugFile, _ = os.OpenFile(debugLogPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 		if debugFile != nil {

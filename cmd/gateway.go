@@ -11,32 +11,32 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/nextlevelbuilder/goclaw/internal/agent"
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/cache"
-	"github.com/nextlevelbuilder/goclaw/internal/channels"
-	"github.com/nextlevelbuilder/goclaw/internal/channels/discord"
-	"github.com/nextlevelbuilder/goclaw/internal/channels/feishu"
-	slackchannel "github.com/nextlevelbuilder/goclaw/internal/channels/slack"
-	"github.com/nextlevelbuilder/goclaw/internal/channels/telegram"
-	"github.com/nextlevelbuilder/goclaw/internal/channels/whatsapp"
-	"github.com/nextlevelbuilder/goclaw/internal/channels/zalo"
-	zalopersonal "github.com/nextlevelbuilder/goclaw/internal/channels/zalo/personal"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	"github.com/nextlevelbuilder/goclaw/internal/gateway"
-	"github.com/nextlevelbuilder/goclaw/internal/heartbeat"
-	"github.com/nextlevelbuilder/goclaw/internal/gateway/methods"
-	httpapi "github.com/nextlevelbuilder/goclaw/internal/http"
-	mcpbridge "github.com/nextlevelbuilder/goclaw/internal/mcp"
-	"github.com/nextlevelbuilder/goclaw/internal/media"
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
-	"github.com/nextlevelbuilder/goclaw/internal/scheduler"
-	"github.com/nextlevelbuilder/goclaw/internal/skills"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
-	"github.com/nextlevelbuilder/goclaw/internal/store/pg"
-	"github.com/nextlevelbuilder/goclaw/internal/tasks"
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
-	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/agent"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/cache"
+	"github.com/vellus-ai/arargoclaw/internal/channels"
+	"github.com/vellus-ai/arargoclaw/internal/channels/discord"
+	"github.com/vellus-ai/arargoclaw/internal/channels/feishu"
+	slackchannel "github.com/vellus-ai/arargoclaw/internal/channels/slack"
+	"github.com/vellus-ai/arargoclaw/internal/channels/telegram"
+	"github.com/vellus-ai/arargoclaw/internal/channels/whatsapp"
+	"github.com/vellus-ai/arargoclaw/internal/channels/zalo"
+	zalopersonal "github.com/vellus-ai/arargoclaw/internal/channels/zalo/personal"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/gateway"
+	"github.com/vellus-ai/arargoclaw/internal/heartbeat"
+	"github.com/vellus-ai/arargoclaw/internal/gateway/methods"
+	httpapi "github.com/vellus-ai/arargoclaw/internal/http"
+	mcpbridge "github.com/vellus-ai/arargoclaw/internal/mcp"
+	"github.com/vellus-ai/arargoclaw/internal/media"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/scheduler"
+	"github.com/vellus-ai/arargoclaw/internal/skills"
+	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/store/pg"
+	"github.com/vellus-ai/arargoclaw/internal/tasks"
+	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/arargoclaw/pkg/protocol"
 )
 
 func runGateway() {
@@ -402,8 +402,8 @@ func runGateway() {
 	server.SetFilesHandler(httpapi.NewFilesHandler(cfg.Gateway.Token, workspace))
 
 	// Storage file management — browse/delete files under the resolved workspace directory.
-	// Uses GOCLAW_WORKSPACE (or default ~/.goclaw/workspace) so it works correctly
-	// in Docker deployments where volumes are mounted outside ~/.goclaw/.
+	// Uses ARGOCLAW_WORKSPACE (or default ~/.argoclaw/workspace) so it works correctly
+	// in Docker deployments where volumes are mounted outside ~/.argoclaw/.
 	server.SetStorageHandler(httpapi.NewStorageHandler(workspace, cfg.Gateway.Token))
 
 	// Media upload endpoint — accepts multipart file uploads, returns temp path + MIME type.
@@ -976,7 +976,7 @@ func runGateway() {
 		cancel()
 	}()
 
-	slog.Info("goclaw gateway starting",
+	slog.Info("argoclaw gateway starting",
 		"version", Version,
 		"protocol", protocol.ProtocolVersion,
 		"agents", agentRouter.List(),
@@ -1003,7 +1003,7 @@ func runGateway() {
 
 	// Phase 1: suggest localhost binding when Tailscale is active
 	if cfg.Tailscale.Hostname != "" && cfg.Gateway.Host == "0.0.0.0" {
-		slog.Info("Tailscale enabled. Consider setting GOCLAW_HOST=127.0.0.1 for localhost-only + Tailscale access")
+		slog.Info("Tailscale enabled. Consider setting ARGOCLAW_HOST=127.0.0.1 for localhost-only + Tailscale access")
 	}
 
 	if err := server.Start(ctx); err != nil {

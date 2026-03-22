@@ -51,7 +51,7 @@ func main() {
 	}
 	defer listener.Close()
 
-	// Socket permissions: owner root, group goclaw (gid 1000), mode 0660.
+	// Socket permissions: owner root, group argoclaw (gid 1000), mode 0660.
 	// Chown requires CAP_CHOWN; if missing (misconfigured container), warn but continue
 	// since umask already set restrictive permissions.
 	if os.Getuid() == 0 {
@@ -229,7 +229,7 @@ func apkListFile() string {
 }
 
 // ensurePersistDir ensures the apk persist file's parent directory is writable by root.
-// On existing volumes the directory may be goclaw-owned (from older images); fix ownership
+// On existing volumes the directory may be argoclaw-owned (from older images); fix ownership
 // using CAP_CHOWN so pkg-helper can create/write the persist file.
 func ensurePersistDir() {
 	dir := filepath.Dir(apkListFile())
@@ -242,7 +242,7 @@ func ensurePersistDir() {
 		return
 	}
 
-	// Try to fix ownership to root:goclaw (gid 1000) if not already root-owned.
+	// Try to fix ownership to root:argoclaw (gid 1000) if not already root-owned.
 	// CAP_CHOWN is available even when CAP_DAC_OVERRIDE is dropped.
 	if stat, ok := fi.Sys().(*syscall.Stat_t); ok && stat.Uid != 0 {
 		if err := os.Chown(dir, 0, 1000); err != nil {

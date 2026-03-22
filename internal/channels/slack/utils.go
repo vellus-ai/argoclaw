@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
 )
 
 // HandleMessage overrides BaseChannel to allow messages when the chatID (Slack channel)

@@ -1,6 +1,6 @@
 package acp
 
-// ACP protocol types — client-side subset for GoClaw as ACP client.
+// ACP protocol types — client-side subset for ArgoClaw as ACP client.
 // Covers: initialize, session lifecycle, content blocks, and agent→client requests.
 
 // --- Client → Agent Requests ---

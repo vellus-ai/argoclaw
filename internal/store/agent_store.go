@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/config"
 )
 
 // sanitizeToolCallPrefix strips characters not in [a-z0-9_{}] from the prefix.

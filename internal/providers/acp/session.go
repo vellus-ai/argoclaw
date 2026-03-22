@@ -9,7 +9,7 @@ import (
 // Initialize sends the ACP initialize request to establish capabilities.
 func (p *ACPProcess) Initialize(ctx context.Context) error {
 	req := InitializeRequest{
-		ClientInfo: ClientInfo{Name: "goclaw", Version: "1.0"},
+		ClientInfo: ClientInfo{Name: "argoclaw", Version: "1.0"},
 		Capabilities: ClientCaps{
 			Fs:       &FsCaps{ReadTextFile: true, WriteTextFile: true},
 			Terminal: &TerminalCaps{Enabled: true},

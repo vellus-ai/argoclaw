@@ -26,7 +26,7 @@ Output valid JSON with this schema:
 ## Entity ID Rules
 - Use consistent, canonical lowercase IDs with hyphens
 - For people: use full name when known (e.g., "john-doe"), not partial ("john")
-- For projects/products: use official name (e.g., "project-alpha", "goclaw")
+- For projects/products: use official name (e.g., "project-alpha", "argoclaw")
 - Same real-world entity MUST always get the same external_id across extractions
 - When a pronoun or partial reference clearly refers to a named entity, use that entity's ID — do NOT create a new entity
 
@@ -57,19 +57,19 @@ Output valid JSON with this schema:
 
 ## Example
 
-Input: "Talked to Minh about the GoClaw migration. He'll handle the database schema changes by Friday. The team uses PostgreSQL with pgvector."
+Input: "Talked to Minh about the ArgoClaw migration. He'll handle the database schema changes by Friday. The team uses PostgreSQL with pgvector."
 
 Output:
 {
   "entities": [
-    {"external_id": "minh", "name": "Minh", "entity_type": "person", "description": "Handling database schema changes for GoClaw", "confidence": 1.0},
-    {"external_id": "goclaw", "name": "GoClaw", "entity_type": "project", "description": "Project undergoing migration", "confidence": 1.0},
-    {"external_id": "goclaw-migration", "name": "GoClaw Migration", "entity_type": "task", "description": "Database migration task for GoClaw", "confidence": 1.0},
+    {"external_id": "minh", "name": "Minh", "entity_type": "person", "description": "Handling database schema changes for ArgoClaw", "confidence": 1.0},
+    {"external_id": "argoclaw", "name": "ArgoClaw", "entity_type": "project", "description": "Project undergoing migration", "confidence": 1.0},
+    {"external_id": "argoclaw-migration", "name": "ArgoClaw Migration", "entity_type": "task", "description": "Database migration task for ArgoClaw", "confidence": 1.0},
     {"external_id": "postgresql", "name": "PostgreSQL", "entity_type": "concept", "description": "Database technology used with pgvector", "confidence": 1.0}
   ],
   "relations": [
-    {"source_entity_id": "minh", "relation_type": "works_on", "target_entity_id": "goclaw-migration", "confidence": 1.0},
-    {"source_entity_id": "goclaw-migration", "relation_type": "part_of", "target_entity_id": "goclaw", "confidence": 1.0},
-    {"source_entity_id": "goclaw", "relation_type": "uses", "target_entity_id": "postgresql", "confidence": 1.0}
+    {"source_entity_id": "minh", "relation_type": "works_on", "target_entity_id": "argoclaw-migration", "confidence": 1.0},
+    {"source_entity_id": "argoclaw-migration", "relation_type": "part_of", "target_entity_id": "argoclaw", "confidence": 1.0},
+    {"source_entity_id": "argoclaw", "relation_type": "uses", "target_entity_id": "postgresql", "confidence": 1.0}
   ]
 }`

@@ -19,17 +19,17 @@ type RedisCache[V any] struct {
 }
 
 // NewRedisCache creates a Redis-backed cache with the given key prefix.
-// Keys are stored as "goclaw:{prefix}:{key}".
+// Keys are stored as "argoclaw:{prefix}:{key}".
 func NewRedisCache[V any](client *redis.Client, prefix string) *RedisCache[V] {
 	return &RedisCache[V]{client: client, prefix: prefix}
 }
 
 func (c *RedisCache[V]) fullKey(key string) string {
-	return "goclaw:" + c.prefix + ":" + key
+	return "argoclaw:" + c.prefix + ":" + key
 }
 
 func (c *RedisCache[V]) keyPattern() string {
-	return "goclaw:" + c.prefix + ":*"
+	return "argoclaw:" + c.prefix + ":*"
 }
 
 func (c *RedisCache[V]) Get(ctx context.Context, key string) (V, bool) {
@@ -64,7 +64,7 @@ func (c *RedisCache[V]) Delete(ctx context.Context, key string) {
 }
 
 func (c *RedisCache[V]) DeleteByPrefix(ctx context.Context, prefix string) {
-	pattern := "goclaw:" + c.prefix + ":" + prefix + "*"
+	pattern := "argoclaw:" + c.prefix + ":" + prefix + "*"
 	c.deleteByPattern(ctx, pattern)
 }
 

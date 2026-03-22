@@ -10,7 +10,7 @@ import (
 	mcpclient "github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/client/transport"
 	mcpgo "github.com/mark3labs/mcp-go/mcp"
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
+	"github.com/vellus-ai/arargoclaw/internal/tools"
 )
 
 // connectAndDiscover creates a client, initializes the MCP handshake, and
@@ -33,7 +33,7 @@ func connectAndDiscover(ctx context.Context, name, transportType, command string
 	initReq := mcpgo.InitializeRequest{}
 	initReq.Params.ProtocolVersion = mcpgo.LATEST_PROTOCOL_VERSION
 	initReq.Params.ClientInfo = mcpgo.Implementation{
-		Name:    "goclaw",
+		Name:    "argoclaw",
 		Version: "1.0.0",
 	}
 

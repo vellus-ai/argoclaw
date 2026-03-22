@@ -3,9 +3,9 @@ package http
 import (
 	"net/http"
 
-	kg "github.com/nextlevelbuilder/goclaw/internal/knowledgegraph"
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	kg "github.com/vellus-ai/arargoclaw/internal/knowledgegraph"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // KnowledgeGraphHandler handles KG entity/relation management endpoints.

@@ -9,26 +9,26 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bootstrap"
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	"github.com/nextlevelbuilder/goclaw/internal/i18n"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
-	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/bootstrap"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/i18n"
+	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/pkg/protocol"
 )
 
 // AgentsHandler handles agent CRUD and sharing endpoints.
 type AgentsHandler struct {
 	agents           store.AgentStore
 	token            string
-	defaultWorkspace string            // default workspace path template (e.g. "~/.goclaw/workspace")
+	defaultWorkspace string            // default workspace path template (e.g. "~/.argoclaw/workspace")
 	msgBus           *bus.MessageBus   // for cache invalidation events (nil = no events)
 	summoner         *AgentSummoner    // LLM-based agent setup (nil = disabled)
 	isOwner          func(string) bool // checks if user ID is a system owner (nil = no owners configured)
 }
 
 // NewAgentsHandler creates a handler for agent management endpoints.
-// isOwner is a function that checks if a user ID is in GOCLAW_OWNER_IDS (nil = disabled).
+// isOwner is a function that checks if a user ID is in ARGOCLAW_OWNER_IDS (nil = disabled).
 func NewAgentsHandler(agents store.AgentStore, token, defaultWorkspace string, msgBus *bus.MessageBus, summoner *AgentSummoner, isOwner func(string) bool) *AgentsHandler {
 	return &AgentsHandler{agents: agents, token: token, defaultWorkspace: defaultWorkspace, msgBus: msgBus, summoner: summoner, isOwner: isOwner}
 }

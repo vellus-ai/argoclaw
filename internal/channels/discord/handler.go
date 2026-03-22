@@ -9,10 +9,10 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/channels"
-	"github.com/nextlevelbuilder/goclaw/internal/channels/media"
-	"github.com/nextlevelbuilder/goclaw/internal/channels/typing"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/channels"
+	"github.com/vellus-ai/arargoclaw/internal/channels/media"
+	"github.com/vellus-ai/arargoclaw/internal/channels/typing"
 )
 
 // handleMessage processes incoming Discord messages.
@@ -377,7 +377,7 @@ func (c *Channel) sendPairingReply(senderID, channelID string) {
 	}
 
 	replyText := fmt.Sprintf(
-		"GoClaw: access not configured.\n\nYour Discord user ID: %s\n\nPairing code: %s\n\nAsk the bot owner to approve with:\n  goclaw pairing approve %s",
+		"ArgoClaw: access not configured.\n\nYour Discord user ID: %s\n\nPairing code: %s\n\nAsk the bot owner to approve with:\n  argoclaw pairing approve %s",
 		senderID, code, code,
 	)
 

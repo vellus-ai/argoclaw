@@ -8,7 +8,7 @@ import (
 
 // sensitiveEnvPrefixes lists env var prefixes stripped from ACP subprocesses.
 var sensitiveEnvPrefixes = []string{
-	"GOCLAW", "CLAUDE", "ANTHROPIC", "OPENAI",
+	"ARGOCLAW", "CLAUDE", "ANTHROPIC", "OPENAI",
 	"DATABASE", "POSTGRES", "MYSQL", "REDIS", "MONGO",
 	"AWS_", "GOOGLE_", "AZURE_", "GCP_",
 	"GITHUB_", "GH_", "GITLAB_", "BITBUCKET_",

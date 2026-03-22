@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/nextlevelbuilder/goclaw/internal/channels"
-	"github.com/nextlevelbuilder/goclaw/internal/gateway"
-	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/channels"
+	"github.com/vellus-ai/arargoclaw/internal/gateway"
+	"github.com/vellus-ai/arargoclaw/pkg/protocol"
 )
 
 // QuotaMethods handles quota.usage — returns per-user quota consumption for the dashboard.

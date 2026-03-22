@@ -11,7 +11,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 const (
@@ -64,11 +64,11 @@ type Collector struct {
 }
 
 // NewCollector creates a new tracing collector backed by the given store.
-// Set GOCLAW_TRACE_VERBOSE=1 to include full LLM input in spans.
+// Set ARGOCLAW_TRACE_VERBOSE=1 to include full LLM input in spans.
 func NewCollector(ts store.TracingStore) *Collector {
-	verbose := os.Getenv("GOCLAW_TRACE_VERBOSE") != ""
+	verbose := os.Getenv("ARGOCLAW_TRACE_VERBOSE") != ""
 	if verbose {
-		slog.Info("tracing: verbose mode enabled (GOCLAW_TRACE_VERBOSE)")
+		slog.Info("tracing: verbose mode enabled (ARGOCLAW_TRACE_VERBOSE)")
 	}
 	return &Collector{
 		store:        ts,

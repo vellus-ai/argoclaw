@@ -9,7 +9,7 @@ import (
 func requireGateway() {
 	if !isGatewayReachable() {
 		fmt.Fprintln(os.Stderr, "Error: the gateway must be running for this command.")
-		fmt.Fprintln(os.Stderr, "Start it first:  goclaw")
+		fmt.Fprintln(os.Stderr, "Start it first:  argoclaw")
 		os.Exit(1)
 	}
 }

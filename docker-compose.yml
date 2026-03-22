@@ -1,5 +1,5 @@
 # Base docker-compose — shared service definition.
-# Pre-built images: ghcr.io/nextlevelbuilder/goclaw (also on Docker Hub: digitop/goclaw)
+# Pre-built images: ghcr.io/nextlevelbuilder/argoclaw (also on Docker Hub: digitop/argoclaw)
 #
 # Combine with overlays for your deployment:
 #
@@ -13,8 +13,8 @@
 #   With OTel tracing:  docker compose -f docker-compose.yml -f docker-compose.postgres.yml -f docker-compose.otel.yml up -d --build
 
 services:
-  goclaw:
-    image: ghcr.io/nextlevelbuilder/goclaw:latest
+  argoclaw:
+    image: ghcr.io/nextlevelbuilder/argoclaw:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -23,22 +23,22 @@ services:
         ENABLE_PYTHON: "${ENABLE_PYTHON:-true}"
         ENABLE_FULL_SKILLS: "${ENABLE_FULL_SKILLS:-false}"
     ports:
-      - "${GOCLAW_PORT:-18790}:18790"
+      - "${ARGOCLAW_PORT:-18790}:18790"
     env_file:
       - path: .env
         required: false
     environment:
-      - GOCLAW_HOST=0.0.0.0
-      - GOCLAW_PORT=18790
-      - GOCLAW_CONFIG=/app/data/config.json
-      - GOCLAW_GATEWAY_TOKEN=${GOCLAW_GATEWAY_TOKEN:-}
-      - GOCLAW_ENCRYPTION_KEY=${GOCLAW_ENCRYPTION_KEY:-}
-      - GOCLAW_SKILLS_DIR=/app/data/skills
+      - ARGOCLAW_HOST=0.0.0.0
+      - ARGOCLAW_PORT=18790
+      - ARGOCLAW_CONFIG=/app/data/config.json
+      - ARGOCLAW_GATEWAY_TOKEN=${ARGOCLAW_GATEWAY_TOKEN:-}
+      - ARGOCLAW_ENCRYPTION_KEY=${ARGOCLAW_ENCRYPTION_KEY:-}
+      - ARGOCLAW_SKILLS_DIR=/app/data/skills
       # Debug
-      - GOCLAW_TRACE_VERBOSE=${GOCLAW_TRACE_VERBOSE:-0}
+      - ARGOCLAW_TRACE_VERBOSE=${ARGOCLAW_TRACE_VERBOSE:-0}
     volumes:
-      - goclaw-data:/app/data
-      - goclaw-workspace:/app/workspace
+      - argoclaw-data:/app/data
+      - argoclaw-workspace:/app/workspace
     security_opt:
       - no-new-privileges:true
     init: true
@@ -62,8 +62,8 @@ services:
     restart: unless-stopped
 
 volumes:
-  goclaw-data:
-  goclaw-workspace:
+  argoclaw-data:
+  argoclaw-workspace:
 
 networks:
   shared:

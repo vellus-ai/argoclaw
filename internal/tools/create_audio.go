@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
 )
 
 // audioGenProviderPriority is the default fallback order for music generation providers.
@@ -153,7 +153,7 @@ func (t *CreateAudioTool) Execute(ctx context.Context, args map[string]any) *Res
 	if err := os.MkdirAll(dateDir, 0755); err != nil {
 		return ErrorResult(fmt.Sprintf("failed to create output directory: %v", err))
 	}
-	audioPath := filepath.Join(dateDir, fmt.Sprintf("goclaw_gen_%d.mp3", time.Now().UnixNano()))
+	audioPath := filepath.Join(dateDir, fmt.Sprintf("argoclaw_gen_%d.mp3", time.Now().UnixNano()))
 	if err := os.WriteFile(audioPath, audioBytes, 0644); err != nil {
 		return ErrorResult(fmt.Sprintf("failed to save generated audio: %v", err))
 	}

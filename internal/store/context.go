@@ -10,25 +10,25 @@ type contextKey string
 
 const (
 	// UserIDKey is the context key for the external user ID (TEXT, free-form).
-	UserIDKey contextKey = "goclaw_user_id"
+	UserIDKey contextKey = "argoclaw_user_id"
 	// AgentIDKey is the context key for the agent UUID.
-	AgentIDKey contextKey = "goclaw_agent_id"
+	AgentIDKey contextKey = "argoclaw_agent_id"
 	// AgentTypeKey is the context key for the agent type ("open" or "predefined").
-	AgentTypeKey contextKey = "goclaw_agent_type"
+	AgentTypeKey contextKey = "argoclaw_agent_type"
 	// SenderIDKey is the original individual sender's ID (not group-scoped).
 	// In group chats, UserIDKey is group-scoped but SenderIDKey preserves
 	// the actual person who sent the message.
-	SenderIDKey contextKey = "goclaw_sender_id"
+	SenderIDKey contextKey = "argoclaw_sender_id"
 	// SelfEvolveKey indicates whether a predefined agent can update its SOUL.md.
-	SelfEvolveKey contextKey = "goclaw_self_evolve"
+	SelfEvolveKey contextKey = "argoclaw_self_evolve"
 	// LocaleKey is the context key for the user's preferred locale (e.g. "en", "vi", "zh").
-	LocaleKey contextKey = "goclaw_locale"
+	LocaleKey contextKey = "argoclaw_locale"
 	// SharedMemoryKey indicates memory should be shared (no per-user scoping).
-	SharedMemoryKey contextKey = "goclaw_shared_memory"
+	SharedMemoryKey contextKey = "argoclaw_shared_memory"
 	// SharedKGKey indicates KG should be shared across all users of the agent (no per-user scoping).
-	SharedKGKey contextKey = "goclaw_shared_kg"
+	SharedKGKey contextKey = "argoclaw_shared_kg"
 	// ShellDenyGroupsKey holds per-agent shell deny group overrides.
-	ShellDenyGroupsKey contextKey = "goclaw_shell_deny_groups"
+	ShellDenyGroupsKey contextKey = "argoclaw_shell_deny_groups"
 )
 
 // WithShellDenyGroups returns a new context with shell deny group overrides.

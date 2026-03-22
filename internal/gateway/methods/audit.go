@@ -1,9 +1,9 @@
 package methods
 
 import (
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/gateway"
-	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/gateway"
+	"github.com/vellus-ai/arargoclaw/pkg/protocol"
 )
 
 // emitAudit broadcasts an audit event via eventBus for async persistence.

@@ -6,16 +6,16 @@
 # Dashboard: http://localhost:3000
 
 services:
-  goclaw-ui:
-    image: ghcr.io/nextlevelbuilder/goclaw-web:latest
+  argoclaw-ui:
+    image: ghcr.io/nextlevelbuilder/argoclaw-web:latest
     build:
       context: ./ui/web
       dockerfile: Dockerfile
     ports:
-      - "${GOCLAW_UI_PORT:-3000}:80"
+      - "${ARGOCLAW_UI_PORT:-3000}:80"
     networks:
       - default
       - shared
     depends_on:
-      - goclaw
+      - argoclaw
     restart: unless-stopped

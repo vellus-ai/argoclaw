@@ -12,11 +12,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	"github.com/nextlevelbuilder/goclaw/internal/oauth"
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/oauth"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/tools"
 )
 
 // loopbackAddr normalizes a gateway address for local connections.
@@ -149,11 +149,11 @@ func registerProviders(registry *providers.Registry, cfg *config.Config) {
 		if cfg.Providers.ClaudeCLI.PermMode != "" {
 			opts = append(opts, providers.WithClaudeCLIPermMode(cfg.Providers.ClaudeCLI.PermMode))
 		}
-		// Build per-session MCP config: external MCP servers + GoClaw bridge
+		// Build per-session MCP config: external MCP servers + ArgoClaw bridge
 		gatewayAddr := loopbackAddr(cfg.Gateway.Host, cfg.Gateway.Port)
 		mcpData := providers.BuildCLIMCPConfigData(cfg.Tools.McpServers, gatewayAddr, cfg.Gateway.Token)
 		opts = append(opts, providers.WithClaudeCLIMCPConfigData(mcpData))
-		// Enable GoClaw security hooks (shell deny patterns, path restrictions)
+		// Enable ArgoClaw security hooks (shell deny patterns, path restrictions)
 		opts = append(opts, providers.WithClaudeCLISecurityHooks(
 			cfg.Providers.ClaudeCLI.BaseWorkDir, true))
 		registry.Register(providers.NewClaudeCLIProvider(cliPath, opts...))
@@ -229,7 +229,7 @@ func jsonToStringMap(data json.RawMessage) map[string]string {
 
 // registerProvidersFromDB loads providers from Postgres and registers them.
 // DB providers are registered after config providers, so they take precedence (overwrite).
-// gatewayAddr is used to inject GoClaw MCP bridge for Claude CLI providers.
+// gatewayAddr is used to inject ArgoClaw MCP bridge for Claude CLI providers.
 // mcpStore is optional; when provided, per-agent MCP servers are injected into CLI config.
 // cfg provides fallback api_base values from config/env when DB providers have none set.
 func registerProvidersFromDB(registry *providers.Registry, provStore store.ProviderStore, secretStore store.ConfigSecretsStore, gatewayAddr, gatewayToken string, mcpStore store.MCPServerStore, cfg *config.Config) {

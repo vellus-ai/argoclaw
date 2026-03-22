@@ -14,18 +14,18 @@ type ProviderEntry = {
 type ProvidersData = Record<string, ProviderEntry>;
 
 const KNOWN_PROVIDERS = [
-  { key: "anthropic", label: "Anthropic", envKey: "GOCLAW_ANTHROPIC_API_KEY" },
-  { key: "openai", label: "OpenAI", envKey: "GOCLAW_OPENAI_API_KEY" },
-  { key: "openrouter", label: "OpenRouter", envKey: "GOCLAW_OPENROUTER_API_KEY" },
-  { key: "groq", label: "Groq", envKey: "GOCLAW_GROQ_API_KEY" },
-  { key: "gemini", label: "Gemini", envKey: "GOCLAW_GEMINI_API_KEY" },
-  { key: "deepseek", label: "DeepSeek", envKey: "GOCLAW_DEEPSEEK_API_KEY" },
-  { key: "mistral", label: "Mistral", envKey: "GOCLAW_MISTRAL_API_KEY" },
-  { key: "xai", label: "xAI", envKey: "GOCLAW_XAI_API_KEY" },
-  { key: "minimax", label: "MiniMax", envKey: "GOCLAW_MINIMAX_API_KEY" },
-  { key: "cohere", label: "Cohere", envKey: "GOCLAW_COHERE_API_KEY" },
-  { key: "perplexity", label: "Perplexity", envKey: "GOCLAW_PERPLEXITY_API_KEY" },
-  { key: "ollama_cloud", label: "Ollama Cloud", envKey: "GOCLAW_OLLAMA_CLOUD_API_KEY" },
+  { key: "anthropic", label: "Anthropic", envKey: "ARGO_ANTHROPIC_API_KEY" },
+  { key: "openai", label: "OpenAI", envKey: "ARGO_OPENAI_API_KEY" },
+  { key: "openrouter", label: "OpenRouter", envKey: "ARGO_OPENROUTER_API_KEY" },
+  { key: "groq", label: "Groq", envKey: "ARGO_GROQ_API_KEY" },
+  { key: "gemini", label: "Gemini", envKey: "ARGO_GEMINI_API_KEY" },
+  { key: "deepseek", label: "DeepSeek", envKey: "ARGO_DEEPSEEK_API_KEY" },
+  { key: "mistral", label: "Mistral", envKey: "ARGO_MISTRAL_API_KEY" },
+  { key: "xai", label: "xAI", envKey: "ARGO_XAI_API_KEY" },
+  { key: "minimax", label: "MiniMax", envKey: "ARGO_MINIMAX_API_KEY" },
+  { key: "cohere", label: "Cohere", envKey: "ARGO_COHERE_API_KEY" },
+  { key: "perplexity", label: "Perplexity", envKey: "ARGO_PERPLEXITY_API_KEY" },
+  { key: "ollama_cloud", label: "Ollama Cloud", envKey: "ARGO_OLLAMA_CLOUD_API_KEY" },
 ];
 
 function isSecret(val: unknown): boolean {

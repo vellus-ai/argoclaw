@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/crypto"
-	"github.com/nextlevelbuilder/goclaw/internal/i18n"
-	"github.com/nextlevelbuilder/goclaw/internal/permissions"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/crypto"
+	"github.com/vellus-ai/arargoclaw/internal/i18n"
+	"github.com/vellus-ai/arargoclaw/internal/permissions"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // extractBearerToken extracts a bearer token from the Authorization header.
@@ -40,7 +40,7 @@ func tokenMatch(provided, expected string) bool {
 // Returns "" if no user ID is provided (anonymous).
 // Rejects IDs exceeding MaxUserIDLength (VARCHAR(255) DB constraint).
 func extractUserID(r *http.Request) string {
-	id := r.Header.Get("X-GoClaw-User-Id")
+	id := r.Header.Get("X-ArgoClaw-User-Id")
 	if id == "" {
 		return ""
 	}
@@ -54,8 +54,8 @@ func extractUserID(r *http.Request) string {
 // extractAgentID determines the target agent from the request.
 // Checks model field, headers, and falls back to "default".
 func extractAgentID(r *http.Request, model string) string {
-	// From model field: "goclaw:<agentId>" or "agent:<agentId>"
-	if after, ok := strings.CutPrefix(model, "goclaw:"); ok {
+	// From model field: "argoclaw:<agentId>" or "agent:<agentId>"
+	if after, ok := strings.CutPrefix(model, "argoclaw:"); ok {
 		return after
 	}
 	if after, ok := strings.CutPrefix(model, "agent:"); ok {
@@ -63,10 +63,10 @@ func extractAgentID(r *http.Request, model string) string {
 	}
 
 	// From headers
-	if id := r.Header.Get("X-GoClaw-Agent-Id"); id != "" {
+	if id := r.Header.Get("X-ArgoClaw-Agent-Id"); id != "" {
 		return id
 	}
-	if id := r.Header.Get("X-GoClaw-Agent"); id != "" {
+	if id := r.Header.Get("X-ArgoClaw-Agent"); id != "" {
 		return id
 	}
 
@@ -92,7 +92,7 @@ func InitAPIKeyCache(s store.APIKeyStore, mb *bus.MessageBus) {
 }
 
 // InitPairingAuth sets the pairing store for HTTP auth.
-// Allows browser-paired users to access HTTP APIs via X-GoClaw-Sender-Id header.
+// Allows browser-paired users to access HTTP APIs via X-ArgoClaw-Sender-Id header.
 func InitPairingAuth(ps store.PairingStore) {
 	pkgPairingStore = ps
 }
@@ -130,8 +130,8 @@ func resolveAuthBearer(r *http.Request, gatewayToken, bearer string) authResult 
 	if _, role := ResolveAPIKey(r.Context(), bearer); role != "" {
 		return authResult{Role: role, Authenticated: true}
 	}
-	// Browser pairing → operator (via X-GoClaw-Sender-Id header)
-	if senderID := r.Header.Get("X-GoClaw-Sender-Id"); senderID != "" && pkgPairingStore != nil {
+	// Browser pairing → operator (via X-ArgoClaw-Sender-Id header)
+	if senderID := r.Header.Get("X-ArgoClaw-Sender-Id"); senderID != "" && pkgPairingStore != nil {
 		paired, err := pkgPairingStore.IsPaired(senderID, "browser")
 		if err == nil && paired {
 			return authResult{Role: permissions.RoleOperator, Authenticated: true}

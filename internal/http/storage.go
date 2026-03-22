@@ -13,15 +13,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/i18n"
-	"github.com/nextlevelbuilder/goclaw/internal/skills"
+	"github.com/vellus-ai/arargoclaw/internal/i18n"
+	"github.com/vellus-ai/arargoclaw/internal/skills"
 )
 
 // StorageHandler provides HTTP endpoints for browsing and managing
-// files inside the ~/.goclaw/ data directory.
+// files inside the ~/.argoclaw/ data directory.
 // Skills directories are browsable (read-only) but deletion is blocked.
 type StorageHandler struct {
-	baseDir string // resolved absolute path to ~/.goclaw/
+	baseDir string // resolved absolute path to ~/.argoclaw/
 	token   string
 
 	// sizeCache caches the total storage size for 60 minutes.
@@ -71,7 +71,7 @@ func isProtectedPath(rel string) bool {
 	return false
 }
 
-// handleList lists files and directories under ~/.goclaw/ with depth limiting.
+// handleList lists files and directories under ~/.argoclaw/ with depth limiting.
 // Query params:
 //   - ?path=  scopes the listing to a subtree
 //   - ?depth= max depth to walk (default 3, max 20)

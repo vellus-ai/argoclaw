@@ -24,14 +24,14 @@ func authCmd() *cobra.Command {
 
 // gatewayURL returns the base URL for the running gateway.
 func gatewayURL() string {
-	if u := os.Getenv("GOCLAW_GATEWAY_URL"); u != "" {
+	if u := os.Getenv("ARGOCLAW_GATEWAY_URL"); u != "" {
 		return strings.TrimRight(u, "/")
 	}
-	host := os.Getenv("GOCLAW_HOST")
+	host := os.Getenv("ARGOCLAW_HOST")
 	if host == "" {
 		host = "127.0.0.1"
 	}
-	port := os.Getenv("GOCLAW_PORT")
+	port := os.Getenv("ARGOCLAW_PORT")
 	if port == "" {
 		port = "3577"
 	}
@@ -46,7 +46,7 @@ func gatewayRequest(method, path string) (map[string]any, error) {
 		return nil, err
 	}
 
-	if token := os.Getenv("GOCLAW_TOKEN"); token != "" {
+	if token := os.Getenv("ARGOCLAW_TOKEN"); token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
 

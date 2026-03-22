@@ -17,7 +17,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/channels/zalo/personal/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/channels/zalo/personal/protocol"
 )
 
 func main() {
@@ -74,7 +74,7 @@ func main() {
 	// Test 1: Send text message
 	log.Println("\n--- Test 1: Send Text Message ---")
 	msgID, err := protocol.SendMessage(ctx, sess, groupID, protocol.ThreadTypeGroup,
-		fmt.Sprintf("GoClaw Go E2E test - %s", time.Now().Format(time.RFC3339)))
+		fmt.Sprintf("ArgoClaw Go E2E test - %s", time.Now().Format(time.RFC3339)))
 	if err != nil {
 		log.Fatalf("send text: %v", err)
 	}
@@ -130,7 +130,7 @@ func createTestImage() string {
 		0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, // IEND chunk
 		0xae, 0x42, 0x60, 0x82,
 	}
-	f, err := os.CreateTemp("", "goclaw_e2e_*.png")
+	f, err := os.CreateTemp("", "argoclaw_e2e_*.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -140,8 +140,8 @@ func createTestImage() string {
 }
 
 func createTestFile() string {
-	content := fmt.Sprintf("GoClaw E2E Test File\nTimestamp: %s\nThis file tests the file upload pipeline.\n", time.Now().Format(time.RFC3339))
-	f, err := os.CreateTemp("", "goclaw_e2e_*.txt")
+	content := fmt.Sprintf("ArgoClaw E2E Test File\nTimestamp: %s\nThis file tests the file upload pipeline.\n", time.Now().Format(time.RFC3339))
+	f, err := os.CreateTemp("", "argoclaw_e2e_*.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

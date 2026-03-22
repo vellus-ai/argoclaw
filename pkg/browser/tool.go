@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
+	"github.com/vellus-ai/arargoclaw/internal/tools"
 )
 
 // BrowserTool implements tools.Tool for browser automation.
@@ -258,7 +258,7 @@ func (t *BrowserTool) handleScreenshot(ctx context.Context, args map[string]any)
 	}
 
 	// Save to temp file so the media pipeline can deliver it (e.g. Telegram sendPhoto)
-	imagePath := filepath.Join(os.TempDir(), fmt.Sprintf("goclaw_screenshot_%d.png", time.Now().UnixNano()))
+	imagePath := filepath.Join(os.TempDir(), fmt.Sprintf("argoclaw_screenshot_%d.png", time.Now().UnixNano()))
 	if err := os.WriteFile(imagePath, data, 0644); err != nil {
 		return tools.ErrorResult(fmt.Sprintf("failed to save screenshot: %v", err))
 	}

@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/config"
 )
 
 // QuotaResult is returned by QuotaChecker.Check.

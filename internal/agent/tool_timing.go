@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
+	"github.com/vellus-ai/arargoclaw/pkg/protocol"
 )
 
 // defaultSlowToolThreshold is used when no historical data is available for a tool.

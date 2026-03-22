@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nextlevelbuilder/goclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/config"
 )
 
 func agentCmd() *cobra.Command {

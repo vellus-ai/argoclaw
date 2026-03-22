@@ -41,7 +41,7 @@ const swaggerHTML = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GoClaw API Documentation</title>
+  <title>ArgoClaw API Documentation</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.18.2/swagger-ui.css">
   <style>
     html { box-sizing: border-box; overflow-y: scroll; }

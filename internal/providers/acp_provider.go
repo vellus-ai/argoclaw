@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/providers/acp"
+	"github.com/vellus-ai/arargoclaw/internal/providers/acp"
 )
 
 // ACPProvider implements Provider by orchestrating ACP-compatible agent subprocesses.
@@ -213,7 +213,7 @@ func extractACPContent(req ChatRequest) []acp.ContentBlock {
 	return blocks
 }
 
-// mapStopReason converts ACP stopReason to GoClaw finish reason.
+// mapStopReason converts ACP stopReason to ArgoClaw finish reason.
 func mapStopReason(resp *acp.PromptResponse) string {
 	if resp == nil {
 		return "stop"

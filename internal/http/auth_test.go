@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/permissions"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/permissions"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 
 	"github.com/google/uuid"
 )
@@ -199,7 +199,7 @@ func TestRequireAuth_InjectLocaleAndUserID(t *testing.T) {
 	r := httptest.NewRequest("GET", "/v1/agents", nil)
 	r.Header.Set("Authorization", "Bearer secret")
 	r.Header.Set("Accept-Language", "vi")
-	r.Header.Set("X-GoClaw-User-Id", "user123")
+	r.Header.Set("X-ArgoClaw-User-Id", "user123")
 	w := httptest.NewRecorder()
 	handler(w, r)
 

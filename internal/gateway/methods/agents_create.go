@@ -8,12 +8,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bootstrap"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	"github.com/nextlevelbuilder/goclaw/internal/gateway"
-	"github.com/nextlevelbuilder/goclaw/internal/i18n"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
-	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/bootstrap"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/gateway"
+	"github.com/vellus-ai/arargoclaw/internal/i18n"
+	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/pkg/protocol"
 )
 
 // --- agents.create ---
@@ -75,7 +75,7 @@ func (m *AgentsMethods) handleCreate(ctx context.Context, client *gateway.Client
 			return
 		}
 
-		// Resolve owner: use first provided ID so external provisioning tools (e.g. goclaw-wizards)
+		// Resolve owner: use first provided ID so external provisioning tools (e.g. argoclaw-wizards)
 		// can set a real user as owner at creation time. Falls back to "system" for backward compat.
 		ownerID := "system"
 		if len(params.OwnerIDs) > 0 && params.OwnerIDs[0] != "" {

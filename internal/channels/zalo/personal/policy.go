@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/channels/zalo/personal/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/channels/zalo/personal/protocol"
 )
 
 const pairingDebounce = 60 * time.Second
@@ -77,7 +77,7 @@ func (c *Channel) sendPairingReply(senderID, chatID string) {
 	}
 
 	replyText := fmt.Sprintf(
-		"GoClaw: access not configured.\n\nYour Zalo user id: %s\n\nPairing code: %s\n\nAsk the bot owner to approve with:\n  goclaw pairing approve %s",
+		"ArgoClaw: access not configured.\n\nYour Zalo user id: %s\n\nPairing code: %s\n\nAsk the bot owner to approve with:\n  argoclaw pairing approve %s",
 		senderID, code, code,
 	)
 

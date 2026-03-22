@@ -51,7 +51,7 @@ func SanitizeImage(inputPath string) (string, error) {
 			return "", fmt.Errorf("encode jpeg (q=%d): %w", quality, err)
 		}
 		if buf.Len() <= imageSanitizeMaxBytes {
-			outPath := filepath.Join(os.TempDir(), fmt.Sprintf("goclaw_sanitized_%d.jpg", os.Getpid()))
+			outPath := filepath.Join(os.TempDir(), fmt.Sprintf("argoclaw_sanitized_%d.jpg", os.Getpid()))
 			if err := os.WriteFile(outPath, buf.Bytes(), 0644); err != nil {
 				return "", fmt.Errorf("write sanitized image: %w", err)
 			}

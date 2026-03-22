@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/nextlevelbuilder/goclaw/internal/agent"
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/channels"
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	"github.com/nextlevelbuilder/goclaw/internal/sessions"
+	"github.com/vellus-ai/arargoclaw/internal/agent"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/channels"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/sessions"
 )
 
 // resolveAgentRoute determines which agent should handle a message
@@ -124,7 +124,7 @@ func mediaToMarkdown(media []agent.MediaResult, cfg *config.Config) string {
 	var parts []string
 	for _, mr := range media {
 		cleanPath := filepath.Clean(mr.Path)
-		// Strip leading "/" so URL path is /v1/files/app/.goclaw/...
+		// Strip leading "/" so URL path is /v1/files/app/.argoclaw/...
 		urlPath := strings.TrimPrefix(cleanPath, "/")
 		if urlPath == "" {
 			continue

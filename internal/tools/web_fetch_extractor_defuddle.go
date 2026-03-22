@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	defuddleBaseURL = "https://fetch.goclaw.sh/"
+	defuddleBaseURL = "https://fetch.argoclaw.sh/"
 	defuddleTimeout = 10 * time.Second
 	defuddleMaxBody = 1 << 20 // 1MB
 )
 
-// DefuddleExtractor calls the fetch.goclaw.sh Cloudflare Worker to extract
+// DefuddleExtractor calls the fetch.argoclaw.sh Cloudflare Worker to extract
 // clean markdown via Defuddle. The CF Worker handles HTTP fetch + content extraction.
 type DefuddleExtractor struct {
 	baseURL string
@@ -57,7 +57,7 @@ func newDefuddleExtractor(baseURL string, timeout time.Duration) *DefuddleExtrac
 
 func (d *DefuddleExtractor) Name() string { return "defuddle" }
 
-// Extract sends a GET request to fetch.goclaw.sh/<domain>/<path> (no scheme)
+// Extract sends a GET request to fetch.argoclaw.sh/<domain>/<path> (no scheme)
 // and returns the plain markdown response.
 func (d *DefuddleExtractor) Extract(ctx context.Context, rawURL string) (string, error) {
 	// Strip scheme: https://example.com/path → example.com/path

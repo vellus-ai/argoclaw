@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
 )
 
 const (
@@ -150,7 +150,7 @@ func geminiFilePoll(ctx context.Context, apiKey, fileName string) (fileURI strin
 // then calls generateContent with file_data reference.
 // Used for audio/video files where inlineData doesn't work.
 func geminiFileAPICall(ctx context.Context, apiKey, model, prompt string, data []byte, mime string, httpTimeout time.Duration) (*providers.ChatResponse, error) {
-	displayName := fmt.Sprintf("goclaw_%d", time.Now().UnixNano())
+	displayName := fmt.Sprintf("argoclaw_%d", time.Now().UnixNano())
 
 	slog.Info("gemini file api: uploading", "size", len(data), "mime", mime)
 	fileName, fileURI, err := geminiFileUpload(ctx, apiKey, displayName, data, mime)

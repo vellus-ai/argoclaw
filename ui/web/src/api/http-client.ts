@@ -73,7 +73,7 @@ export class HttpClient {
     const token = this.getToken();
     if (token) headers["Authorization"] = `Bearer ${token}`;
     const userId = this.getUserId();
-    if (userId) headers["X-GoClaw-User-Id"] = userId;
+    if (userId) headers["X-ArgoClaw-User-Id"] = userId;
 
     const res = await fetch(this.buildUrl(path), {
       method: "POST",
@@ -108,9 +108,9 @@ export class HttpClient {
     const token = this.getToken();
     if (token) h["Authorization"] = `Bearer ${token}`;
     const userId = this.getUserId();
-    if (userId) h["X-GoClaw-User-Id"] = userId;
+    if (userId) h["X-ArgoClaw-User-Id"] = userId;
     const senderID = this.getSenderID();
-    if (senderID) h["X-GoClaw-Sender-Id"] = senderID;
+    if (senderID) h["X-ARGO-Sender-Id"] = senderID;
     return h;
   }
 

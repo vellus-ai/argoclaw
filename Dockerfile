@@ -30,8 +30,8 @@ RUN set -eux; \
     fi; \
     if [ -n "$TAGS" ]; then TAGS="-tags $TAGS"; fi; \
     CGO_ENABLED=0 GOOS=linux \
-    go build -ldflags="-s -w -X github.com/nextlevelbuilder/goclaw/cmd.Version=${VERSION}" \
-    ${TAGS} -o /out/goclaw . && \
+    go build -ldflags="-s -w -X github.com/nextlevelbuilder/argoclaw/cmd.Version=${VERSION}" \
+    ${TAGS} -o /out/argoclaw . && \
     CGO_ENABLED=0 GOOS=linux \
     go build -ldflags="-s -w" -o /out/pkg-helper ./cmd/pkg-helper
 
@@ -69,11 +69,11 @@ RUN set -eux; \
     fi
 
 # Non-root user
-RUN adduser -D -u 1000 -h /app goclaw
+RUN adduser -D -u 1000 -h /app argoclaw
 WORKDIR /app
 
 # Copy binary, migrations, and bundled skills
-COPY --from=builder /out/goclaw /app/goclaw
+COPY --from=builder /out/argoclaw /app/argoclaw
 COPY --from=builder /out/pkg-helper /app/pkg-helper
 COPY --from=builder /src/migrations/ /app/migrations/
 COPY --from=builder /src/skills/ /app/bundled-skills/
@@ -99,28 +99,28 @@ RUN chmod +x /app/docker-entrypoint.sh && \
 
 # Create data directories.
 # .runtime has split ownership: root owns the dir (so pkg-helper can write apk-packages),
-# while pip/npm subdirs are goclaw-owned (runtime installs by the app process).
+# while pip/npm subdirs are argoclaw-owned (runtime installs by the app process).
 RUN mkdir -p /app/workspace /app/data/.runtime/pip /app/data/.runtime/npm-global/lib \
-        /app/data/.runtime/pip-cache /app/skills /app/tsnet-state /app/.goclaw \
+        /app/data/.runtime/pip-cache /app/skills /app/tsnet-state /app/.argoclaw \
     && touch /app/data/.runtime/apk-packages \
-    && chown -R goclaw:goclaw /app/workspace /app/skills /app/tsnet-state /app/.goclaw \
-    && chown goclaw:goclaw /app/bundled-skills /app/data \
-    && chown root:goclaw /app/data/.runtime /app/data/.runtime/apk-packages \
+    && chown -R argoclaw:argoclaw /app/workspace /app/skills /app/tsnet-state /app/.argoclaw \
+    && chown argoclaw:argoclaw /app/bundled-skills /app/data \
+    && chown root:argoclaw /app/data/.runtime /app/data/.runtime/apk-packages \
     && chmod 0750 /app/data/.runtime \
     && chmod 0640 /app/data/.runtime/apk-packages \
-    && chown -R goclaw:goclaw /app/data/.runtime/pip /app/data/.runtime/npm-global /app/data/.runtime/pip-cache
+    && chown -R argoclaw:argoclaw /app/data/.runtime/pip /app/data/.runtime/npm-global /app/data/.runtime/pip-cache
 
 # Default environment
-ENV GOCLAW_CONFIG=/app/config.json \
-    GOCLAW_WORKSPACE=/app/workspace \
-    GOCLAW_DATA_DIR=/app/data \
-    GOCLAW_SKILLS_DIR=/app/skills \
-    GOCLAW_MIGRATIONS_DIR=/app/migrations \
-    GOCLAW_HOST=0.0.0.0 \
-    GOCLAW_PORT=18790
+ENV ARGOCLAW_CONFIG=/app/config.json \
+    ARGOCLAW_WORKSPACE=/app/workspace \
+    ARGOCLAW_DATA_DIR=/app/data \
+    ARGOCLAW_SKILLS_DIR=/app/skills \
+    ARGOCLAW_MIGRATIONS_DIR=/app/migrations \
+    ARGOCLAW_HOST=0.0.0.0 \
+    ARGOCLAW_PORT=18790
 
 # Entrypoint runs as root to install persisted packages and start pkg-helper,
-# then drops to goclaw user via su-exec before starting the app.
+# then drops to argoclaw user via su-exec before starting the app.
 
 EXPOSE 18790
 

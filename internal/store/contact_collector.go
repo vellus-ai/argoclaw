@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/cache"
+	"github.com/vellus-ai/arargoclaw/internal/cache"
 )
 
 const contactSeenTTL = 30 * time.Minute

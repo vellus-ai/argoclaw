@@ -54,7 +54,7 @@ const (
 	// --- HTTP API ---
 	MsgInvalidAuth          = "error.invalid_auth"              // "invalid authentication"
 	MsgMsgsRequired         = "error.messages_required"         // "messages is required"
-	MsgUserIDHeader         = "error.user_id_header"            // "X-GoClaw-User-Id header is required"
+	MsgUserIDHeader         = "error.user_id_header"            // "X-ArgoClaw-User-Id header is required"
 	MsgFileTooLarge         = "error.file_too_large"            // "file too large or invalid multipart form"
 	MsgMissingFileField     = "error.missing_file_field"        // "missing 'file' field"
 	MsgInvalidFilename      = "error.invalid_filename"          // "invalid filename"

@@ -9,7 +9,7 @@ import (
 	slackapi "github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 
-	"github.com/nextlevelbuilder/goclaw/internal/channels"
+	"github.com/vellus-ai/arargoclaw/internal/channels"
 )
 
 func (c *Channel) handleAppMention(ev *slackevents.AppMentionEvent) {
@@ -212,10 +212,10 @@ func (c *Channel) sendPairingReply(senderID, channelID string) {
 	var msg string
 	if strings.HasPrefix(senderID, "group:") {
 		msg = fmt.Sprintf("This channel is not authorized to use this bot.\n\n"+
-			"An admin can approve via CLI:\n  goclaw pairing approve %s\n\n"+
-			"Or approve via the GoClaw web UI (Pairing section).", code)
+			"An admin can approve via CLI:\n  argoclaw pairing approve %s\n\n"+
+			"Or approve via the ArgoClaw web UI (Pairing section).", code)
 	} else {
-		msg = fmt.Sprintf("GoClaw: access not configured.\n\nYour Slack user ID: %s\n\nPairing code: %s\n\nAsk the bot owner to approve with:\n  goclaw pairing approve %s",
+		msg = fmt.Sprintf("ArgoClaw: access not configured.\n\nYour Slack user ID: %s\n\nPairing code: %s\n\nAsk the bot owner to approve with:\n  argoclaw pairing approve %s",
 			senderID, code, code)
 	}
 	if _, _, err := c.api.PostMessage(channelID, slackapi.MsgOptionText(msg, false)); err != nil {

@@ -14,12 +14,12 @@ services:
     command: redis-server --appendonly yes
     restart: unless-stopped
 
-  goclaw:
+  argoclaw:
     build:
       args:
         ENABLE_REDIS: "true"
     environment:
-      - GOCLAW_REDIS_DSN=redis://redis:6379/0
+      - ARGOCLAW_REDIS_DSN=redis://redis:6379/0
     depends_on:
       redis:
         condition: service_started

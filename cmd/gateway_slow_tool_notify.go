@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/nextlevelbuilder/goclaw/internal/agent"
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
+	"github.com/vellus-ai/arargoclaw/internal/agent"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/pkg/protocol"
 )
 
 // wireSlowToolNotifySubscriber registers a subscriber that sends direct outbound

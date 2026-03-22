@@ -6,9 +6,9 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/nextlevelbuilder/goclaw/internal/config"
-	"github.com/nextlevelbuilder/goclaw/internal/tracing"
-	"github.com/nextlevelbuilder/goclaw/internal/tracing/otelexport"
+	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/arargoclaw/internal/tracing"
+	"github.com/vellus-ai/arargoclaw/internal/tracing/otelexport"
 )
 
 // initOTelExporter creates and wires the OpenTelemetry OTLP exporter

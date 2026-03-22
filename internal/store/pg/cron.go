@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/cron"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/cron"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 const defaultCronCacheTTL = 2 * time.Minute

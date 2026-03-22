@@ -8,13 +8,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/nextlevelbuilder/goclaw/internal/i18n"
+	"github.com/vellus-ai/arargoclaw/internal/i18n"
 )
 
 // FilesHandler serves files over HTTP with Bearer token auth.
 // Accepts absolute paths — the auth token protects against unauthorized access.
 // When an exact path is not found, falls back to searching the workspace for
-// generated files by basename (goclaw_gen_* filenames are globally unique).
+// generated files by basename (argoclaw_gen_* filenames are globally unique).
 type FilesHandler struct {
 	token     string
 	workspace string // workspace root for fallback file search
@@ -69,7 +69,7 @@ func (h *FilesHandler) handleServe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// URL path is the absolute path with leading "/" stripped (e.g. "app/.goclaw/workspace/file.png")
+	// URL path is the absolute path with leading "/" stripped (e.g. "app/.argoclaw/workspace/file.png")
 	absPath := filepath.Clean("/" + urlPath)
 
 	// Block access to sensitive system directories
@@ -84,7 +84,7 @@ func (h *FilesHandler) handleServe(w http.ResponseWriter, r *http.Request) {
 	info, err := os.Stat(absPath)
 	if err != nil || info.IsDir() {
 		// Fallback: search workspace for file by basename (handles LLM-hallucinated paths).
-		// Generated filenames (goclaw_gen_*) include nanosecond timestamps and are globally unique.
+		// Generated filenames (argoclaw_gen_*) include nanosecond timestamps and are globally unique.
 		if resolved := h.findInWorkspace(filepath.Base(absPath)); resolved != "" {
 			absPath = resolved
 			info, _ = os.Stat(absPath)

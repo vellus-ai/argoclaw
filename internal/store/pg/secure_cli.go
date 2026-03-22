@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/nextlevelbuilder/goclaw/internal/crypto"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/crypto"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // PGSecureCLIStore implements store.SecureCLIStore backed by Postgres.

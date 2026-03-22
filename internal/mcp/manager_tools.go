@@ -7,7 +7,7 @@ import (
 	"time"
 
 	mcpgo "github.com/mark3labs/mcp-go/mcp"
-	"github.com/nextlevelbuilder/goclaw/internal/tools"
+	"github.com/vellus-ai/arargoclaw/internal/tools"
 )
 
 // ToolNames returns all registered MCP tool names.
@@ -124,7 +124,7 @@ func DiscoverTools(ctx context.Context, transportType, command string, args []st
 
 	initReq := mcpgo.InitializeRequest{}
 	initReq.Params.ProtocolVersion = mcpgo.LATEST_PROTOCOL_VERSION
-	initReq.Params.ClientInfo = mcpgo.Implementation{Name: "goclaw-discovery", Version: "1.0.0"}
+	initReq.Params.ClientInfo = mcpgo.Implementation{Name: "argoclaw-discovery", Version: "1.0.0"}
 	if _, err := client.Initialize(ctx, initReq); err != nil {
 		return nil, fmt.Errorf("initialize: %w", err)
 	}

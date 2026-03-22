@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 func TestUUIDToTraceID(t *testing.T) {
@@ -82,7 +82,7 @@ func TestConfig_DefaultServiceName(t *testing.T) {
 		Insecure: true,
 	}
 	if cfg.ServiceName == "" {
-		// New should default to "goclaw-gateway"
+		// New should default to "argoclaw-gateway"
 		// We can't easily test this without a running OTLP server,
 		// but we verify the config struct accepts empty service name
 	}

@@ -10,11 +10,11 @@
 #   # Check status:
 #   docker compose -f docker-compose.yml -f docker-compose.postgres.yml -f docker-compose.upgrade.yml run --rm upgrade --status
 #
-# The upgrade service runs goclaw upgrade and exits. Use --rm to auto-remove the container.
+# The upgrade service runs argoclaw upgrade and exits. Use --rm to auto-remove the container.
 
 services:
   upgrade:
-    image: ghcr.io/nextlevelbuilder/goclaw:latest
+    image: ghcr.io/nextlevelbuilder/argoclaw:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -24,15 +24,15 @@ services:
       - path: .env
         required: false
     environment:
-      - GOCLAW_POSTGRES_DSN=postgres://${POSTGRES_USER:-goclaw}:${POSTGRES_PASSWORD:-goclaw}@postgres:5432/${POSTGRES_DB:-goclaw}?sslmode=disable
-      - GOCLAW_CONFIG=/app/data/config.json
-      - GOCLAW_MIGRATIONS_DIR=/app/migrations
-      - GOCLAW_ENCRYPTION_KEY=${GOCLAW_ENCRYPTION_KEY:-}
+      - ARGOCLAW_POSTGRES_DSN=postgres://${POSTGRES_USER:-argoclaw}:${POSTGRES_PASSWORD:-argoclaw}@postgres:5432/${POSTGRES_DB:-argoclaw}?sslmode=disable
+      - ARGOCLAW_CONFIG=/app/data/config.json
+      - ARGOCLAW_MIGRATIONS_DIR=/app/migrations
+      - ARGOCLAW_ENCRYPTION_KEY=${ARGOCLAW_ENCRYPTION_KEY:-}
     volumes:
-      - goclaw-data:/app/data
+      - argoclaw-data:/app/data
     depends_on:
       postgres:
         condition: service_healthy
-    entrypoint: ["/app/goclaw"]
+    entrypoint: ["/app/argoclaw"]
     command: ["upgrade"]
     restart: "no"

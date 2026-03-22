@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // ListAllDocumentsGlobal returns all documents across all agents (for admin overview).

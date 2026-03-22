@@ -4,19 +4,19 @@
 #   docker compose -f docker-compose.yml -f docker-compose.postgres.yml -f docker-compose.tailscale.yml up
 #
 # Required:
-#   GOCLAW_TSNET_AUTH_KEY — Tailscale auth key (from https://login.tailscale.com/admin/settings/keys)
+#   ARGOCLAW_TSNET_AUTH_KEY — Tailscale auth key (from https://login.tailscale.com/admin/settings/keys)
 #
 # Optional:
-#   GOCLAW_TSNET_HOSTNAME — Tailscale device name (default: goclaw-gateway)
+#   ARGOCLAW_TSNET_HOSTNAME — Tailscale device name (default: argoclaw-gateway)
 
 services:
-  goclaw:
+  argoclaw:
     build:
       args:
         ENABLE_TSNET: "true"
     environment:
-      - GOCLAW_TSNET_HOSTNAME=${GOCLAW_TSNET_HOSTNAME:-goclaw-gateway}
-      - GOCLAW_TSNET_AUTH_KEY=${GOCLAW_TSNET_AUTH_KEY}
+      - ARGOCLAW_TSNET_HOSTNAME=${ARGOCLAW_TSNET_HOSTNAME:-argoclaw-gateway}
+      - ARGOCLAW_TSNET_AUTH_KEY=${ARGOCLAW_TSNET_AUTH_KEY}
     volumes:
       - tsnet-state:/app/tsnet-state
 

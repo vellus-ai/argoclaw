@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/providers"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/providers"
 )
 
 // credentialProvider is a narrow interface for providers that expose API credentials.
@@ -104,7 +104,7 @@ func (t *CreateImageTool) Execute(ctx context.Context, args map[string]any) *Res
 	if err := os.MkdirAll(dateDir, 0755); err != nil {
 		return ErrorResult(fmt.Sprintf("failed to create output directory: %v", err))
 	}
-	imagePath := filepath.Join(dateDir, fmt.Sprintf("goclaw_gen_%d.png", time.Now().UnixNano()))
+	imagePath := filepath.Join(dateDir, fmt.Sprintf("argoclaw_gen_%d.png", time.Now().UnixNano()))
 	if err := os.WriteFile(imagePath, chainResult.Data, 0644); err != nil {
 		return ErrorResult(fmt.Sprintf("failed to save generated image: %v", err))
 	}

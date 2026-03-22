@@ -41,13 +41,13 @@ export const ROUTES = {
 } as const;
 
 export const LOCAL_STORAGE_KEYS = {
-  TOKEN: "goclaw:token",
-  USER_ID: "goclaw:userId",
-  SENDER_ID: "goclaw:senderID",
-  THEME: "goclaw:theme",
-  SIDEBAR_COLLAPSED: "goclaw:sidebarCollapsed",
-  LANGUAGE: "goclaw:language",
-  TIMEZONE: "goclaw:timezone",
+  TOKEN: "argo:token",
+  USER_ID: "argo:userId",
+  SENDER_ID: "argo:senderID",
+  THEME: "argo:theme",
+  SIDEBAR_COLLAPSED: "argo:sidebarCollapsed",
+  LANGUAGE: "argo:language",
+  TIMEZONE: "argo:timezone",
 } as const;
 
 export const SUPPORTED_LANGUAGES = ["en", "vi", "zh"] as const;

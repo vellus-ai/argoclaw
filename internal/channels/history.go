@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // maxHistoryKeys is the max number of distinct groups/topics tracked in RAM.

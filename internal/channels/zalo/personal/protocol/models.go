@@ -31,7 +31,7 @@ type ZpwServiceMapV3 struct {
 	File      []string `json:"file"`
 	Profile   []string `json:"profile"`
 	GroupPoll []string `json:"group_poll"`
-	// Only fields needed for GoClaw; Zalo returns many more.
+	// Only fields needed for ArgoClaw; Zalo returns many more.
 }
 
 // ServerInfo from getServerInfo response.

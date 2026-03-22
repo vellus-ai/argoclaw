@@ -7,7 +7,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
 )
 
 // sendMediaMessage sends media attachments to a Discord channel using file uploads.

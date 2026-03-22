@@ -15,7 +15,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // Config configures the OpenTelemetry OTLP exporter.
@@ -23,11 +23,11 @@ type Config struct {
 	Endpoint    string            // OTLP endpoint (e.g. "localhost:4317")
 	Protocol    string            // "grpc" (default) or "http"
 	Insecure    bool              // skip TLS for local dev
-	ServiceName string            // OTEL service name (default "goclaw-gateway")
+	ServiceName string            // OTEL service name (default "argoclaw-gateway")
 	Headers     map[string]string // extra headers (auth tokens, etc.)
 }
 
-// Exporter converts GoClaw SpanData → OTel spans and exports via OTLP.
+// Exporter converts ArgoClaw SpanData → OTel spans and exports via OTLP.
 // It implements the tracing.SpanExporter interface.
 type Exporter struct {
 	provider *sdktrace.TracerProvider
@@ -42,7 +42,7 @@ func New(ctx context.Context, cfg Config) (*Exporter, error) {
 
 	serviceName := cfg.ServiceName
 	if serviceName == "" {
-		serviceName = "goclaw-gateway"
+		serviceName = "argoclaw-gateway"
 	}
 
 	res, err := resource.New(ctx,
@@ -94,11 +94,11 @@ func New(ctx context.Context, cfg Config) (*Exporter, error) {
 
 	return &Exporter{
 		provider: tp,
-		tracer:   tp.Tracer("goclaw"),
+		tracer:   tp.Tracer("argoclaw"),
 	}, nil
 }
 
-// ExportSpans converts GoClaw SpanData to OTel spans and exports them.
+// ExportSpans converts ArgoClaw SpanData to OTel spans and exports them.
 // Called by the Collector during flush alongside the PostgreSQL batch insert.
 func (e *Exporter) ExportSpans(ctx context.Context, spans []store.SpanData) {
 	if e == nil || len(spans) == 0 {
@@ -124,7 +124,7 @@ func (e *Exporter) exportSpan(ctx context.Context, s store.SpanData) {
 
 	// Build attributes based on span type
 	attrs := []attribute.KeyValue{
-		attribute.String("goclaw.span_type", s.SpanType),
+		attribute.String("argoclaw.span_type", s.SpanType),
 	}
 
 	if s.Model != "" {
@@ -143,30 +143,30 @@ func (e *Exporter) exportSpan(ctx context.Context, s store.SpanData) {
 		attrs = append(attrs, attribute.String("gen_ai.response.finish_reason", s.FinishReason))
 	}
 	if s.ToolName != "" {
-		attrs = append(attrs, attribute.String("goclaw.tool.name", s.ToolName))
+		attrs = append(attrs, attribute.String("argoclaw.tool.name", s.ToolName))
 	}
 	if s.ToolCallID != "" {
-		attrs = append(attrs, attribute.String("goclaw.tool.call_id", s.ToolCallID))
+		attrs = append(attrs, attribute.String("argoclaw.tool.call_id", s.ToolCallID))
 	}
 	if s.DurationMS > 0 {
-		attrs = append(attrs, attribute.Int("goclaw.duration_ms", s.DurationMS))
+		attrs = append(attrs, attribute.Int("argoclaw.duration_ms", s.DurationMS))
 	}
 	if s.AgentID != nil {
-		attrs = append(attrs, attribute.String("goclaw.agent_id", s.AgentID.String()))
+		attrs = append(attrs, attribute.String("argoclaw.agent_id", s.AgentID.String()))
 	}
 	if s.InputPreview != "" {
 		preview := s.InputPreview
 		if len(preview) > 500 {
 			preview = preview[:500] + "..."
 		}
-		attrs = append(attrs, attribute.String("goclaw.input_preview", preview))
+		attrs = append(attrs, attribute.String("argoclaw.input_preview", preview))
 	}
 	if s.OutputPreview != "" {
 		preview := s.OutputPreview
 		if len(preview) > 500 {
 			preview = preview[:500] + "..."
 		}
-		attrs = append(attrs, attribute.String("goclaw.output_preview", preview))
+		attrs = append(attrs, attribute.String("argoclaw.output_preview", preview))
 	}
 
 	// Create parent context if parent span exists
@@ -199,8 +199,8 @@ func (e *Exporter) exportSpan(ctx context.Context, s store.SpanData) {
 	// Since we can't easily override IDs in the standard SDK, we set them as attributes
 	// for correlation with PostgreSQL traces.
 	span.SetAttributes(
-		attribute.String("goclaw.trace_id", s.TraceID.String()),
-		attribute.String("goclaw.span_id", s.ID.String()),
+		attribute.String("argoclaw.trace_id", s.TraceID.String()),
+		attribute.String("argoclaw.span_id", s.ID.String()),
 	)
 
 	if s.Status == "error" {

@@ -4,7 +4,7 @@
 #   docker compose -f docker-compose.yml -f docker-compose.postgres.yml -f docker-compose.browser.yml up -d --build
 #
 # The Chrome sidecar exposes CDP (Chrome DevTools Protocol) on port 9222.
-# GoClaw connects to it automatically via GOCLAW_BROWSER_REMOTE_URL.
+# ArgoClaw connects to it automatically via ARGOCLAW_BROWSER_REMOTE_URL.
 
 services:
   chrome:
@@ -31,9 +31,9 @@ services:
           cpus: '2.0'
     restart: unless-stopped
 
-  goclaw:
+  argoclaw:
     environment:
-      - GOCLAW_BROWSER_REMOTE_URL=ws://chrome:9222
+      - ARGOCLAW_BROWSER_REMOTE_URL=ws://chrome:9222
     depends_on:
       chrome:
         condition: service_healthy

@@ -2,7 +2,7 @@
 // Channels connect external platforms (Telegram, Discord, Slack, etc.) to the agent runtime
 // via the message bus.
 //
-// Adapted from PicoClaw's pkg/channels with GoClaw-specific additions:
+// Adapted from PicoClaw's pkg/channels with ArgoClaw-specific additions:
 // - DM/Group policies (pairing, allowlist, open, disabled)
 // - Mention gating for group chats
 // - Rich MsgContext metadata
@@ -14,8 +14,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/nextlevelbuilder/goclaw/internal/bus"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/arargoclaw/internal/store"
 )
 
 // InternalChannels are system channels excluded from outbound dispatch.

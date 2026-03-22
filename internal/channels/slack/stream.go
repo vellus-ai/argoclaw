@@ -9,7 +9,7 @@ import (
 
 	slackapi "github.com/slack-go/slack"
 
-	"github.com/nextlevelbuilder/goclaw/internal/channels"
+	"github.com/vellus-ai/arargoclaw/internal/channels"
 )
 
 const streamThrottleInterval = 1000 * time.Millisecond

@@ -55,7 +55,7 @@ func buildMultipartBody(fieldName, fileName string, data []byte) (io.Reader, str
 	var buf bytes.Buffer
 	w := multipart.NewWriter(&buf)
 
-	boundary := "----GoClaw" + randomBoundary()
+	boundary := "----ArgoClaw" + randomBoundary()
 	if err := w.SetBoundary(boundary); err != nil {
 		return nil, "", err
 	}
