@@ -9,16 +9,28 @@ export function useAgentPresets(): AgentPreset[] {
   const { t } = useTranslation("agents");
   return [
     {
-      label: t("presets.foxSpirit.label"),
-      prompt: t("presets.foxSpirit.prompt"),
+      label: t("presets.captain.label"),
+      prompt: t("presets.captain.prompt"),
     },
     {
-      label: t("presets.artisan.label"),
-      prompt: t("presets.artisan.prompt"),
+      label: t("presets.helmsman.label"),
+      prompt: t("presets.helmsman.prompt"),
     },
     {
-      label: t("presets.astrologer.label"),
-      prompt: t("presets.astrologer.prompt"),
+      label: t("presets.lookout.label"),
+      prompt: t("presets.lookout.prompt"),
+    },
+    {
+      label: t("presets.gunner.label"),
+      prompt: t("presets.gunner.prompt"),
+    },
+    {
+      label: t("presets.navigator.label"),
+      prompt: t("presets.navigator.prompt"),
+    },
+    {
+      label: t("presets.smith.label"),
+      prompt: t("presets.smith.prompt"),
     },
   ];
 }

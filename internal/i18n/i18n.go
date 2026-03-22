@@ -11,6 +11,11 @@ const (
 	LocaleEN = "en"
 	LocaleVI = "vi"
 	LocaleZH = "zh"
+	LocalePT = "pt"
+	LocaleES = "es"
+	LocaleFR = "fr"
+	LocaleIT = "it"
+	LocaleDE = "de"
 
 	DefaultLocale = LocaleEN
 )
@@ -58,7 +63,7 @@ func lookup(locale, key string) string {
 // IsSupported returns true if the locale is a known language.
 func IsSupported(locale string) bool {
 	switch locale {
-	case LocaleEN, LocaleVI, LocaleZH:
+	case LocaleEN, LocaleVI, LocaleZH, LocalePT, LocaleES, LocaleFR, LocaleIT, LocaleDE:
 		return true
 	}
 	return false
@@ -69,7 +74,7 @@ func Normalize(locale string) string {
 	if IsSupported(locale) {
 		return locale
 	}
-	// Handle common prefixes: "en-US" → "en", "vi-VN" → "vi", "zh-CN" → "zh"
+	// Handle common prefixes: "en-US" → "en", "pt-BR" → "pt", "es-ES" → "es", etc.
 	if len(locale) >= 2 {
 		prefix := locale[:2]
 		if IsSupported(prefix) {
