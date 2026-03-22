@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/cron"
-	"github.com/vellus-ai/arargoclaw/internal/sandbox"
+	"github.com/vellus-ai/argoclaw/internal/cron"
+	"github.com/vellus-ai/argoclaw/internal/sandbox"
 )
 
 // FlexibleStringSlice accepts both ["str"] and [123] in JSON.

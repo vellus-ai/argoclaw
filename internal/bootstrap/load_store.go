@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // LoadFromStore loads agent-level context files from the agent store (DB).

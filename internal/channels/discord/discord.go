@@ -9,11 +9,11 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/channels"
-	"github.com/vellus-ai/arargoclaw/internal/channels/typing"
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/channels"
+	"github.com/vellus-ai/argoclaw/internal/channels/typing"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 const pairingDebounceTime = 60 * time.Second

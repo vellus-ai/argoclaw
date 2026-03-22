@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"log/slog"
 
-	"github.com/vellus-ai/arargoclaw/internal/gateway"
-	"github.com/vellus-ai/arargoclaw/internal/i18n"
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/internal/gateway"
+	"github.com/vellus-ai/argoclaw/internal/i18n"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 // LogsMethods handles logs.tail (start/stop live log tailing).

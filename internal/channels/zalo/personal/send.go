@@ -6,10 +6,10 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/channels/typing"
-	"github.com/vellus-ai/arargoclaw/internal/channels/zalo"
-	"github.com/vellus-ai/arargoclaw/internal/channels/zalo/personal/protocol"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/channels/typing"
+	"github.com/vellus-ai/argoclaw/internal/channels/zalo"
+	"github.com/vellus-ai/argoclaw/internal/channels/zalo/personal/protocol"
 )
 
 const maxTextLength = 2000

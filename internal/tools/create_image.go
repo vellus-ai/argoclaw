@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // credentialProvider is a narrow interface for providers that expose API credentials.

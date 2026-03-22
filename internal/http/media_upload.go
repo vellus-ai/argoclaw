@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/channels/media"
-	"github.com/vellus-ai/arargoclaw/internal/i18n"
+	"github.com/vellus-ai/argoclaw/internal/channels/media"
+	"github.com/vellus-ai/argoclaw/internal/i18n"
 )
 
 const (

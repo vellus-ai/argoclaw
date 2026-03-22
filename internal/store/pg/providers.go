@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/crypto"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/crypto"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // PGProviderStore implements store.ProviderStore backed by Postgres.

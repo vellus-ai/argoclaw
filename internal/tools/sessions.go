@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // ============================================================

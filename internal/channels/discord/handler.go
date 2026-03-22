@@ -9,10 +9,10 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/channels"
-	"github.com/vellus-ai/arargoclaw/internal/channels/media"
-	"github.com/vellus-ai/arargoclaw/internal/channels/typing"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/channels"
+	"github.com/vellus-ai/argoclaw/internal/channels/media"
+	"github.com/vellus-ai/argoclaw/internal/channels/typing"
 )
 
 // handleMessage processes incoming Discord messages.

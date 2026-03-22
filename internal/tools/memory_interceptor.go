@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/bootstrap"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/bootstrap"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // effectiveWorkspace returns the per-user workspace from ctx if available,

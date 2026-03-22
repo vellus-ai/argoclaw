@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/memory"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/memory"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // PGMemoryStore implements store.MemoryStore backed by Postgres.

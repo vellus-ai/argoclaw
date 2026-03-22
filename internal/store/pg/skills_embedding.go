@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // SetEmbeddingProvider sets the embedding provider for vector-based skill search.

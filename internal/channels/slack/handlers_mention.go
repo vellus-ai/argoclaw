@@ -9,7 +9,7 @@ import (
 	slackapi "github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 
-	"github.com/vellus-ai/arargoclaw/internal/channels"
+	"github.com/vellus-ai/argoclaw/internal/channels"
 )
 
 func (c *Channel) handleAppMention(ev *slackevents.AppMentionEvent) {

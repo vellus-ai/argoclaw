@@ -7,16 +7,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/bootstrap"
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/media"
-	"github.com/vellus-ai/arargoclaw/internal/providers"
-	"github.com/vellus-ai/arargoclaw/internal/sandbox"
-	"github.com/vellus-ai/arargoclaw/internal/skills"
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
-	"github.com/vellus-ai/arargoclaw/internal/tracing"
+	"github.com/vellus-ai/argoclaw/internal/bootstrap"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/media"
+	"github.com/vellus-ai/argoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/sandbox"
+	"github.com/vellus-ai/argoclaw/internal/skills"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/tracing"
 )
 
 // bootstrapAutoCleanupTurns is the number of user messages after which

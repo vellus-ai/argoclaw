@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // dashScopeImageEndpoint derives the DashScope multimodal generation endpoint from the

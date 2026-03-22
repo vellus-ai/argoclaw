@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // PGBuiltinToolStore implements store.BuiltinToolStore backed by Postgres.

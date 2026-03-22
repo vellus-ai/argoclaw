@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/config"
 )
 
 // MCPServerEntry represents a single MCP server config for CLI injection.

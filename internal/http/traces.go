@@ -11,8 +11,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/i18n"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/i18n"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // TracesHandler handles LLM trace listing and detail endpoints.

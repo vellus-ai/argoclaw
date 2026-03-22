@@ -9,9 +9,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/internal/tracing"
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/tracing"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 func (t *TeamTasksTool) executeCreate(ctx context.Context, args map[string]any) *Result {

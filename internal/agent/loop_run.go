@@ -7,10 +7,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
-	"github.com/vellus-ai/arargoclaw/internal/tracing"
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/tracing"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 // Run processes a single message through the agent loop.

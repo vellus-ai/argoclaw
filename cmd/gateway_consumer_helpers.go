@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/agent"
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/channels"
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/sessions"
+	"github.com/vellus-ai/argoclaw/internal/agent"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/channels"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/sessions"
 )
 
 // resolveAgentRoute determines which agent should handle a message

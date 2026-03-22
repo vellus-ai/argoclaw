@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // resolveVideoFile finds the video file path from context MediaRefs.

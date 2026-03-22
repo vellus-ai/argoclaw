@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/channels/zalo/personal/protocol"
+	"github.com/vellus-ai/argoclaw/internal/channels/zalo/personal/protocol"
 )
 
 const (

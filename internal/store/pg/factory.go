@@ -3,8 +3,8 @@ package pg
 import (
 	"fmt"
 
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // NewPGStores creates all stores backed by Postgres.

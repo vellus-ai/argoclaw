@@ -11,10 +11,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/i18n"
-	"github.com/vellus-ai/arargoclaw/internal/skills"
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/internal/store/pg"
+	"github.com/vellus-ai/argoclaw/internal/i18n"
+	"github.com/vellus-ai/argoclaw/internal/skills"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store/pg"
 )
 
 // handleUpload processes a ZIP file upload containing a skill (must have SKILL.md at root).

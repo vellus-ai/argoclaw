@@ -10,9 +10,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/sessions"
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/sessions"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 func runClientMode(cfg *config.Config, addr, agentName, message, sessionKey string) {

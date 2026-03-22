@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // callMinimaxVideoGen calls the MiniMax video generation API (async with task polling).

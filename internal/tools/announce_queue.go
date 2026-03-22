@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/bus"
 )
 
 // AnnounceQueueItem represents a single subagent result waiting to be announced.

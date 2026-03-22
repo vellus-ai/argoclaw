@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 const titleGenerateTimeout = 120 * time.Second

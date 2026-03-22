@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/crypto"
-	"github.com/vellus-ai/arargoclaw/internal/i18n"
-	"github.com/vellus-ai/arargoclaw/internal/permissions"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/crypto"
+	"github.com/vellus-ai/argoclaw/internal/i18n"
+	"github.com/vellus-ai/argoclaw/internal/permissions"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // extractBearerToken extracts a bearer token from the Authorization header.

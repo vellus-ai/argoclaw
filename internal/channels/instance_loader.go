@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/providers"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // ChannelFactory creates a Channel from DB instance data.

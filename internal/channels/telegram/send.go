@@ -15,8 +15,8 @@ import (
 	"github.com/mymmrac/telego/telegoapi"
 	tu "github.com/mymmrac/telego/telegoutil"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/channels/typing"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/channels/typing"
 )
 
 // Error patterns for graceful handling (matching TS error constants in send.ts).

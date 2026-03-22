@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/tools"
 )
 
 // BrowserTool implements tools.Tool for browser automation.

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/tools"
 )
 
 // MCPToolSearchTool searches deferred MCP tools by keyword using BM25.

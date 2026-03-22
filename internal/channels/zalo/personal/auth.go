@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/vellus-ai/arargoclaw/internal/channels/zalo/personal/protocol"
-	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/channels/zalo/personal/protocol"
+	"github.com/vellus-ai/argoclaw/internal/config"
 )
 
 // authenticate resolves credentials and returns an authenticated session.

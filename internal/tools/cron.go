@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // CronTool lets agents manage Gateway cron jobs.

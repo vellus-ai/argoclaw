@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // textReadableMIMEs are MIME types whose content can be returned directly without LLM analysis.

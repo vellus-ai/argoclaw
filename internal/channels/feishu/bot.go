@@ -6,9 +6,9 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/channels"
-	"github.com/vellus-ai/arargoclaw/internal/channels/media"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/channels"
+	"github.com/vellus-ai/argoclaw/internal/channels/media"
 )
 
 // messageContext holds parsed information from a Feishu message event.

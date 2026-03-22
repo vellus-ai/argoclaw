@@ -6,8 +6,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/providers"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/tools"
 )
 
 // sanitizePathSegment makes a userID safe for use as a directory name.

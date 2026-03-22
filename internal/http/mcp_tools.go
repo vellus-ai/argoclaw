@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/i18n"
-	mcpbridge "github.com/vellus-ai/arargoclaw/internal/mcp"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/i18n"
+	mcpbridge "github.com/vellus-ai/argoclaw/internal/mcp"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // handleTestConnection tests an MCP server connection without saving it.

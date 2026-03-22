@@ -16,7 +16,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 // Role represents a user's permission level.

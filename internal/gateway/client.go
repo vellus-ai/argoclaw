@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 
-	"github.com/vellus-ai/arargoclaw/internal/permissions"
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/internal/permissions"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 // Client represents a single WebSocket connection.

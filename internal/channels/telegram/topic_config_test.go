@@ -3,7 +3,7 @@ package telegram
 import (
 	"testing"
 
-	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/config"
 )
 
 //go:fix inline

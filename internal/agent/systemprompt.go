@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/bootstrap"
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/bootstrap"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/tools"
 )
 
 // PromptMode controls which system prompt sections are included.

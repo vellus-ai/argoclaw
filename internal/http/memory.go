@@ -3,7 +3,7 @@ package http
 import (
 	"net/http"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // MemoryHandler handles memory document management endpoints.

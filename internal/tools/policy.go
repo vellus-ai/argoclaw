@@ -5,8 +5,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // toolGroupsMu protects toolGroups from concurrent access.

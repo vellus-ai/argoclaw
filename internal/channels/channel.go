@@ -14,8 +14,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // InternalChannels are system channels excluded from outbound dispatch.

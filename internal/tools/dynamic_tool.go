@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // DynamicTool wraps a CustomToolDef from the database and implements the Tool interface.

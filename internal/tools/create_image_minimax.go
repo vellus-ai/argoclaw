@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // callMinimaxImageGen calls the MiniMax image generation API.

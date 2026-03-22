@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/sandbox"
+	"github.com/vellus-ai/argoclaw/internal/sandbox"
 )
 
 // ListFilesTool lists files in a directory, optionally through a sandbox container.

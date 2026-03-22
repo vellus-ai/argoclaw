@@ -9,9 +9,9 @@ import (
 	"time"
 
 	mcpclient "github.com/mark3labs/mcp-go/client"
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/tools"
 
 	"github.com/google/uuid"
 )

@@ -9,7 +9,7 @@ import (
 	"github.com/adhocore/gronx"
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 func (s *PGCronStore) UpdateJob(jobID string, patch store.CronJobPatch) (*store.CronJob, error) {

@@ -15,8 +15,8 @@ import (
 	"github.com/google/uuid"
 	shellwords "github.com/mattn/go-shellwords"
 
-	"github.com/vellus-ai/arargoclaw/internal/sandbox"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/sandbox"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // shellOperatorPattern detects shell metacharacters that indicate command chaining.
@@ -217,7 +217,7 @@ func (t *ExecTool) executeCredentialedSandbox(ctx context.Context, absPath strin
 func buildCredentialedEnv(envMap map[string]string) []string {
 	env := []string{
 		"PATH=" + getenvDefault("PATH", "/usr/local/bin:/usr/bin:/bin"),
-		"HOME=" + getenvDefault("HOME", "/tmp"),
+		"HOME=" + getenvDefault("HOME", "/app"), // SECURITY: Use /app (non-root user home) instead of /tmp
 		"LANG=" + getenvDefault("LANG", "en_US.UTF-8"),
 		"USER=" + getenvDefault("USER", "argoclaw"),
 	}

@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/bus"
 )
 
 // downloadMessageResource downloads a message attachment (image, file, audio, video, sticker).

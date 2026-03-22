@@ -8,7 +8,7 @@ import (
 
 	slackapi "github.com/slack-go/slack"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/bus"
 )
 
 // Send delivers an outbound message to Slack.

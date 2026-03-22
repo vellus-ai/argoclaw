@@ -11,8 +11,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/providers"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // PGSessionStore implements store.SessionStore backed by Postgres.

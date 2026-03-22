@@ -8,16 +8,16 @@ import (
 
 	"log/slog"
 
-	"github.com/vellus-ai/arargoclaw/internal/agent"
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/channels/media"
-	"github.com/vellus-ai/arargoclaw/internal/gateway"
-	"github.com/vellus-ai/arargoclaw/internal/i18n"
-	"github.com/vellus-ai/arargoclaw/internal/providers"
-	"github.com/vellus-ai/arargoclaw/internal/sessions"
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/internal/agent"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/channels/media"
+	"github.com/vellus-ai/argoclaw/internal/gateway"
+	"github.com/vellus-ai/argoclaw/internal/i18n"
+	"github.com/vellus-ai/argoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/sessions"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 // ChatMethods handles chat.send, chat.history, chat.abort, chat.inject.

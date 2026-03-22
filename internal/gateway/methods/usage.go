@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"sort"
 
-	"github.com/vellus-ai/arargoclaw/internal/gateway"
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/internal/gateway"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 // UsageMethods handles usage.get, usage.summary.

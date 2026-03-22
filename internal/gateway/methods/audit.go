@@ -1,9 +1,9 @@
 package methods
 
 import (
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/gateway"
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/gateway"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 // emitAudit broadcasts an audit event via eventBus for async persistence.

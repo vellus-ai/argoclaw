@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/vellus-ai/arargoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/config"
 )
 
 func onboardCmd() *cobra.Command {

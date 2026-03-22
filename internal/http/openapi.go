@@ -25,9 +25,13 @@ func (h *DocsHandler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /docs/", h.handleSwaggerUI)
 }
 
-func (h *DocsHandler) handleSpec(w http.ResponseWriter, _ *http.Request) {
+func (h *DocsHandler) handleSpec(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	// SECURITY: Restrict CORS to same-origin/localhost instead of wildcard.
+	origin := r.Header.Get("Origin")
+	if origin == "http://localhost:3000" || origin == "http://127.0.0.1:3000" {
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+	}
 	w.Write(openapiSpec)
 }
 

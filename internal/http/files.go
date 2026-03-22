@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/i18n"
+	"github.com/vellus-ai/argoclaw/internal/i18n"
 )
 
 // FilesHandler serves files over HTTP with Bearer token auth.

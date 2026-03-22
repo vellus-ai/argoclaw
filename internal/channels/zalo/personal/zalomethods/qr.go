@@ -10,12 +10,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/channels"
-	"github.com/vellus-ai/arargoclaw/internal/channels/zalo/personal/protocol"
-	"github.com/vellus-ai/arargoclaw/internal/gateway"
-	"github.com/vellus-ai/arargoclaw/internal/store"
-	argoclawprotocol "github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/channels"
+	"github.com/vellus-ai/argoclaw/internal/channels/zalo/personal/protocol"
+	"github.com/vellus-ai/argoclaw/internal/gateway"
+	"github.com/vellus-ai/argoclaw/internal/store"
+	argoclawprotocol "github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 // QRMethods handles QR login for zalo_personal channel instances.

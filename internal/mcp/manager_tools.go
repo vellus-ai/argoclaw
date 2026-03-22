@@ -7,7 +7,7 @@ import (
 	"time"
 
 	mcpgo "github.com/mark3labs/mcp-go/mcp"
-	"github.com/vellus-ai/arargoclaw/internal/tools"
+	"github.com/vellus-ai/argoclaw/internal/tools"
 )
 
 // ToolNames returns all registered MCP tool names.

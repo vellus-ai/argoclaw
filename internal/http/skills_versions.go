@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/skills"
+	"github.com/vellus-ai/argoclaw/internal/skills"
 
 	"github.com/google/uuid"
 
-	"github.com/vellus-ai/arargoclaw/internal/i18n"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/i18n"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // handleListVersions returns all available version numbers for a skill.

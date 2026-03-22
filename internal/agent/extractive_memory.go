@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // Regex patterns for extractive memory fallback.

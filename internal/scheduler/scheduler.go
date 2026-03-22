@@ -7,7 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/vellus-ai/arargoclaw/internal/agent"
+	"github.com/vellus-ai/argoclaw/internal/agent"
 )
 
 // --- Scheduler ---

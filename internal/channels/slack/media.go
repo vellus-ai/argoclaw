@@ -7,7 +7,7 @@ import (
 
 	slackapi "github.com/slack-go/slack"
 
-	"github.com/vellus-ai/arargoclaw/internal/channels/media"
+	"github.com/vellus-ai/argoclaw/internal/channels/media"
 )
 
 const defaultMediaMaxBytes int64 = 20 * 1024 * 1024 // 20MB

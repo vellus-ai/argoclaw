@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/internal/providers"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
 // compactMessagesInPlace summarizes the first ~70% of messages into a condensed

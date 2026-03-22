@@ -12,7 +12,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
-	"github.com/vellus-ai/arargoclaw/internal/channels/media"
+	"github.com/vellus-ai/argoclaw/internal/channels/media"
 )
 
 const (

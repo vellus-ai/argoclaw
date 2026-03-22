@@ -3,7 +3,7 @@ package pg
 import (
 	"context"
 
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // Search performs hybrid search (FTS + vector) over memory_chunks.

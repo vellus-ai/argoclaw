@@ -160,11 +160,37 @@ func scanStringArray(data []byte, dest *[]string) {
 	*dest = result
 }
 
+// allowedTables is a strict whitelist of tables that execMapUpdate may target.
+// Any table not in this set is rejected to prevent SQL injection via table name.
+var allowedTables = map[string]bool{
+	"agents": true, "llm_providers": true, "sessions": true,
+	"channel_instances": true, "cron_jobs": true, "custom_tools": true,
+	"skills": true, "mcp_servers": true, "agent_links": true,
+	"agent_teams": true, "team_tasks": true, "builtin_tools": true,
+	"agent_context_files": true, "user_context_files": true,
+	"user_agent_overrides": true, "config_secrets": true,
+	"memory_documents": true, "memory_chunks": true, "embedding_cache": true,
+	"secure_cli_binaries": true,
+	"api_keys": true, "paired_devices": true, "team_messages": true,
+	"delegation_history": true, "agent_shares": true, "user_agent_profiles": true,
+	"team_tasks_comments": true, "team_task_events": true, "team_task_attachments": true,
+}
+
+// validTableName returns true only if the table is in the strict whitelist.
+func validTableName(table string) bool {
+	return allowedTables[table]
+}
+
 // --- Dynamic UPDATE helper ---
 
 // execMapUpdate builds and runs a dynamic UPDATE from a column→value map.
 // Column names are validated against a strict identifier regex to prevent SQL injection.
+// Table names are validated against a strict whitelist.
 func execMapUpdate(ctx context.Context, db *sql.DB, table string, id uuid.UUID, updates map[string]any) error {
+	if !validTableName(table) {
+		slog.Warn("security.invalid_table_name", "table", table)
+		return fmt.Errorf("invalid table name: %q", table)
+	}
 	if len(updates) == 0 {
 		return nil
 	}

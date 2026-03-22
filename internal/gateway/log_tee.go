@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vellus-ai/arargoclaw/pkg/protocol"
+	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
 
 const (

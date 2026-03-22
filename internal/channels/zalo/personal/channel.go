@@ -6,12 +6,12 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/vellus-ai/arargoclaw/internal/bus"
-	"github.com/vellus-ai/arargoclaw/internal/channels"
-	"github.com/vellus-ai/arargoclaw/internal/channels/typing"
-	"github.com/vellus-ai/arargoclaw/internal/channels/zalo/personal/protocol"
-	"github.com/vellus-ai/arargoclaw/internal/config"
-	"github.com/vellus-ai/arargoclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/bus"
+	"github.com/vellus-ai/argoclaw/internal/channels"
+	"github.com/vellus-ai/argoclaw/internal/channels/typing"
+	"github.com/vellus-ai/argoclaw/internal/channels/zalo/personal/protocol"
+	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // Channel connects to Zalo Personal Chat via the internal protocol port (from zcago, MIT).

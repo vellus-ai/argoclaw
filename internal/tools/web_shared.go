@@ -199,6 +199,43 @@ func CheckSSRF(rawURL string) error {
 	return nil
 }
 
+// CheckSSRFWithPinning validates and returns resolved IPs to prevent DNS rebinding TOCTOU.
+// Callers should use returned IPs for the actual HTTP request via a custom dialer.
+func CheckSSRFWithPinning(rawURL string) ([]string, error) {
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid URL: %w", err)
+	}
+	hostname := parsed.Hostname()
+	if hostname == "" {
+		return nil, fmt.Errorf("missing hostname")
+	}
+	if isBlockedHostname(hostname) {
+		return nil, fmt.Errorf("blocked hostname: %s", hostname)
+	}
+	if ip := net.ParseIP(hostname); ip != nil {
+		if isPrivateIP(hostname) {
+			return nil, fmt.Errorf("private IP address not allowed: %s", hostname)
+		}
+		return []string{hostname}, nil
+	}
+	addrs, err := net.LookupHost(hostname)
+	if err != nil {
+		return nil, fmt.Errorf("DNS resolution failed for %s: %w", hostname, err)
+	}
+	var safe []string
+	for _, addr := range addrs {
+		if isPrivateIP(addr) {
+			return nil, fmt.Errorf("hostname %s resolves to private IP %s", hostname, addr)
+		}
+		safe = append(safe, addr)
+	}
+	if len(safe) == 0 {
+		return nil, fmt.Errorf("no valid addresses for %s", hostname)
+	}
+	return safe, nil
+}
+
 // --- External Content Wrapping (matching TS src/security/external-content.ts) ---
 
 const (
