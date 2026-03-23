@@ -56,6 +56,7 @@ type Server struct {
 	memoryHandler           *httpapi.MemoryHandler           // memory management API
 	kgHandler               *httpapi.KnowledgeGraphHandler   // knowledge graph API
 	oauthHandler            *httpapi.OAuthHandler            // OAuth endpoints
+	anthropicAuthHandler    *httpapi.AnthropicAuthHandler    // Anthropic setup token endpoints
 	filesHandler            *httpapi.FilesHandler            // workspace file serving
 	storageHandler          *httpapi.StorageHandler          // storage file management
 	mediaUploadHandler      *httpapi.MediaUploadHandler      // media upload endpoint
@@ -314,6 +315,9 @@ func (s *Server) BuildMux() *http.ServeMux {
 	if s.oauthHandler != nil {
 		s.oauthHandler.RegisterRoutes(mux)
 	}
+	if s.anthropicAuthHandler != nil {
+		s.anthropicAuthHandler.RegisterRoutes(mux)
+	}
 
 	// MCP bridge: expose ArgoClaw tools to Claude CLI via streamable-http.
 	// Only listens on localhost (CLI runs on the same machine).
@@ -533,6 +537,11 @@ func (s *Server) SetPackagesHandler(h *httpapi.PackagesHandler) { s.packagesHand
 
 // SetOAuthHandler sets the OAuth handler (available in all modes).
 func (s *Server) SetOAuthHandler(h *httpapi.OAuthHandler) { s.oauthHandler = h }
+
+// SetAnthropicAuthHandler sets the Anthropic setup token handler.
+func (s *Server) SetAnthropicAuthHandler(h *httpapi.AnthropicAuthHandler) {
+	s.anthropicAuthHandler = h
+}
 
 // SetAPIKeysHandler sets the API key management handler.
 func (s *Server) SetAPIKeysHandler(h *httpapi.APIKeysHandler) { s.apiKeysHandler = h }
