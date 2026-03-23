@@ -20,13 +20,14 @@
 | [#343](https://github.com/nextlevelbuilder/goclaw/pull/343) | feat: Anthropic OAuth setup tokens + **configurable system prompt** | @anhle128 | ✅ Merged (PR #9) + PBT | 2026-03-23 |
 | [#202](https://github.com/nextlevelbuilder/goclaw/pull/202) | fix: Telegram @mention preservation + bot-to-bot routing | @nvt-ak | ✅ Merged (PR #10) + PBT | 2026-03-23 |
 
-### Upstream PRs — Approved, Pending Conflict Resolution
+| [#182](https://github.com/nextlevelbuilder/goclaw/pull/182) | fix: nil pointer SSE + extractDefaultModel (cherry-pick, no Party Mode) | @duhd-vnpay | ✅ Merged (PR #11) + PBT | 2026-03-23 |
+| [#346](https://github.com/nextlevelbuilder/goclaw/pull/346) | fix(zalo): allow QR session restart | @ductrantrong | ✅ Merged (PR #11) | 2026-03-23 |
 
-| PR | Title | Author | Issue |
-|---|---|---|---|
-| [#182](https://github.com/nextlevelbuilder/goclaw/pull/182) | fix: prevent nil pointer crash in OpenAI SSE | @duhd-vnpay | Conflicts in cmd/gateway.go, agent/loop.go |
-| [#350](https://github.com/nextlevelbuilder/goclaw/pull/350) | fix: listing providers error + session key gen | @anhle128 | Conflicts in ui/web routes.tsx |
-| [#346](https://github.com/nextlevelbuilder/goclaw/pull/346) | fix(zalo): allow QR session restart | @ductrantrong | Conflicts in zalo/qr.go |
+### Upstream PRs — Skipped (fix already applied)
+
+| PR | Title | Reason |
+|---|---|---|
+| [#350](https://github.com/nextlevelbuilder/goclaw/pull/350) | fix: listing providers + session key | Core fix (generateId) already in PR #352. UX improvements deferred. |
 
 ### Upstream PRs — Under Review
 
