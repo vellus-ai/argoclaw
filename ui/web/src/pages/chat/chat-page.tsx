@@ -15,6 +15,7 @@ import { useChatMessages } from "./hooks/use-chat-messages";
 import { useChatSend } from "./hooks/use-chat-send";
 import { isOwnSession, parseSessionKey } from "@/lib/session-key";
 import { useVirtualKeyboard } from "@/hooks/use-virtual-keyboard";
+import { generateId } from "@/lib/utils";
 
 export function ChatPage() {
   const { t } = useTranslation("chat");
@@ -114,7 +115,7 @@ export function ChatPage() {
   const handleAgentChange = useCallback(
     (newAgentId: string) => {
       setAgentId(newAgentId);
-      navigate(`/chat/${encodeURIComponent(`agent:${newAgentId}:ws:direct:${crypto.randomUUID()}`)}`);
+      navigate(`/chat/${encodeURIComponent(`agent:${newAgentId}:ws:direct:${generateId()}`)}`);
     },
     [navigate],
   );

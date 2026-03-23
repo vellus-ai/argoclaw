@@ -34,7 +34,11 @@ export function useChatSend({
     async (message: string, sessionKey: string, files?: AttachedFile[]) => {
       const hasMessage = message.trim().length > 0;
       const hasFiles = files && files.length > 0;
-      if (!ws.isConnected || (!hasMessage && !hasFiles) || !sessionKey) return;
+      if (!ws.isConnected) {
+        setError("Not connected. Please wait for the connection to be established.");
+        return;
+      }
+      if ((!hasMessage && !hasFiles) || !sessionKey) return;
 
       const trimmed = message.trim();
       setError(null);
