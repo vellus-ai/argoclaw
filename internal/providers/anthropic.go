@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 )
@@ -38,16 +39,19 @@ func resolveAnthropicModel(model, defaultModel string) string {
 
 // AnthropicProvider implements Provider using the Anthropic Claude API via net/http.
 type AnthropicProvider struct {
-	apiKey       string
-	baseURL      string
-	defaultModel string
-	client       *http.Client
-	retryConfig  RetryConfig
+	name              string
+	apiKey            string
+	baseURL           string
+	defaultModel      string
+	oauthSystemPrompt string // configurable system prompt for OAuth setup tokens
+	client            *http.Client
+	retryConfig       RetryConfig
 }
 
 // NewAnthropicProvider creates a new Anthropic provider.
 func NewAnthropicProvider(apiKey string, opts ...AnthropicOption) *AnthropicProvider {
 	p := &AnthropicProvider{
+		name:         "anthropic",
 		apiKey:       apiKey,
 		baseURL:      anthropicAPIBase,
 		defaultModel: defaultClaudeModel,
@@ -62,6 +66,14 @@ func NewAnthropicProvider(apiKey string, opts ...AnthropicOption) *AnthropicProv
 
 type AnthropicOption func(*AnthropicProvider)
 
+func WithAnthropicName(name string) AnthropicOption {
+	return func(p *AnthropicProvider) {
+		if name != "" {
+			p.name = name
+		}
+	}
+}
+
 func WithAnthropicModel(model string) AnthropicOption {
 	return func(p *AnthropicProvider) { p.defaultModel = model }
 }
@@ -74,7 +86,7 @@ func WithAnthropicBaseURL(baseURL string) AnthropicOption {
 	}
 }
 
-func (p *AnthropicProvider) Name() string           { return "anthropic" }
+func (p *AnthropicProvider) Name() string           { return p.name }
 func (p *AnthropicProvider) DefaultModel() string   { return p.defaultModel }
 func (p *AnthropicProvider) SupportsThinking() bool { return true }
 
@@ -111,14 +123,29 @@ func (p *AnthropicProvider) doRequest(ctx context.Context, body any) (io.ReadClo
 	}
 
 	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("x-api-key", p.apiKey)
 	httpReq.Header.Set("anthropic-version", anthropicAPIVersion)
+
+	// Build beta features list
+	var betaFeatures []string
+
+	if IsAnthropicSetupToken(p.apiKey) {
+		// OAuth Tokens use Bearer auth with required beta flags
+		httpReq.Header.Set("Authorization", "Bearer "+p.apiKey)
+		betaFeatures = append(betaFeatures, "claude-code-20250219", "oauth-2025-04-20")
+		httpReq.Header.Set("anthropic-dangerous-direct-browser-access", "true")
+	} else {
+		httpReq.Header.Set("x-api-key", p.apiKey)
+	}
 
 	// Add beta header for interleaved thinking when thinking is enabled
 	if bodyMap, ok := body.(map[string]any); ok {
 		if _, hasThinking := bodyMap["thinking"]; hasThinking {
-			httpReq.Header.Set("anthropic-beta", "interleaved-thinking-2025-05-14")
+			betaFeatures = append(betaFeatures, "interleaved-thinking-2025-05-14")
 		}
+	}
+
+	if len(betaFeatures) > 0 {
+		httpReq.Header.Set("anthropic-beta", strings.Join(betaFeatures, ","))
 	}
 
 	resp, err := p.client.Do(httpReq)
@@ -130,6 +157,10 @@ func (p *AnthropicProvider) doRequest(ctx context.Context, body any) (io.ReadClo
 		respBody, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
 		retryAfter := ParseRetryAfter(resp.Header.Get("Retry-After"))
+		// Warn if 401 and credential looks like a setup token (may have expired)
+		if resp.StatusCode == http.StatusUnauthorized && IsAnthropicSetupToken(p.apiKey) {
+			slog.Warn("anthropic: authentication failed with setup token — token may have expired, re-run 'claude setup-token'")
+		}
 		return nil, &HTTPError{
 			Status:     resp.StatusCode,
 			Body:       fmt.Sprintf("anthropic: %s", string(respBody)),

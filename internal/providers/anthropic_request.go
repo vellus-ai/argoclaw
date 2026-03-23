@@ -1,6 +1,9 @@
 package providers
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+)
 
 // buildRawBlock reconstructs a complete content block from streaming data.
 // This is needed to preserve thinking blocks (with signatures) for tool use passback.
@@ -142,6 +145,25 @@ func (p *AnthropicProvider) buildRequestBody(model string, req ChatRequest, stre
 					},
 				},
 			})
+		}
+	}
+
+	// OAuth setup tokens require a system prompt identifier for Anthropic API compliance.
+	// Default is the Claude Code identifier; can be overridden via provider settings.
+	if IsAnthropicSetupToken(p.apiKey) {
+		oauthSystem := "You are Claude Code, Anthropic's official CLI for Claude."
+		if p.oauthSystemPrompt != "" {
+			oauthSystem = p.oauthSystemPrompt
+		}
+		found := false
+		for _, block := range systemBlocks {
+			if text, ok := block["text"].(string); ok && strings.Contains(text, oauthSystem) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			systemBlocks = append([]map[string]any{{"type": "text", "text": oauthSystem}}, systemBlocks...)
 		}
 	}
 
