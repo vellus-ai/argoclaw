@@ -1,0 +1,113 @@
+name: Monitor GoClaw Upstream PRs
+
+on:
+  schedule:
+    # Daily at 08:00 UTC (05:00 BRT)
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Manual trigger
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  monitor-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ArgoClaw
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/nextlevelbuilder/goclaw.git || true
+          git fetch upstream main --quiet
+
+      - name: Fetch upstream open PRs
+        id: fetch-prs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## GoClaw Upstream PR Report — $(date -u '+%Y-%m-%d')" > /tmp/pr-report.md
+          echo "" >> /tmp/pr-report.md
+
+          # Fetch open PRs from upstream
+          gh pr list --repo nextlevelbuilder/goclaw --state open --limit 30 \
+            --json number,title,author,createdAt,labels,additions,deletions \
+            --jq '.[] | "\(.number)|\(.title)|\(.author.login)|\(.createdAt)|\(.additions)|\(.deletions)"' \
+            > /tmp/upstream-prs.txt
+
+          TOTAL=$(wc -l < /tmp/upstream-prs.txt)
+          echo "total_prs=$TOTAL" >> $GITHUB_OUTPUT
+
+          # Classify PRs
+          echo "### Security/Bug Fixes (HIGH)" >> /tmp/pr-report.md
+          echo "| PR | Title | Author | Lines |" >> /tmp/pr-report.md
+          echo "|---|---|---|---|" >> /tmp/pr-report.md
+          grep -iE "fix|security|crash|vulnerability|inject|xss|csrf" /tmp/upstream-prs.txt | while IFS='|' read -r num title author created adds dels; do
+            echo "| #$num | $title | @$author | +$adds/-$dels |" >> /tmp/pr-report.md
+          done
+          echo "" >> /tmp/pr-report.md
+
+          echo "### Features (MEDIUM/LOW)" >> /tmp/pr-report.md
+          echo "| PR | Title | Author | Lines |" >> /tmp/pr-report.md
+          echo "|---|---|---|---|" >> /tmp/pr-report.md
+          grep -iE "feat|add|implement|support" /tmp/upstream-prs.txt | while IFS='|' read -r num title author created adds dels; do
+            echo "| #$num | $title | @$author | +$adds/-$dels |" >> /tmp/pr-report.md
+          done
+          echo "" >> /tmp/pr-report.md
+
+          echo "### Build/Docs/Other" >> /tmp/pr-report.md
+          echo "| PR | Title | Author | Lines |" >> /tmp/pr-report.md
+          echo "|---|---|---|---|" >> /tmp/pr-report.md
+          grep -viE "fix|security|crash|feat|add|implement|support" /tmp/upstream-prs.txt | while IFS='|' read -r num title author created adds dels; do
+            echo "| #$num | $title | @$author | +$adds/-$dels |" >> /tmp/pr-report.md
+          done
+
+          cat /tmp/pr-report.md
+
+      - name: Test patch applicability
+        run: |
+          echo "" >> /tmp/pr-report.md
+          echo "### Patch Applicability Test" >> /tmp/pr-report.md
+          echo "| PR | Applies Clean? |" >> /tmp/pr-report.md
+          echo "|---|---|" >> /tmp/pr-report.md
+
+          while IFS='|' read -r num title rest; do
+            gh pr diff "$num" --repo nextlevelbuilder/goclaw > /tmp/pr_$num.patch 2>/dev/null || continue
+            if git apply --check /tmp/pr_$num.patch 2>/dev/null; then
+              echo "| #$num | ✅ Clean |" >> /tmp/pr-report.md
+            else
+              echo "| #$num | ⚠️ Conflicts |" >> /tmp/pr-report.md
+            fi
+          done < /tmp/upstream-prs.txt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create/Update tracking issue
+        if: steps.fetch-prs.outputs.total_prs > 0
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPORT=$(cat /tmp/pr-report.md)
+          EXISTING=$(gh issue list --repo vellus-ai/argoclaw --label "upstream-monitor" --state open --json number --jq '.[0].number // empty')
+
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --repo vellus-ai/argoclaw --body "$REPORT"
+          else
+            gh issue create --repo vellus-ai/argoclaw \
+              --title "🔍 GoClaw Upstream PR Monitor" \
+              --label "upstream-monitor" \
+              --body "$REPORT"
+          fi
+
+      # Optional: Notify via Telegram (requires TELEGRAM_BOT_TOKEN secret)
+      # - name: Notify Telegram
+      #   if: steps.fetch-prs.outputs.total_prs > 0
+      #   run: |
+      #     MSG="🔍 *GoClaw Upstream Report*%0A${{ steps.fetch-prs.outputs.total_prs }} PRs abertos"
+      #     curl -s "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+      #       -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
+      #       -d "text=$MSG" \
+      #       -d "parse_mode=Markdown"
