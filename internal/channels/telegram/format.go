@@ -61,6 +61,11 @@ func markdownToTelegramHTML(text string) string {
 	inlineCodes := extractInlineCodes(text)
 	text = inlineCodes.text
 
+	// Extract and protect @mentions (e.g. @vinaco_pm_bot) so the italic regex
+	// _([^_]+)_ does not treat underscores inside usernames as markdown italic.
+	mentions := extractMentions(text)
+	text = mentions.text
+
 	// Strip markdown headers
 	text = regexp.MustCompile(`(?m)^#{1,6}\s+(.+)$`).ReplaceAllString(text, "$1")
 
@@ -92,6 +97,11 @@ func markdownToTelegramHTML(text string) string {
 
 	// List items
 	text = regexp.MustCompile(`(?m)^[-*]\s+`).ReplaceAllString(text, "• ")
+
+	// Restore @mentions (plain text, no escaping)
+	for i, mention := range mentions.mentions {
+		text = strings.ReplaceAll(text, fmt.Sprintf("\x00MN%d\x00", i), mention)
+	}
 
 	// Restore inline code
 	for i, code := range inlineCodes.codes {
@@ -160,6 +170,37 @@ func extractInlineCodes(text string) inlineCodeMatch {
 	})
 
 	return inlineCodeMatch{text: text, codes: codes}
+}
+
+// mentionMatch holds extracted @mentions for later restoration.
+type mentionMatch struct {
+	text     string   // text with \x00MNn\x00 placeholders
+	mentions []string // original @username strings
+}
+
+// extractMentions finds Telegram @mentions (5-32 chars, [a-zA-Z0-9_]) and replaces
+// them with placeholders so the italic regex _([^_]+)_ does not mangle underscores
+// inside usernames (e.g. @v_pm_bot → @vpmbot).
+// Telegram usernames: 5-32 chars, [a-zA-Z0-9_]. Go regexp (RE2) has no lookbehind,
+// so we use a simple pattern; may match @domain in email@domain.com (harmless).
+var mentionRe = regexp.MustCompile(`@[a-zA-Z0-9_]{5,32}`)
+
+func extractMentions(text string) mentionMatch {
+	matches := mentionRe.FindAllString(text, -1)
+	mentions := make([]string, 0)
+	seen := make(map[string]int)
+	for _, m := range matches {
+		if _, ok := seen[m]; !ok {
+			seen[m] = len(mentions)
+			mentions = append(mentions, m)
+		}
+	}
+
+	text = mentionRe.ReplaceAllStringFunc(text, func(s string) string {
+		return fmt.Sprintf("\x00MN%d\x00", seen[s])
+	})
+
+	return mentionMatch{text: text, mentions: mentions}
 }
 
 func escapeHTML(text string) string {

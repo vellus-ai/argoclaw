@@ -260,6 +260,11 @@ func (c *Channel) draftTransportEnabled() bool {
 	return *c.config.DraftTransport
 }
 
+// BotUsername implements channels.BotMentionChannel for internal bot-to-bot mention routing.
+func (c *Channel) BotUsername() string {
+	return c.bot.Username()
+}
+
 // ReasoningStreamEnabled returns whether reasoning should be shown as a separate message.
 // Default: true. Set "reasoning_stream": false to hide reasoning (only show answer).
 func (c *Channel) ReasoningStreamEnabled() bool {

@@ -5,6 +5,16 @@ import (
 	"testing"
 )
 
+func TestMarkdownToTelegramHTML_MentionsPreserved(t *testing.T) {
+	// @mentions with underscores must not be mangled by the italic regex _([^_]+)_.
+	// Before fix: @v_pm_bot became @vinaco<pm>bot (underscores consumed).
+	input := "Bạn có thể hỏi @v_pm_bot nhé."
+	got := markdownToTelegramHTML(input)
+	if !strings.Contains(got, "@v_pm_bot") {
+		t.Errorf("markdownToTelegramHTML(%q): expected @v_pm_bot preserved, got %q", input, got)
+	}
+}
+
 func TestDisplayWidth(t *testing.T) {
 	tests := []struct {
 		input string
