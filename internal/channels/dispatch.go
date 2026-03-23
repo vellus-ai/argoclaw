@@ -12,6 +12,9 @@ import (
 	"github.com/vellus-ai/argoclaw/internal/bus"
 )
 
+// botMentionRe matches Telegram @mentions (5-32 chars, [a-zA-Z0-9_]).
+var botMentionRe = regexp.MustCompile(`@([a-zA-Z0-9_]{5,32})`)
+
 // WebhookRoute holds a path and handler pair for mounting on the main gateway mux.
 type WebhookRoute struct {
 	Path    string
@@ -88,6 +91,10 @@ func (m *Manager) dispatchOutbound(ctx context.Context) {
 							"channel", msg.Channel, "error", err2)
 					}
 				}
+			} else {
+				// Bot-to-bot mention routing: Telegram does not deliver bot messages to other bots.
+				// When this bot's message mentions another bot, inject InboundMessage so the other bot wakes up.
+				m.dispatchBotMentions(ctx, msg, channel)
 			}
 
 			// Clean up temp media files only. Workspace-generated files are preserved
@@ -101,6 +108,108 @@ func (m *Manager) dispatchOutbound(ctx context.Context) {
 				}
 			}
 		}
+	}
+}
+
+// dispatchBotMentions publishes InboundMessage for each @mentioned bot so they receive the message.
+// Telegram does not deliver bot→bot messages; this internal routing wakes up the mentioned bots.
+func (m *Manager) dispatchBotMentions(ctx context.Context, msg bus.OutboundMessage, fromChannel Channel) {
+	if msg.Content == "" {
+		return
+	}
+	bmc, ok := fromChannel.(BotMentionChannel)
+	if !ok {
+		return
+	}
+	fromBotUsername := bmc.BotUsername()
+	if fromBotUsername == "" {
+		return
+	}
+
+	// Build map: lowercase bot username → (channelName, agentID)
+	type targetInfo struct {
+		channelName string
+		agentID     string
+	}
+	targets := make(map[string]targetInfo)
+	m.mu.RLock()
+	for name, ch := range m.channels {
+		if name == msg.Channel {
+			continue
+		}
+		if other, ok := ch.(BotMentionChannel); ok {
+			uname := other.BotUsername()
+			if uname == "" {
+				continue
+			}
+			key := strings.ToLower(uname)
+			agentID := ""
+			if ag, ok := ch.(interface{ AgentID() string }); ok {
+				agentID = ag.AgentID()
+			}
+			targets[key] = targetInfo{channelName: name, agentID: agentID}
+		}
+	}
+	m.mu.RUnlock()
+
+	// Find unique @mentions in content
+	matches := botMentionRe.FindAllStringSubmatch(msg.Content, -1)
+	seen := make(map[string]bool)
+	for _, submatch := range matches {
+		if len(submatch) < 2 {
+			continue
+		}
+		username := strings.ToLower(submatch[1])
+		if seen[username] {
+			continue
+		}
+		seen[username] = true
+		if username == strings.ToLower(fromBotUsername) {
+			continue
+		}
+		tgt, ok := targets[username]
+		if !ok {
+			continue
+		}
+		// Inject InboundMessage for the mentioned bot (same pattern as teammate).
+		// target_channel: the mentioned bot's channel — session is keyed by this (not origin).
+		// When user mentions techlead, session is agent+telegram_techlead+chatID.
+		meta := map[string]string{
+			"origin_channel":   msg.Channel,
+			"target_channel":   tgt.channelName,
+			"origin_peer_kind": "group",
+			"from_agent":       fromBotUsername,
+			"to_agent":         tgt.agentID,
+		}
+		if v := msg.Metadata["local_key"]; v != "" {
+			meta["origin_local_key"] = v
+		} else if msg.ChatID != "" {
+			meta["origin_local_key"] = msg.ChatID
+		}
+		for _, k := range []string{"message_thread_id", "group_id"} {
+			if v := msg.Metadata[k]; v != "" {
+				meta[k] = v
+			}
+		}
+
+		content := fmt.Sprintf("[Message from @%s]: %s", fromBotUsername, msg.Content)
+		m.bus.PublishInbound(bus.InboundMessage{
+			Channel:  "system",
+			SenderID: fmt.Sprintf("bot_mention:%s:%s", msg.Channel, fromBotUsername),
+			ChatID:   msg.ChatID,
+			Content:  content,
+			Media:    nil,
+			UserID:   fmt.Sprintf("bot:%s:%s", msg.Channel, fromBotUsername),
+			AgentID:  tgt.agentID,
+			Metadata: meta,
+		})
+		slog.Info("bot mention routed",
+			"from_channel", msg.Channel,
+			"from_bot", fromBotUsername,
+			"to_channel", tgt.channelName,
+			"to_agent", tgt.agentID,
+			"chat_id", msg.ChatID,
+		)
 	}
 }
 

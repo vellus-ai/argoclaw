@@ -137,6 +137,15 @@ type WebhookChannel interface {
 	WebhookHandler() (path string, handler http.Handler)
 }
 
+// BotMentionChannel is implemented by channels (e.g. Telegram) that have a bot username.
+// Used for internal bot-to-bot mention routing when one bot's message mentions another.
+// Telegram does not deliver bot messages to other bots, so we inject InboundMessage internally.
+type BotMentionChannel interface {
+	Channel
+	// BotUsername returns the platform bot username without @ (e.g. "v_pm_bot").
+	BotUsername() string
+}
+
 // ReactionChannel extends Channel with status reaction support.
 // Channels that implement this interface can show emoji reactions on user messages
 // to indicate agent status (thinking, tool call, done, error, stall).
