@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"net/http"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -225,9 +226,16 @@ func (p *OpenAIProvider) ChatStream(ctx context.Context, req ChatRequest, onChun
 		return nil, fmt.Errorf("%s: stream read error: %w", p.name, err)
 	}
 
-	// Parse accumulated tool call arguments
-	for i := 0; i < len(accumulators); i++ {
-		acc := accumulators[i]
+	// Parse accumulated tool call arguments.
+	// Keys are SSE tool_call indices which may be non-contiguous (e.g. {0, 2}),
+	// so we sort keys instead of assuming sequential 0..len-1.
+	indices := make([]int, 0, len(accumulators))
+	for idx := range accumulators {
+		indices = append(indices, idx)
+	}
+	sort.Ints(indices)
+	for _, idx := range indices {
+		acc := accumulators[idx]
 		args := make(map[string]any)
 		if err := json.Unmarshal([]byte(acc.rawArgs), &args); err != nil && acc.rawArgs != "" {
 			slog.Warn("openai_stream: failed to parse tool call arguments",
