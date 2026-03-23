@@ -16,6 +16,9 @@
 | [#356](https://github.com/nextlevelbuilder/goclaw/pull/356) | fix(summoning): prevent identity markdown corrupting display names | @kaitranntt | ✅ Merged | 2026-03-22 |
 | [#352](https://github.com/nextlevelbuilder/goclaw/pull/352) | fix(ui): chat nav route + crypto.randomUUID in non-secure contexts | @maxfraieho | ✅ Merged | 2026-03-22 |
 | [#339](https://github.com/nextlevelbuilder/goclaw/pull/339) | build(docker): add curl to runtime image | @tolkonepiu | ✅ Merged | 2026-03-22 |
+| [#316](https://github.com/nextlevelbuilder/goclaw/pull/316) | feat: project-scoped MCP isolation + **env blocklist + tenant_id** | @duhd-vnpay | ✅ Merged (PR #8) + Security TDD/PBT | 2026-03-23 |
+| [#343](https://github.com/nextlevelbuilder/goclaw/pull/343) | feat: Anthropic OAuth setup tokens + **configurable system prompt** | @anhle128 | ✅ Merged (PR #9) + PBT | 2026-03-23 |
+| [#202](https://github.com/nextlevelbuilder/goclaw/pull/202) | fix: Telegram @mention preservation + bot-to-bot routing | @nvt-ak | ✅ Merged (PR #10) + PBT | 2026-03-23 |
 
 ### Upstream PRs — Approved, Pending Conflict Resolution
 
