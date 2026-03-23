@@ -102,6 +102,56 @@ jobs:
               --body "$REPORT"
           fi
 
+      - name: Send email notification via Resend
+        if: steps.fetch-prs.outputs.total_prs > 0
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: |
+          REPORT=$(cat /tmp/pr-report.md)
+          TOTAL=${{ steps.fetch-prs.outputs.total_prs }}
+          DATE=$(date -u '+%Y-%m-%d')
+
+          # Convert markdown to basic HTML
+          HTML_REPORT=$(echo "$REPORT" | sed \
+            -e 's/^## \(.*\)/<h2>\1<\/h2>/g' \
+            -e 's/^### \(.*\)/<h3>\1<\/h3>/g' \
+            -e 's/| --- |/|---|/g' \
+            -e 's/^|/<tr><td>/g' \
+            -e 's/|$/<\/td><\/tr>/g' \
+            -e 's/|/<\/td><td>/g' \
+            -e 's/✅/<span style="color:green">✅<\/span>/g' \
+            -e 's/⚠️/<span style="color:orange">⚠️<\/span>/g')
+
+          # Build email body
+          EMAIL_BODY=$(cat <<EMAILEOF
+          <div style="font-family: -apple-system, sans-serif; max-width: 700px; margin: 0 auto; background: #0a1628; color: #e2e8f0; padding: 32px; border-radius: 12px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+              <span style="font-size: 32px;">⚓</span>
+              <h1 style="color: #3b82f6; margin: 8px 0;">ARGO — Upstream Monitor</h1>
+              <p style="color: #94a3b8;">Relatório diário de PRs da comunidade GoClaw</p>
+              <p style="color: #64748b; font-size: 12px;">$DATE • $TOTAL PRs abertos</p>
+            </div>
+            <div style="background: #1e293b; border-radius: 8px; padding: 24px; font-size: 14px;">
+              <pre style="white-space: pre-wrap; color: #e2e8f0;">$REPORT</pre>
+            </div>
+            <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #334155;">
+              <a href="https://github.com/vellus-ai/argoclaw/issues?q=label:upstream-monitor" style="color: #3b82f6; text-decoration: none;">Ver Issue no GitHub →</a>
+              <p style="color: #475569; font-size: 11px; margin-top: 12px;">ARGO by Vellus • Upstream PR Monitor</p>
+            </div>
+          </div>
+          EMAILEOF
+          )
+
+          curl -s -X POST "https://api.resend.com/emails" \
+            -H "Authorization: Bearer $RESEND_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg from "ARGO Monitor <noreply@consilium.tec.br>" \
+              --arg to "milton@vellus.tech" \
+              --arg subject "⚓ ARGO Upstream Report — $DATE — $TOTAL PRs" \
+              --arg html "$EMAIL_BODY" \
+              '{from: $from, to: [$to], subject: $subject, html: $html}')"
+
       # Optional: Notify via Telegram (requires TELEGRAM_BOT_TOKEN secret)
       # - name: Notify Telegram
       #   if: steps.fetch-prs.outputs.total_prs > 0
