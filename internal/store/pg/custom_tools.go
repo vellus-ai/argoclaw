@@ -47,15 +47,16 @@ func (s *PGCustomToolStore) Create(ctx context.Context, def *store.CustomToolDef
 		envBytes = def.Env
 	}
 
+	tid := tenantIDFromCtx(ctx)
 	now := time.Now()
 	def.CreatedAt = now
 	def.UpdatedAt = now
 
 	_, err := s.db.ExecContext(ctx,
-		`INSERT INTO custom_tools (id, name, description, parameters, command, working_dir,
+		`INSERT INTO custom_tools (id, tenant_id, name, description, parameters, command, working_dir,
 		 timeout_seconds, env, agent_id, enabled, created_by, created_at, updated_at)
-		 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
-		def.ID, def.Name, def.Description,
+		 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+		def.ID, nilUUID(&tid), def.Name, def.Description,
 		jsonOrEmpty(def.Parameters),
 		def.Command, nilStr(def.WorkingDir),
 		def.TimeoutSeconds, envBytes,
@@ -66,8 +67,13 @@ func (s *PGCustomToolStore) Create(ctx context.Context, def *store.CustomToolDef
 }
 
 func (s *PGCustomToolStore) Get(ctx context.Context, id uuid.UUID) (*store.CustomToolDef, error) {
-	row := s.db.QueryRowContext(ctx,
-		`SELECT `+customToolSelectCols+` FROM custom_tools WHERE id = $1`, id)
+	q := `SELECT ` + customToolSelectCols + ` FROM custom_tools WHERE id = $1`
+	args := []any{id}
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += ` AND tenant_id = $2`
+		args = append(args, tid)
+	}
+	row := s.db.QueryRowContext(ctx, q, args...)
 	return s.scanTool(row)
 }
 
@@ -158,17 +164,29 @@ func (s *PGCustomToolStore) Update(ctx context.Context, id uuid.UUID, updates ma
 		}
 	}
 	updates["updated_at"] = time.Now()
-	return execMapUpdate(ctx, s.db, "custom_tools", id, updates)
+	return execMapUpdateTenant(ctx, s.db, "custom_tools", id, updates)
 }
 
 func (s *PGCustomToolStore) Delete(ctx context.Context, id uuid.UUID) error {
-	_, err := s.db.ExecContext(ctx, "DELETE FROM custom_tools WHERE id = $1", id)
+	q := "DELETE FROM custom_tools WHERE id = $1"
+	args := []any{id}
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += " AND tenant_id = $2"
+		args = append(args, tid)
+	}
+	_, err := s.db.ExecContext(ctx, q, args...)
 	return err
 }
 
 func (s *PGCustomToolStore) ListGlobal(ctx context.Context) ([]store.CustomToolDef, error) {
-	rows, err := s.db.QueryContext(ctx,
-		`SELECT `+customToolSelectCols+` FROM custom_tools WHERE agent_id IS NULL AND enabled = true ORDER BY name`)
+	q := `SELECT ` + customToolSelectCols + ` FROM custom_tools WHERE agent_id IS NULL AND enabled = true`
+	var args []any
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += ` AND tenant_id = $1`
+		args = append(args, tid)
+	}
+	q += ` ORDER BY name`
+	rows, err := s.db.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -176,8 +194,14 @@ func (s *PGCustomToolStore) ListGlobal(ctx context.Context) ([]store.CustomToolD
 }
 
 func (s *PGCustomToolStore) ListByAgent(ctx context.Context, agentID uuid.UUID) ([]store.CustomToolDef, error) {
-	rows, err := s.db.QueryContext(ctx,
-		`SELECT `+customToolSelectCols+` FROM custom_tools WHERE agent_id = $1 AND enabled = true ORDER BY name`, agentID)
+	q := `SELECT ` + customToolSelectCols + ` FROM custom_tools WHERE agent_id = $1 AND enabled = true`
+	args := []any{agentID}
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += ` AND tenant_id = $2`
+		args = append(args, tid)
+	}
+	q += ` ORDER BY name`
+	rows, err := s.db.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -185,18 +209,30 @@ func (s *PGCustomToolStore) ListByAgent(ctx context.Context, agentID uuid.UUID) 
 }
 
 func (s *PGCustomToolStore) ListAll(ctx context.Context) ([]store.CustomToolDef, error) {
-	rows, err := s.db.QueryContext(ctx,
-		`SELECT `+customToolSelectCols+` FROM custom_tools WHERE enabled = true ORDER BY name`)
+	q := `SELECT ` + customToolSelectCols + ` FROM custom_tools WHERE enabled = true`
+	var args []any
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += ` AND tenant_id = $1`
+		args = append(args, tid)
+	}
+	q += ` ORDER BY name`
+	rows, err := s.db.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
 	return s.scanTools(rows)
 }
 
-func buildCustomToolWhere(opts store.CustomToolListOpts) (string, []any) {
+func buildCustomToolWhere(ctx context.Context, opts store.CustomToolListOpts) (string, []any) {
 	conditions := []string{"enabled = true"}
 	var args []any
 	argIdx := 1
+
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		conditions = append(conditions, fmt.Sprintf("tenant_id = $%d", argIdx))
+		args = append(args, tid)
+		argIdx++
+	}
 
 	if opts.AgentID != nil {
 		conditions = append(conditions, fmt.Sprintf("agent_id = $%d", argIdx))
@@ -213,7 +249,7 @@ func buildCustomToolWhere(opts store.CustomToolListOpts) (string, []any) {
 }
 
 func (s *PGCustomToolStore) ListPaged(ctx context.Context, opts store.CustomToolListOpts) ([]store.CustomToolDef, error) {
-	where, args := buildCustomToolWhere(opts)
+	where, args := buildCustomToolWhere(ctx, opts)
 	limit := opts.Limit
 	if limit <= 0 {
 		limit = 50
@@ -229,7 +265,7 @@ func (s *PGCustomToolStore) ListPaged(ctx context.Context, opts store.CustomTool
 }
 
 func (s *PGCustomToolStore) CountTools(ctx context.Context, opts store.CustomToolListOpts) (int, error) {
-	where, args := buildCustomToolWhere(opts)
+	where, args := buildCustomToolWhere(ctx, opts)
 	var count int
 	err := s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM custom_tools"+where, args...).Scan(&count)
 	return count, err

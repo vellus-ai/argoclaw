@@ -9,8 +9,6 @@ import (
 	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
-const ctxKeyTenantID contextKey = "tenant_id"
-
 // TenantMiddleware resolves the user's tenant from JWT claims and injects it into context.
 // All downstream queries MUST filter by tenant_id for data isolation.
 type TenantMiddleware struct {
@@ -38,8 +36,8 @@ func (m *TenantMiddleware) Wrap(next http.Handler) http.Handler {
 			return
 		}
 
-		// Inject tenant_id into context for downstream store queries
-		ctx := context.WithValue(r.Context(), ctxKeyTenantID, tenantID)
+		// Inject tenant_id into context via store package — available to all store queries
+		ctx := store.WithTenantID(r.Context(), tenantID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -47,15 +45,14 @@ func (m *TenantMiddleware) Wrap(next http.Handler) http.Handler {
 // TenantIDFromRequest extracts the tenant UUID from request context.
 // Returns uuid.Nil if no tenant is set (e.g., gateway token mode).
 func TenantIDFromRequest(ctx context.Context) uuid.UUID {
-	id, _ := ctx.Value(ctxKeyTenantID).(uuid.UUID)
-	return id
+	return store.TenantIDFromContext(ctx)
 }
 
 // RequireTenant returns a middleware that rejects requests without a tenant context.
 func RequireTenant() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if TenantIDFromRequest(r.Context()) == uuid.Nil {
+			if store.TenantIDFromContext(r.Context()) == uuid.Nil {
 				writeJSONError(w, http.StatusForbidden, "tenant context required")
 				return
 			}

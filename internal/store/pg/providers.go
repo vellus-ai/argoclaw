@@ -47,13 +47,14 @@ func (s *PGProviderStore) CreateProvider(ctx context.Context, p *store.LLMProvid
 		settings = []byte("{}")
 	}
 
+	tid := tenantIDFromCtx(ctx)
 	now := time.Now()
 	p.CreatedAt = now
 	p.UpdatedAt = now
 	_, err := s.db.ExecContext(ctx,
-		`INSERT INTO llm_providers (id, name, display_name, provider_type, api_base, api_key, enabled, settings, created_at, updated_at)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-		p.ID, p.Name, p.DisplayName, p.ProviderType, p.APIBase, apiKey, p.Enabled, settings, now, now,
+		`INSERT INTO llm_providers (id, tenant_id, name, display_name, provider_type, api_base, api_key, enabled, settings, created_at, updated_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+		p.ID, nilUUID(&tid), p.Name, p.DisplayName, p.ProviderType, p.APIBase, apiKey, p.Enabled, settings, now, now,
 	)
 	return err
 }
@@ -61,10 +62,18 @@ func (s *PGProviderStore) CreateProvider(ctx context.Context, p *store.LLMProvid
 func (s *PGProviderStore) GetProvider(ctx context.Context, id uuid.UUID) (*store.LLMProviderData, error) {
 	var p store.LLMProviderData
 	var apiKey string
-	err := s.db.QueryRowContext(ctx,
-		`SELECT id, name, display_name, provider_type, api_base, api_key, enabled, settings, created_at, updated_at
-		 FROM llm_providers WHERE id = $1`, id,
-	).Scan(&p.ID, &p.Name, &p.DisplayName, &p.ProviderType, &p.APIBase, &apiKey, &p.Enabled, &p.Settings, &p.CreatedAt, &p.UpdatedAt)
+
+	q := `SELECT id, name, display_name, provider_type, api_base, api_key, enabled, settings, created_at, updated_at
+		 FROM llm_providers WHERE id = $1`
+	args := []any{id}
+
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += ` AND tenant_id = $2`
+		args = append(args, tid)
+	}
+
+	err := s.db.QueryRowContext(ctx, q, args...).Scan(
+		&p.ID, &p.Name, &p.DisplayName, &p.ProviderType, &p.APIBase, &apiKey, &p.Enabled, &p.Settings, &p.CreatedAt, &p.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("provider not found: %s", id)
 	}
@@ -75,10 +84,18 @@ func (s *PGProviderStore) GetProvider(ctx context.Context, id uuid.UUID) (*store
 func (s *PGProviderStore) GetProviderByName(ctx context.Context, name string) (*store.LLMProviderData, error) {
 	var p store.LLMProviderData
 	var apiKey string
-	err := s.db.QueryRowContext(ctx,
-		`SELECT id, name, display_name, provider_type, api_base, api_key, enabled, settings, created_at, updated_at
-		 FROM llm_providers WHERE name = $1`, name,
-	).Scan(&p.ID, &p.Name, &p.DisplayName, &p.ProviderType, &p.APIBase, &apiKey, &p.Enabled, &p.Settings, &p.CreatedAt, &p.UpdatedAt)
+
+	q := `SELECT id, name, display_name, provider_type, api_base, api_key, enabled, settings, created_at, updated_at
+		 FROM llm_providers WHERE name = $1`
+	args := []any{name}
+
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += ` AND tenant_id = $2`
+		args = append(args, tid)
+	}
+
+	err := s.db.QueryRowContext(ctx, q, args...).Scan(
+		&p.ID, &p.Name, &p.DisplayName, &p.ProviderType, &p.APIBase, &apiKey, &p.Enabled, &p.Settings, &p.CreatedAt, &p.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("provider not found: %s", name)
 	}
@@ -87,9 +104,17 @@ func (s *PGProviderStore) GetProviderByName(ctx context.Context, name string) (*
 }
 
 func (s *PGProviderStore) ListProviders(ctx context.Context) ([]store.LLMProviderData, error) {
-	rows, err := s.db.QueryContext(ctx,
-		`SELECT id, name, display_name, provider_type, api_base, api_key, enabled, settings, created_at, updated_at
-		 FROM llm_providers ORDER BY name`)
+	q := `SELECT id, name, display_name, provider_type, api_base, api_key, enabled, settings, created_at, updated_at
+		 FROM llm_providers`
+	var args []any
+
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += ` WHERE tenant_id = $1`
+		args = append(args, tid)
+	}
+	q += ` ORDER BY name`
+
+	rows, err := s.db.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -118,11 +143,19 @@ func (s *PGProviderStore) UpdateProvider(ctx context.Context, id uuid.UUID, upda
 			updates["api_key"] = encrypted
 		}
 	}
-	return execMapUpdate(ctx, s.db, "llm_providers", id, updates)
+	return execMapUpdateTenant(ctx, s.db, "llm_providers", id, updates)
 }
 
 func (s *PGProviderStore) DeleteProvider(ctx context.Context, id uuid.UUID) error {
-	_, err := s.db.ExecContext(ctx, "DELETE FROM llm_providers WHERE id = $1", id)
+	q := "DELETE FROM llm_providers WHERE id = $1"
+	args := []any{id}
+
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += " AND tenant_id = $2"
+		args = append(args, tid)
+	}
+
+	_, err := s.db.ExecContext(ctx, q, args...)
 	return err
 }
 
@@ -130,7 +163,7 @@ func (s *PGProviderStore) decryptKey(apiKey, providerName string) string {
 	if s.encKey != "" && apiKey != "" {
 		decrypted, err := crypto.Decrypt(apiKey, s.encKey)
 		if err != nil {
-			slog.Warn("failed to decrypt provider API key", "provider", providerName, "error", err)
+			slog.Warn("provider: could not decrypt API key", "provider", providerName, "error", err)
 			return apiKey
 		}
 		return decrypted
