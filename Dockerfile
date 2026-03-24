@@ -30,7 +30,7 @@ RUN set -eux; \
     fi; \
     if [ -n "$TAGS" ]; then TAGS="-tags $TAGS"; fi; \
     CGO_ENABLED=0 GOOS=linux \
-    go build -ldflags="-s -w -X github.com/nextlevelbuilder/argoclaw/cmd.Version=${VERSION}" \
+    go build -ldflags="-s -w -X github.com/vellus-ai/argoclaw/cmd.Version=${VERSION}" \
     ${TAGS} -o /out/argoclaw . && \
     CGO_ENABLED=0 GOOS=linux \
     go build -ldflags="-s -w" -o /out/pkg-helper ./cmd/pkg-helper
