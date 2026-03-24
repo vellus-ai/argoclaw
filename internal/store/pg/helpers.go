@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // validColumnName matches safe SQL identifiers (letters, digits, underscores).
@@ -235,4 +237,61 @@ var tablesWithUpdatedAt = map[string]bool{
 
 func tableHasUpdatedAt(table string) bool {
 	return tablesWithUpdatedAt[table]
+}
+
+// --- Multi-tenancy helpers ---
+
+// tenantIDFromCtx extracts the tenant UUID from context.
+// Returns uuid.Nil if no tenant is set (single-tenant / gateway token mode).
+func tenantIDFromCtx(ctx context.Context) uuid.UUID {
+	return store.TenantIDFromContext(ctx)
+}
+
+// execMapUpdateTenant is like execMapUpdate but adds AND tenant_id = $N to the WHERE clause
+// when a tenant_id is present in context. This prevents cross-tenant data modification.
+func execMapUpdateTenant(ctx context.Context, db *sql.DB, table string, id uuid.UUID, updates map[string]any) error {
+	if !validTableName(table) {
+		slog.Warn("security.invalid_table_name", "table", table)
+		return fmt.Errorf("invalid table name: %q", table)
+	}
+	if len(updates) == 0 {
+		return nil
+	}
+	var setClauses []string
+	var args []any
+	i := 1
+	for col, val := range updates {
+		if !validColumnName.MatchString(col) {
+			slog.Warn("security.invalid_column_name", "table", table, "column", col)
+			return fmt.Errorf("invalid column name: %q", col)
+		}
+		setClauses = append(setClauses, fmt.Sprintf("%s = $%d", col, i))
+		args = append(args, val)
+		i++
+	}
+	if _, ok := updates["updated_at"]; !ok && tableHasUpdatedAt(table) {
+		setClauses = append(setClauses, fmt.Sprintf("updated_at = $%d", i))
+		args = append(args, time.Now().UTC())
+		i++
+	}
+	args = append(args, id)
+	where := fmt.Sprintf("id = $%d", i)
+	i++
+
+	tid := tenantIDFromCtx(ctx)
+	if tid != uuid.Nil {
+		args = append(args, tid)
+		where += fmt.Sprintf(" AND tenant_id = $%d", i)
+	}
+
+	q := fmt.Sprintf("UPDATE %s SET %s WHERE %s", table, strings.Join(setClauses, ", "), where)
+	result, err := db.ExecContext(ctx, q, args...)
+	if err != nil {
+		return err
+	}
+	n, _ := result.RowsAffected()
+	if n == 0 && tid != uuid.Nil {
+		return fmt.Errorf("not found or tenant mismatch: %s/%s", table, id)
+	}
+	return nil
 }

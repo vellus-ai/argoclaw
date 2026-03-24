@@ -43,16 +43,17 @@ func (s *PGMCPServerStore) CreateServer(ctx context.Context, srv *store.MCPServe
 		apiKey = encrypted
 	}
 
+	tid := tenantIDFromCtx(ctx)
 	now := time.Now()
 	srv.CreatedAt = now
 	srv.UpdatedAt = now
 	encHeaders := s.encryptJSONB(jsonOrEmpty(srv.Headers))
 	encEnv := s.encryptJSONB(jsonOrEmpty(srv.Env))
 	_, err := s.db.ExecContext(ctx,
-		`INSERT INTO mcp_servers (id, name, display_name, transport, command, args, url, headers, env,
+		`INSERT INTO mcp_servers (id, tenant_id, name, display_name, transport, command, args, url, headers, env,
 		 api_key, tool_prefix, timeout_sec, settings, enabled, created_by, created_at, updated_at)
-		 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
-		srv.ID, srv.Name, nilStr(srv.DisplayName), srv.Transport, nilStr(srv.Command),
+		 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
+		srv.ID, nilUUID(&tid), srv.Name, nilStr(srv.DisplayName), srv.Transport, nilStr(srv.Command),
 		jsonOrEmpty(srv.Args), nilStr(srv.URL), encHeaders, encEnv,
 		nilStr(apiKey), nilStr(srv.ToolPrefix), srv.TimeoutSec,
 		jsonOrEmpty(srv.Settings), srv.Enabled, srv.CreatedBy, now, now,
@@ -61,17 +62,31 @@ func (s *PGMCPServerStore) CreateServer(ctx context.Context, srv *store.MCPServe
 }
 
 func (s *PGMCPServerStore) GetServer(ctx context.Context, id uuid.UUID) (*store.MCPServerData, error) {
-	return s.scanServer(s.db.QueryRowContext(ctx,
-		`SELECT id, name, display_name, transport, command, args, url, headers, env,
+	q := `SELECT id, name, display_name, transport, command, args, url, headers, env,
 		 api_key, tool_prefix, timeout_sec, settings, enabled, created_by, created_at, updated_at
-		 FROM mcp_servers WHERE id = $1`, id))
+		 FROM mcp_servers WHERE id = $1`
+	args := []any{id}
+
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += ` AND tenant_id = $2`
+		args = append(args, tid)
+	}
+
+	return s.scanServer(s.db.QueryRowContext(ctx, q, args...))
 }
 
 func (s *PGMCPServerStore) GetServerByName(ctx context.Context, name string) (*store.MCPServerData, error) {
-	return s.scanServer(s.db.QueryRowContext(ctx,
-		`SELECT id, name, display_name, transport, command, args, url, headers, env,
+	q := `SELECT id, name, display_name, transport, command, args, url, headers, env,
 		 api_key, tool_prefix, timeout_sec, settings, enabled, created_by, created_at, updated_at
-		 FROM mcp_servers WHERE name = $1`, name))
+		 FROM mcp_servers WHERE name = $1`
+	args := []any{name}
+
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += ` AND tenant_id = $2`
+		args = append(args, tid)
+	}
+
+	return s.scanServer(s.db.QueryRowContext(ctx, q, args...))
 }
 
 func (s *PGMCPServerStore) scanServer(row *sql.Row) (*store.MCPServerData, error) {
@@ -108,10 +123,18 @@ func (s *PGMCPServerStore) scanServer(row *sql.Row) (*store.MCPServerData, error
 }
 
 func (s *PGMCPServerStore) ListServers(ctx context.Context) ([]store.MCPServerData, error) {
-	rows, err := s.db.QueryContext(ctx,
-		`SELECT id, name, display_name, transport, command, args, url, headers, env,
+	q := `SELECT id, name, display_name, transport, command, args, url, headers, env,
 		 api_key, tool_prefix, timeout_sec, settings, enabled, created_by, created_at, updated_at
-		 FROM mcp_servers ORDER BY name`)
+		 FROM mcp_servers`
+	var args []any
+
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += ` WHERE tenant_id = $1`
+		args = append(args, tid)
+	}
+	q += ` ORDER BY name`
+
+	rows, err := s.db.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -178,11 +201,19 @@ func (s *PGMCPServerStore) UpdateServer(ctx context.Context, id uuid.UUID, updat
 		}
 	}
 	updates["updated_at"] = time.Now()
-	return execMapUpdate(ctx, s.db, "mcp_servers", id, updates)
+	return execMapUpdateTenant(ctx, s.db, "mcp_servers", id, updates)
 }
 
 func (s *PGMCPServerStore) DeleteServer(ctx context.Context, id uuid.UUID) error {
-	_, err := s.db.ExecContext(ctx, "DELETE FROM mcp_servers WHERE id = $1", id)
+	q := "DELETE FROM mcp_servers WHERE id = $1"
+	args := []any{id}
+
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += " AND tenant_id = $2"
+		args = append(args, tid)
+	}
+
+	_, err := s.db.ExecContext(ctx, q, args...)
 	return err
 }
 

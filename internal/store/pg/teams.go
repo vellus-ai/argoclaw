@@ -48,38 +48,55 @@ func (s *PGTeamStore) CreateTeam(ctx context.Context, team *store.TeamData) erro
 		settings = json.RawMessage(`{}`)
 	}
 
+	tid := tenantIDFromCtx(ctx)
 	_, err := s.db.ExecContext(ctx,
-		`INSERT INTO agent_teams (id, name, lead_agent_id, description, status, settings, created_by, created_at, updated_at)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-		team.ID, team.Name, team.LeadAgentID, team.Description,
+		`INSERT INTO agent_teams (id, tenant_id, name, lead_agent_id, description, status, settings, created_by, created_at, updated_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+		team.ID, nilUUID(&tid), team.Name, team.LeadAgentID, team.Description,
 		team.Status, settings, team.CreatedBy, now, now,
 	)
 	return err
 }
 
 func (s *PGTeamStore) GetTeam(ctx context.Context, teamID uuid.UUID) (*store.TeamData, error) {
-	row := s.db.QueryRowContext(ctx,
-		`SELECT `+teamSelectCols+` FROM agent_teams WHERE id = $1`, teamID)
+	q := `SELECT ` + teamSelectCols + ` FROM agent_teams WHERE id = $1`
+	args := []any{teamID}
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += ` AND tenant_id = $2`
+		args = append(args, tid)
+	}
+	row := s.db.QueryRowContext(ctx, q, args...)
 	return scanTeamRow(row)
 }
 
 func (s *PGTeamStore) UpdateTeam(ctx context.Context, teamID uuid.UUID, updates map[string]any) error {
-	return execMapUpdate(ctx, s.db, "agent_teams", teamID, updates)
+	return execMapUpdateTenant(ctx, s.db, "agent_teams", teamID, updates)
 }
 
 func (s *PGTeamStore) DeleteTeam(ctx context.Context, teamID uuid.UUID) error {
-	_, err := s.db.ExecContext(ctx, `DELETE FROM agent_teams WHERE id = $1`, teamID)
+	q := `DELETE FROM agent_teams WHERE id = $1`
+	args := []any{teamID}
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += ` AND tenant_id = $2`
+		args = append(args, tid)
+	}
+	_, err := s.db.ExecContext(ctx, q, args...)
 	return err
 }
 
 func (s *PGTeamStore) ListTeams(ctx context.Context) ([]store.TeamData, error) {
-	rows, err := s.db.QueryContext(ctx,
-		`SELECT t.id, t.name, t.lead_agent_id, t.description, t.status, t.settings, t.created_by, t.created_at, t.updated_at,
+	q := `SELECT t.id, t.name, t.lead_agent_id, t.description, t.status, t.settings, t.created_by, t.created_at, t.updated_at,
 		 COALESCE(a.agent_key, '') AS lead_agent_key,
 		 COALESCE(a.display_name, '') AS lead_display_name
 		 FROM agent_teams t
-		 LEFT JOIN agents a ON a.id = t.lead_agent_id
-		 ORDER BY t.created_at`)
+		 LEFT JOIN agents a ON a.id = t.lead_agent_id`
+	var args []any
+	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+		q += ` WHERE t.tenant_id = $1`
+		args = append(args, tid)
+	}
+	q += ` ORDER BY t.created_at`
+	rows, err := s.db.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}

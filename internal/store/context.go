@@ -29,6 +29,8 @@ const (
 	SharedKGKey contextKey = "argoclaw_shared_kg"
 	// ShellDenyGroupsKey holds per-agent shell deny group overrides.
 	ShellDenyGroupsKey contextKey = "argoclaw_shell_deny_groups"
+	// TenantIDKey is the context key for the tenant UUID (multi-tenancy isolation).
+	TenantIDKey contextKey = "argoclaw_tenant_id"
 )
 
 // WithShellDenyGroups returns a new context with shell deny group overrides.
@@ -145,6 +147,19 @@ func WithSharedKG(ctx context.Context) context.Context {
 func IsSharedKG(ctx context.Context) bool {
 	v, _ := ctx.Value(SharedKGKey).(bool)
 	return v
+}
+
+// WithTenantID returns a new context with the given tenant UUID.
+func WithTenantID(ctx context.Context, id uuid.UUID) context.Context {
+	return context.WithValue(ctx, TenantIDKey, id)
+}
+
+// TenantIDFromContext extracts the tenant UUID from context. Returns uuid.Nil if not set.
+func TenantIDFromContext(ctx context.Context) uuid.UUID {
+	if v, ok := ctx.Value(TenantIDKey).(uuid.UUID); ok {
+		return v
+	}
+	return uuid.Nil
 }
 
 // WithLocale returns a new context with the given locale.
