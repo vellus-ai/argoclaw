@@ -8,7 +8,7 @@ import (
 	"regexp"
 
 	"github.com/google/uuid"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 var secretKeyPattern = regexp.MustCompile(`(?i)(^|_)(TOKEN|SECRET|PASSWORD|API_KEY)($|_)`)

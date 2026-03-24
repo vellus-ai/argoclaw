@@ -15,7 +15,9 @@ import (
 	"github.com/vellus-ai/argoclaw/internal/bus"
 	"github.com/vellus-ai/argoclaw/internal/channels"
 	"github.com/vellus-ai/argoclaw/internal/config"
+	"github.com/vellus-ai/argoclaw/internal/providers"
 	"github.com/vellus-ai/argoclaw/internal/scheduler"
+	"github.com/vellus-ai/argoclaw/internal/sessions"
 	"github.com/vellus-ai/argoclaw/internal/store"
 	"github.com/vellus-ai/argoclaw/internal/tools"
 	"github.com/vellus-ai/argoclaw/pkg/protocol"
@@ -137,7 +139,7 @@ func consumeInboundMessages(ctx context.Context, msgBus *bus.MessageBus, agents 
 
 			outMeta := buildAnnounceOutMeta(origLocalKey)
 
-			outCh := sched.Schedule(ctx, scheduler.LaneDelegate, agent.RunRequest{
+			outCh := sched.Schedule(ctx, scheduler.LaneTeam, agent.RunRequest{
 				SessionKey:  sessionKey,
 				Message:     msg.Content,
 				Channel:     origChannel,
@@ -213,7 +215,7 @@ func consumeInboundMessages(ctx context.Context, msgBus *bus.MessageBus, agents 
 
 			outMeta := buildAnnounceOutMeta(origLocalKey)
 
-			outCh := sched.Schedule(ctx, scheduler.LaneDelegate, agent.RunRequest{
+			outCh := sched.Schedule(ctx, scheduler.LaneTeam, agent.RunRequest{
 				SessionKey:  sessionKey,
 				Message:     msg.Content,
 				Channel:     origChannel,
@@ -334,7 +336,7 @@ func consumeInboundMessages(ctx context.Context, msgBus *bus.MessageBus, agents 
 
 			outMeta := buildAnnounceOutMeta(origLocalKey)
 
-			outCh := sched.Schedule(ctx, scheduler.LaneDelegate, agent.RunRequest{
+			outCh := sched.Schedule(ctx, scheduler.LaneTeam, agent.RunRequest{
 				SessionKey:  sessionKey,
 				Message:     msg.Content,
 				Channel:     targetChannel,

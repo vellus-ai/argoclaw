@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // stubProjectStore implements store.ProjectStore for testing.
