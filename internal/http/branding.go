@@ -2,11 +2,17 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
+	"net/mail"
+	"net/url"
+	"regexp"
 
 	"github.com/vellus-ai/argoclaw/internal/store"
 )
+
+var validHexColor = regexp.MustCompile(`^#[0-9A-Fa-f]{6}$`)
 
 // BrandingHandler manages tenant white-label branding configuration.
 type BrandingHandler struct {
@@ -72,6 +78,11 @@ func (h *BrandingHandler) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := validateBrandingRequest(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	branding := &store.TenantBranding{TenantID: tenantID, ProductName: "ARGO"}
 
 	// Apply provided fields
@@ -127,4 +138,46 @@ func (h *BrandingHandler) handleGetByDomain(w http.ResponseWriter, r *http.Reque
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(branding)
+}
+
+// validateBrandingRequest checks input fields for security and format correctness.
+func validateBrandingRequest(req *brandingUpdateRequest) error {
+	if req.PrimaryColor != nil && *req.PrimaryColor != "" {
+		if !validHexColor.MatchString(*req.PrimaryColor) {
+			return fmt.Errorf("primary_color must be a valid hex color (#RRGGBB)")
+		}
+	}
+	if req.LogoURL != nil && *req.LogoURL != "" {
+		if err := validateHTTPSURL(*req.LogoURL, "logo_url"); err != nil {
+			return err
+		}
+	}
+	if req.FaviconURL != nil && *req.FaviconURL != "" {
+		if err := validateHTTPSURL(*req.FaviconURL, "favicon_url"); err != nil {
+			return err
+		}
+	}
+	if req.SenderEmail != nil && *req.SenderEmail != "" {
+		if _, err := mail.ParseAddress(*req.SenderEmail); err != nil {
+			return fmt.Errorf("sender_email: invalid email format")
+		}
+	}
+	if req.ProductName != nil && len(*req.ProductName) > 100 {
+		return fmt.Errorf("product_name: max 100 characters")
+	}
+	return nil
+}
+
+func validateHTTPSURL(raw, field string) error {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return fmt.Errorf("%s: invalid URL", field)
+	}
+	if u.Scheme != "https" {
+		return fmt.Errorf("%s: must use https:// scheme", field)
+	}
+	if u.Host == "" {
+		return fmt.Errorf("%s: missing host", field)
+	}
+	return nil
 }
