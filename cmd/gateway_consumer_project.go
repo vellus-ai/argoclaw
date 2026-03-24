@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/nextlevelbuilder/goclaw/internal/store"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // resolveProjectOverrides looks up the project for a chat and returns its ID + MCP env overrides.
