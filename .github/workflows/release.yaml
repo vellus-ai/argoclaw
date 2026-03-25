@@ -10,7 +10,6 @@ permissions:
 
 env:
   GHCR_IMAGE: ghcr.io/${{ github.repository }}
-  DOCKERHUB_IMAGE: digitop/argoclaw
 
 jobs:
   release:
@@ -60,7 +59,7 @@ jobs:
           VERSION: v${{ needs.release.outputs.version }}
         run: |
           CGO_ENABLED=0 go build \
-            -ldflags="-s -w -X github.com/nextlevelbuilder/argoclaw/cmd.Version=${VERSION}" \
+            -ldflags="-s -w -X github.com/vellus-ai/argoclaw/cmd.Version=${VERSION}" \
             -o argoclaw .
           tar -czf "argoclaw-${{ needs.release.outputs.version }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz" argoclaw migrations/
 
@@ -72,7 +71,7 @@ jobs:
             "argoclaw-${{ needs.release.outputs.version }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz" \
             --clobber
 
-  # Build and push Docker images to GHCR + Docker Hub
+  # Build and push Docker images to GHCR
   docker-images:
     needs: release
     if: needs.release.outputs.released == 'true'
@@ -150,19 +149,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: |
-            ${{ env.GHCR_IMAGE }}
-            ${{ env.DOCKERHUB_IMAGE }}
+          images: ${{ env.GHCR_IMAGE }}
           tags: |
             type=raw,value=v${{ needs.release.outputs.version }},suffix=${{ matrix.suffix }}
             type=raw,value=latest,enable=${{ matrix.suffix == '' }},suffix=
@@ -187,7 +178,7 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.variant }}
           cache-to: type=gha,mode=max,scope=${{ matrix.variant }}
 
-  # Build and push web UI Docker image
+  # Build and push web UI Docker image to GHCR
   docker-web:
     needs: release
     if: needs.release.outputs.released == 'true'
@@ -206,19 +197,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: |
-            ${{ env.GHCR_IMAGE }}-web
-            ${{ env.DOCKERHUB_IMAGE }}-web
+          images: ${{ env.GHCR_IMAGE }}-web
           tags: |
             type=raw,value=v${{ needs.release.outputs.version }}
             type=raw,value=latest
@@ -233,30 +216,3 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web
-
-  # Notify Discord on new release (runs even if docker jobs fail)
-  notify-discord:
-    needs: [release, build-binaries, docker-images, docker-web]
-    if: always() && needs.release.outputs.released == 'true' && !cancelled()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Discord notification
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          VERSION: v${{ needs.release.outputs.version }}
-        run: |
-          curl -fsSL -H "Content-Type: application/json" \
-            -d "{
-              \"embeds\": [{
-                \"title\": \"ArgoClaw ${VERSION} Released\",
-                \"url\": \"https://github.com/${{ github.repository }}/releases/tag/${VERSION}\",
-                \"color\": 5814783,
-                \"fields\": [
-                  {\"name\": \"Docker\", \"value\": \"\`docker pull digitop/argoclaw:latest\`\", \"inline\": false},
-                  {\"name\": \"Install\", \"value\": \"\`curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/install.sh | bash\`\", \"inline\": false}
-                ],
-                \"footer\": {\"text\": \"${{ github.repository }}\"},
-                \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-              }]
-            }" \
-            "$DISCORD_WEBHOOK_URL"
