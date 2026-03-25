@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/vellus-ai/argoclaw/internal/auth"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 func TestTenantMiddleware_InjectsTenantID(t *testing.T) {
@@ -81,7 +82,7 @@ func TestRequireTenant_AllowsWithTenant(t *testing.T) {
 	}))
 
 	req := httptest.NewRequest("GET", "/v1/agents", nil)
-	ctx := context.WithValue(req.Context(), ctxKeyTenantID, tenantID)
+	ctx := store.WithTenantID(req.Context(), tenantID)
 	req = req.WithContext(ctx)
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
