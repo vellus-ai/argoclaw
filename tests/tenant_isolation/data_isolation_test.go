@@ -18,6 +18,7 @@ import (
 
 // Test: Agent created by Tenant A is invisible to Tenant B.
 func TestAgentIsolation_CreateAndGetByKey(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	agentKey := "iso-agent-" + uuid.New().String()[:8]
@@ -58,6 +59,7 @@ func TestAgentIsolation_CreateAndGetByKey(t *testing.T) {
 
 // Test: Agent created by Tenant A is invisible to Tenant B via GetByID.
 func TestAgentIsolation_GetByID_CrossTenant(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	agent := &store.AgentData{
@@ -96,6 +98,7 @@ func TestAgentIsolation_GetByID_CrossTenant(t *testing.T) {
 
 // Test: Agent update is scoped to the owning tenant.
 func TestAgentIsolation_Update_CrossTenant(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	agent := &store.AgentData{
@@ -140,6 +143,7 @@ func TestAgentIsolation_Update_CrossTenant(t *testing.T) {
 
 // Test: Soft-delete is scoped to the owning tenant.
 func TestAgentIsolation_SoftDelete_CrossTenant(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	agent := &store.AgentData{
@@ -181,6 +185,7 @@ func TestAgentIsolation_SoftDelete_CrossTenant(t *testing.T) {
 
 // Test: Branding for Tenant A is invisible to Tenant B.
 func TestBrandingIsolation_CrossTenant(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	branding := &store.TenantBranding{
@@ -360,6 +365,7 @@ func TestPBT_RandomUUID_NeverAccessesCrossTenantAgent(t *testing.T) {
 
 // Test: Two tenants cannot share the same slug.
 func TestTenantSlugUniqueness(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	duplicateTenant := &store.Tenant{
@@ -381,6 +387,7 @@ func TestTenantSlugUniqueness(t *testing.T) {
 
 // Test: Tenant A cannot see Tenant B via GetBySlug.
 func TestTenantSlugIsolation(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	gotA, err := env.tenantStore.GetBySlug(ctx, env.tenantA.Slug)

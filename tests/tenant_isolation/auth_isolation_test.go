@@ -20,6 +20,7 @@ import (
 
 // Test: Valid JWT for Tenant A is accepted.
 func TestJWT_ValidToken_Accepted(t *testing.T) {
+	t.Parallel()
 	claims, err := auth.ValidateAccessToken(env.tokenA, env.jwtSecret)
 	if err != nil {
 		t.Fatalf("valid token A should be accepted: %v", err)
@@ -34,6 +35,7 @@ func TestJWT_ValidToken_Accepted(t *testing.T) {
 
 // Test: JWT signed with wrong secret is rejected.
 func TestJWT_WrongSecret_Rejected(t *testing.T) {
+	t.Parallel()
 	wrongToken, err := auth.GenerateAccessToken(auth.TokenClaims{
 		UserID:   env.userA.String(),
 		TenantID: env.tenantA.ID.String(),
@@ -51,6 +53,7 @@ func TestJWT_WrongSecret_Rejected(t *testing.T) {
 
 // Test: JWT with tampered tenant_id is detected.
 func TestJWT_TamperedTenantID_Detected(t *testing.T) {
+	t.Parallel()
 	// Generate valid token for Tenant A
 	token := env.tokenA
 
@@ -87,6 +90,7 @@ func TestJWT_TamperedTenantID_Detected(t *testing.T) {
 
 // Test: JWT with non-existent tenant UUID passes validation but store queries return nothing.
 func TestJWT_NonExistentTenant_QueriesEmpty(t *testing.T) {
+	t.Parallel()
 	fakeTenantID := uuid.New()
 	token := mustGenerateToken(t, auth.TokenClaims{
 		UserID:   env.userA.String(),
@@ -113,6 +117,7 @@ func TestJWT_NonExistentTenant_QueriesEmpty(t *testing.T) {
 
 // Test: JWT with empty tenant_id — middleware should pass through (gateway mode).
 func TestJWT_EmptyTenantID_PassThrough(t *testing.T) {
+	t.Parallel()
 	token := mustGenerateToken(t, auth.TokenClaims{
 		UserID:   env.userA.String(),
 		TenantID: "",
@@ -140,7 +145,13 @@ func TestJWT_InvalidUUID_TenantID(t *testing.T) {
 	}
 
 	for _, tid := range invalidIDs {
-		t.Run(tid[:min(len(tid), 20)], func(t *testing.T) {
+		tid := tid // capture for parallel subtests
+		label := tid
+		if len(label) > 20 {
+			label = label[:20]
+		}
+		t.Run(label, func(t *testing.T) {
+			t.Parallel()
 			token := mustGenerateToken(t, auth.TokenClaims{
 				UserID:   env.userA.String(),
 				TenantID: tid,
@@ -151,14 +162,23 @@ func TestJWT_InvalidUUID_TenantID(t *testing.T) {
 			if err != nil {
 				return // if validation fails, that's fine
 			}
-			// But uuid.Parse should fail for invalid IDs
-			_, parseErr := uuid.Parse(claims.TenantID)
+
+			parsedID, parseErr := uuid.Parse(claims.TenantID)
+
 			if tid == "00000000-0000-0000-0000-000000000000" {
-				// Nil UUID parses successfully but should be treated as no-tenant
+				// Nil UUID parses but TenantMiddleware treats uuid.Nil as no-tenant
+				if parseErr != nil {
+					t.Error("nil UUID should parse successfully")
+				}
+				if parsedID != uuid.Nil {
+					t.Error("expected uuid.Nil for all-zeros UUID")
+				}
 				return
 			}
-			if parseErr == nil && tid == "not-a-uuid" {
-				t.Fatal("SECURITY VIOLATION: invalid UUID parsed successfully")
+
+			// All other invalid payloads MUST fail uuid.Parse
+			if parseErr == nil {
+				t.Fatalf("SECURITY VIOLATION: invalid tenant_id %q parsed as valid UUID %s", tid, parsedID)
 			}
 		})
 	}
@@ -166,6 +186,7 @@ func TestJWT_InvalidUUID_TenantID(t *testing.T) {
 
 // Test: JWT with algorithm confusion (none/HS384/RS256).
 func TestJWT_AlgorithmConfusion(t *testing.T) {
+	t.Parallel()
 	// Build a token with "alg": "none"
 	header := base64.RawURLEncoding.EncodeToString([]byte(`{"alg":"none","typ":"JWT"}`))
 	payload := base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprintf(

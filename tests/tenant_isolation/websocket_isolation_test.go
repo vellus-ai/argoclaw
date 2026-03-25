@@ -313,7 +313,7 @@ func TestWS_MultipleConnections_SameTenant(t *testing.T) {
 	for i := 0; i < numConns; i++ {
 		conn := dialWS(t)
 		conns = append(conns, conn)
-		defer conn.Close()
+		t.Cleanup(func() { conn.Close() })
 
 		// Generate unique token per connection (same tenant)
 		token := mustGenerateToken(t, auth.TokenClaims{

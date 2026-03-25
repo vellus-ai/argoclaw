@@ -16,6 +16,7 @@ import (
 
 // Test: JWT with role "admin" for Tenant A cannot escalate to affect Tenant B.
 func TestPrivilegeEscalation_AdminRoleCrossTenant(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	ctxA := ctxForTenant(env.tenantA.ID)
 	ctxB := ctxForTenant(env.tenantB.ID)
@@ -60,6 +61,7 @@ func TestPrivilegeEscalation_AdminRoleCrossTenant(t *testing.T) {
 
 // Test: JWT crafted with Tenant A's user but Tenant B's tenant_id is detected.
 func TestPrivilegeEscalation_CrossTenantTokenForge(t *testing.T) {
+	t.Parallel()
 	// Forge a token: Tenant A's user claims Tenant B's tenant
 	forgedToken := mustGenerateToken(t, auth.TokenClaims{
 		UserID:   env.userA.String(),     // Tenant A's user
@@ -190,6 +192,7 @@ func TestSuspendedTenant_DataAccessPolicy(t *testing.T) {
 
 // Test: tenant_id cannot be changed via agent update.
 func TestImmutableTenantID_AgentUpdate(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	ctxA := ctxForTenant(env.tenantA.ID)
 

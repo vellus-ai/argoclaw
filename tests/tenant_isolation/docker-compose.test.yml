@@ -23,7 +23,7 @@ services:
       - no-new-privileges:true
 
   test-migrate:
-    image: migrate/migrate:v4.17.0
+    image: migrate/migrate:v4.18.2
     depends_on:
       test-postgres:
         condition: service_healthy
