@@ -65,8 +65,8 @@ func TestValidateAccessToken_WrongSecret(t *testing.T) {
 }
 
 func TestGenerateRefreshToken_Unique(t *testing.T) {
-	t1, _ := GenerateRefreshToken()
-	t2, _ := GenerateRefreshToken()
+	t1, _, _ := GenerateRefreshToken()
+	t2, _, _ := GenerateRefreshToken()
 	if t1 == t2 {
 		t.Error("refresh tokens must be unique")
 	}

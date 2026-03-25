@@ -38,6 +38,7 @@ interface ProviderFormDialogProps {
 }
 
 export function ProviderFormDialog({ open, onOpenChange, onSubmit, existingProviders = [] }: ProviderFormDialogProps) {
+  const isEdit = false; // This dialog is create-only; edit uses a separate flow.
   const { t } = useTranslation("providers");
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
