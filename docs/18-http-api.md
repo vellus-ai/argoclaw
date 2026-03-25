@@ -1,6 +1,6 @@
 # 18 — HTTP REST API
 
-GoClaw exposes a comprehensive HTTP REST API alongside the WebSocket RPC protocol. All endpoints are served from the same gateway server and share authentication, rate limiting, and i18n infrastructure.
+ArgoClaw exposes a comprehensive HTTP REST API alongside the WebSocket RPC protocol. All endpoints are served from the same gateway server and share authentication, rate limiting, and i18n infrastructure.
 
 Interactive documentation is available at `/docs` (Swagger UI) and the raw OpenAPI 3.0 spec at `/v1/openapi.json`.
 
@@ -19,7 +19,7 @@ Two token types are accepted:
 | Type | Format | Scope |
 |------|--------|-------|
 | Gateway token | Configured in `config.json` | Full admin access |
-| API key | `goclaw_` + 32 hex chars | Scoped by key permissions |
+| API key | `argoclaw_` + 32 hex chars | Scoped by key permissions |
 
 API keys are hashed with SHA-256 before lookup — the raw key is never stored. See [20 — API Keys & Auth](20-api-keys-auth.md) for details.
 
@@ -30,8 +30,8 @@ API keys are hashed with SHA-256 before lookup — the raw key is never stored. 
 | Header | Purpose |
 |--------|---------|
 | `Authorization` | Bearer token for authentication |
-| `X-GoClaw-User-Id` | External user ID for multi-tenant context |
-| `X-GoClaw-Agent-Id` | Agent identifier for scoped operations |
+| `X-ArgoClaw-User-Id` | External user ID for multi-tenant context |
+| `X-ArgoClaw-Agent-Id` | Agent identifier for scoped operations |
 | `Accept-Language` | Locale (`en`, `vi`, `zh`) for i18n error messages |
 | `Content-Type` | `application/json` for request bodies |
 
@@ -45,7 +45,7 @@ OpenAI-compatible chat API for programmatic access to agents.
 
 ```json
 {
-  "model": "goclaw:agent-id-or-key",
+  "model": "argoclaw:agent-id-or-key",
   "messages": [
     {"role": "user", "content": "Hello"}
   ],
@@ -85,7 +85,7 @@ Alternative response-based protocol (compatible with OpenAI Responses API). Acce
 
 ## 4. Agents
 
-CRUD operations for agent management. Requires `X-GoClaw-User-Id` header for multi-tenant context.
+CRUD operations for agent management. Requires `X-ArgoClaw-User-Id` header for multi-tenant context.
 
 | Method | Path | Description | Auth |
 |--------|------|-------------|------|
@@ -635,8 +635,8 @@ Admin-only endpoints for managing gateway API keys. See [20 — API Keys & Auth]
 {
   "id": "01961234-...",
   "name": "ci-deploy",
-  "prefix": "goclaw_a1b2c3d4",
-  "key": "goclaw_a1b2c3d4e5f6...full-key",
+  "prefix": "argoclaw_a1b2c3d4",
+  "key": "argoclaw_a1b2c3d4e5f6...full-key",
   "scopes": ["operator.read", "operator.write"],
   "expires_at": "2026-04-14T12:00:00Z",
   "created_at": "2026-03-15T12:00:00Z"
@@ -679,7 +679,7 @@ Admin-only endpoints for managing gateway API keys. See [20 — API Keys & Auth]
 
 ## 27. MCP Bridge
 
-Exposes GoClaw tools to Claude CLI via streamable HTTP at `/mcp/bridge`. Only listens on localhost. Protected by gateway token with HMAC-signed context headers.
+Exposes ArgoClaw tools to Claude CLI via streamable HTTP at `/mcp/bridge`. Only listens on localhost. Protected by gateway token with HMAC-signed context headers.
 
 | Header | Purpose |
 |--------|---------|

@@ -545,10 +545,10 @@ flowchart TD
 
 | Key | Type | Purpose |
 |-----|------|---------|
-| `goclaw_user_id` | string | External user ID (e.g., Telegram user ID) |
-| `goclaw_agent_id` | uuid.UUID | Agent UUID |
-| `goclaw_agent_type` | string | Agent type: `"open"` or `"predefined"` |
-| `goclaw_sender_id` | string | Original individual sender ID (in group chats, `user_id` is group-scoped but `sender_id` preserves the actual person) |
+| `argoclaw_user_id` | string | External user ID (e.g., Telegram user ID) |
+| `argoclaw_agent_id` | uuid.UUID | Agent UUID |
+| `argoclaw_agent_type` | string | Agent type: `"open"` or `"predefined"` |
+| `argoclaw_sender_id` | string | Original individual sender ID (in group chats, `user_id` is group-scoped but `sender_id` preserves the actual person) |
 
 ### Tool Context Keys
 

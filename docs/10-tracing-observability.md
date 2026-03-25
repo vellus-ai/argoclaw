@@ -98,7 +98,7 @@ flowchart TD
 | `endpoint` | OTLP endpoint (e.g., `localhost:4317` for gRPC, `localhost:4318` for HTTP) |
 | `protocol` | `grpc` (default) or `http` |
 | `insecure` | Skip TLS for local development |
-| `service_name` | OTel service name (default: `goclaw-gateway`) |
+| `service_name` | OTel service name (default: `argoclaw-gateway`) |
 | `headers` | Extra headers (auth tokens, etc.) |
 
 ### Batch Processing

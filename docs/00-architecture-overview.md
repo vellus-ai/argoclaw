@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-GoClaw is an AI agent gateway written in Go. It exposes a WebSocket RPC (v3) interface and an OpenAI-compatible HTTP API for orchestrating LLM-powered agents. The system uses PostgreSQL as its storage backend with full multi-tenant isolation, per-user context files, encrypted credentials, agent delegation, teams, and LLM call tracing.
+ArgoClaw is an AI agent gateway written in Go. It exposes a WebSocket RPC (v3) interface and an OpenAI-compatible HTTP API for orchestrating LLM-powered agents. The system uses PostgreSQL as its storage backend with full multi-tenant isolation, per-user context files, encrypted credentials, agent delegation, teams, and LLM call tracing.
 
 ## 2. Component Diagram
 
@@ -136,16 +136,16 @@ flowchart TD
 
 ## 4. Multi-Tenant Identity Model
 
-GoClaw uses the **Identity Propagation** pattern (also known as **Trusted Subsystem**). It does not implement authentication or authorization — instead, it trusts the upstream service that authenticates with the gateway token to provide accurate user identity.
+ArgoClaw uses the **Identity Propagation** pattern (also known as **Trusted Subsystem**). It does not implement authentication or authorization — instead, it trusts the upstream service that authenticates with the gateway token to provide accurate user identity.
 
 ```mermaid
 flowchart LR
     subgraph "Upstream Service (trusted)"
         AUTH["Authenticate end-user"]
-        HDR["Set X-GoClaw-User-Id header<br/>or user_id in WS connect"]
+        HDR["Set X-ArgoClaw-User-Id header<br/>or user_id in WS connect"]
     end
 
-    subgraph "GoClaw Gateway"
+    subgraph "ArgoClaw Gateway"
         EXTRACT["Extract user_id<br/>(opaque, VARCHAR 255)"]
         CTX["store.WithUserID(ctx)"]
         SCOPE["Per-user scoping:<br/>sessions, context files,<br/>memory, traces, agent shares"]
@@ -161,13 +161,13 @@ flowchart LR
 
 | Entry Point | How user_id is provided | Enforcement |
 |-------------|------------------------|-------------|
-| HTTP API | `X-GoClaw-User-Id` header | Required |
+| HTTP API | `X-ArgoClaw-User-Id` header | Required |
 | WebSocket | `user_id` field in `connect` handshake | Required |
 | Channels | Derived from platform sender ID (e.g., Telegram user ID) | Automatic |
 
 ### Compound User ID Convention
 
-The `user_id` field is **opaque** to GoClaw — it does not interpret or validate the format. For multi-tenant deployments, the recommended convention is:
+The `user_id` field is **opaque** to ArgoClaw — it does not interpret or validate the format. For multi-tenant deployments, the recommended convention is:
 
 ```
 tenant.{tenantId}.user.{userId}

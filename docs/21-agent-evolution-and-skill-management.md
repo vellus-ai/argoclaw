@@ -436,7 +436,7 @@ Line-by-line regex scan of SKILL.md content **before** any disk write. Hard-reje
 | SQL injection | `DROP TABLE`, `TRUNCATE TABLE`, `DROP DATABASE` |
 | Privilege escalation | `sudo`, world-writable `chmod`, `chown root` |
 
-Not exhaustive — defense-in-depth layer. GoClaw's `exec` tool has its own runtime deny-list for shell commands.
+Not exhaustive — defense-in-depth layer. ArgoClaw's `exec` tool has its own runtime deny-list for shell commands.
 
 ### 4.2 Ownership Enforcement
 

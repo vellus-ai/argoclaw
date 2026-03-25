@@ -1,4 +1,4 @@
-# GoClaw Gateway
+# ArgoClaw Gateway
 
 PostgreSQL multi-tenant AI agent gateway with WebSocket RPC + HTTP API.
 
@@ -66,8 +66,8 @@ ui/web/                       React SPA (pnpm, Vite, Tailwind, Radix UI)
 ## Running
 
 ```bash
-go build -o goclaw . && ./goclaw onboard && source .env.local && ./goclaw
-./goclaw migrate up                 # DB migrations
+go build -o argoclaw . && ./argoclaw onboard && source .env.local && ./argoclaw
+./argoclaw migrate up                 # DB migrations
 go test -v ./tests/integration/     # Integration tests
 
 cd ui/web && pnpm install && pnpm dev   # Web dashboard (dev)

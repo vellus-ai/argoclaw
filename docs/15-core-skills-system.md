@@ -6,7 +6,7 @@ How bundled (system) skills are loaded, stored, injected into agents, and manage
 
 ## 1. Overview
 
-GoClaw ships with a set of **core skills** — SKILL.md-based modules bundled inside the binary's embedded filesystem. Unlike custom skills uploaded by users, core skills are:
+ArgoClaw ships with a set of **core skills** — SKILL.md-based modules bundled inside the binary's embedded filesystem. Unlike custom skills uploaded by users, core skills are:
 
 - Seeded automatically on every gateway startup
 - Tracked by content hash (no re-import if file unchanged)
@@ -101,7 +101,7 @@ Example: `/app/data/skills/pdf/3/`
 ---
 name: pdf
 description: Use this skill whenever the user wants to do anything with PDF files...
-author: GoClaw Team
+author: ArgoClaw Team
 tags: [pdf, document]
 ---
 
