@@ -120,7 +120,7 @@ func newTestOAuthHandler(token string) *OAuthHandler {
 
 // --- tests ---
 
-func TestOAuthHandlerStatusNoToken(t *testing.T) {
+func TestOAuthHandlerStatusWithoutConfiguredTokenIsUnauthorized(t *testing.T) {
 	h := newTestOAuthHandler("")
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
@@ -129,15 +129,8 @@ func TestOAuthHandlerStatusNoToken(t *testing.T) {
 	w := httptest.NewRecorder()
 	mux.ServeHTTP(w, req)
 
-	if w.Code != http.StatusOK {
-		t.Fatalf("status code = %d, want %d", w.Code, http.StatusOK)
-	}
-
-	var result map[string]any
-	json.NewDecoder(w.Body).Decode(&result)
-
-	if result["authenticated"] != false {
-		t.Errorf("authenticated = %v, want false", result["authenticated"])
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status code = %d, want %d", w.Code, http.StatusUnauthorized)
 	}
 }
 
@@ -166,7 +159,7 @@ func TestOAuthHandlerAuth(t *testing.T) {
 	}
 }
 
-func TestOAuthHandlerLogoutNoProvider(t *testing.T) {
+func TestOAuthHandlerLogoutWithoutConfiguredTokenIsUnauthorized(t *testing.T) {
 	h := newTestOAuthHandler("")
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
@@ -175,15 +168,8 @@ func TestOAuthHandlerLogoutNoProvider(t *testing.T) {
 	w := httptest.NewRecorder()
 	mux.ServeHTTP(w, req)
 
-	if w.Code != http.StatusOK {
-		t.Fatalf("status code = %d, want %d", w.Code, http.StatusOK)
-	}
-
-	var result map[string]string
-	json.NewDecoder(w.Body).Decode(&result)
-
-	if result["status"] != "logged out" {
-		t.Errorf("status = %q, want 'logged out'", result["status"])
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status code = %d, want %d", w.Code, http.StatusUnauthorized)
 	}
 }
 
@@ -211,7 +197,7 @@ func TestOAuthHandlerRouteRegistration(t *testing.T) {
 	}
 }
 
-func TestOAuthHandlerStartReturnsAuthURL(t *testing.T) {
+func TestOAuthHandlerStartWithoutConfiguredTokenIsUnauthorized(t *testing.T) {
 	h := newTestOAuthHandler("")
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
@@ -220,21 +206,7 @@ func TestOAuthHandlerStartReturnsAuthURL(t *testing.T) {
 	w := httptest.NewRecorder()
 	mux.ServeHTTP(w, req)
 
-	// Skip if port 1455 is already in use (environment issue, not code bug)
-	if w.Code == http.StatusInternalServerError {
-		t.Skip("port 1455 unavailable, skipping")
-	}
-	if w.Code != http.StatusOK {
-		t.Fatalf("status code = %d, want %d; body: %s", w.Code, http.StatusOK, w.Body.String())
-	}
-
-	var result map[string]any
-	json.NewDecoder(w.Body).Decode(&result)
-
-	_, hasURL := result["auth_url"]
-	_, hasStatus := result["status"]
-
-	if !hasURL && !hasStatus {
-		t.Fatal("response has neither auth_url nor status")
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status code = %d, want %d; body: %s", w.Code, http.StatusUnauthorized, w.Body.String())
 	}
 }

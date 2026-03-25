@@ -53,17 +53,14 @@ func TestResolveAuth_WrongToken(t *testing.T) {
 	}
 }
 
-func TestResolveAuth_NoAuthConfigured(t *testing.T) {
+func TestResolveAuth_NoGatewayTokenConfigured_DeniesAccess(t *testing.T) {
 	setupTestCache(t, nil)
 
 	r := httptest.NewRequest("GET", "/v1/agents", nil)
 
 	auth := resolveAuth(r, "") // no gateway token configured
-	if !auth.Authenticated {
-		t.Fatal("expected authenticated when no token configured")
-	}
-	if auth.Role != permissions.RoleAdmin {
-		t.Errorf("role = %v, want admin (no token = dev/single-user mode)", auth.Role)
+	if auth.Authenticated {
+		t.Fatal("expected unauthenticated when no token configured")
 	}
 }
 
@@ -215,7 +212,6 @@ func TestRequireAuth_InjectLocaleAndUserID(t *testing.T) {
 }
 
 func TestRequireAuth_AdminRoleEnforced(t *testing.T) {
-	// No auth configured → admin role (dev/single-user mode) → admin endpoint accessible
 	setupTestCache(t, nil)
 
 	handler := requireAuth("", permissions.RoleAdmin, func(w http.ResponseWriter, r *http.Request) {
@@ -226,14 +222,12 @@ func TestRequireAuth_AdminRoleEnforced(t *testing.T) {
 	w := httptest.NewRecorder()
 	handler(w, r)
 
-	// No token configured → admin role, admin endpoint → 200
-	if w.Code != http.StatusOK {
-		t.Errorf("status = %d, want 200 (no token = admin in dev mode)", w.Code)
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("status = %d, want 401", w.Code)
 	}
 }
 
 func TestRequireAuth_AutoDetectRole_GET(t *testing.T) {
-	// No auth configured → operator role. GET needs viewer → passes.
 	setupTestCache(t, nil)
 
 	handler := requireAuth("", "", func(w http.ResponseWriter, r *http.Request) {
@@ -244,8 +238,8 @@ func TestRequireAuth_AutoDetectRole_GET(t *testing.T) {
 	w := httptest.NewRecorder()
 	handler(w, r)
 
-	if w.Code != http.StatusOK {
-		t.Errorf("status = %d, want 200 (operator can access viewer endpoint)", w.Code)
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("status = %d, want 401", w.Code)
 	}
 }
 
