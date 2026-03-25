@@ -1,0 +1,36 @@
+# Docker Compose for E2E Tenant Isolation Tests
+# Usage: docker compose -f tests/tenant_isolation/docker-compose.test.yml up -d
+#        go test -v -count=1 -timeout 120s ./tests/tenant_isolation/...
+#        docker compose -f tests/tenant_isolation/docker-compose.test.yml down -v
+
+services:
+  test-postgres:
+    image: pgvector/pgvector:pg18
+    environment:
+      POSTGRES_USER: argoclaw_test
+      POSTGRES_PASSWORD: argoclaw_test_password
+      POSTGRES_DB: argoclaw_test
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U argoclaw_test -d argoclaw_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    tmpfs:
+      - /var/lib/postgresql/data
+    security_opt:
+      - no-new-privileges:true
+
+  test-migrate:
+    image: migrate/migrate:v4.17.0
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+    volumes:
+      - ../../migrations:/migrations:ro
+    command: >
+      -path=/migrations
+      -database=postgres://argoclaw_test:argoclaw_test_password@test-postgres:5432/argoclaw_test?sslmode=disable
+      up
+    restart: "no"

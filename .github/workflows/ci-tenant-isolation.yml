@@ -1,0 +1,70 @@
+name: CI - Tenant Isolation E2E
+
+on:
+  pull_request:
+    paths:
+      - 'internal/store/**'
+      - 'internal/http/**'
+      - 'internal/auth/**'
+      - 'internal/gateway/**'
+      - 'migrations/**'
+      - 'tests/tenant_isolation/**'
+  push:
+    branches: [main]
+    paths:
+      - 'internal/store/**'
+      - 'internal/http/**'
+      - 'internal/auth/**'
+      - 'internal/gateway/**'
+      - 'migrations/**'
+      - 'tests/tenant_isolation/**'
+
+jobs:
+  tenant-isolation-e2e:
+    name: Tenant Isolation E2E Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg18
+        env:
+          POSTGRES_USER: argoclaw_test
+          POSTGRES_PASSWORD: argoclaw_test_password
+          POSTGRES_DB: argoclaw_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U argoclaw_test"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run DB Migrations
+        env:
+          POSTGRES_DSN: postgres://argoclaw_test:argoclaw_test_password@localhost:5432/argoclaw_test?sslmode=disable
+        run: |
+          go install -tags postgres github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+          migrate -path migrations -database "$POSTGRES_DSN" up
+
+      - name: Run Tenant Isolation Tests (Store Layer)
+        env:
+          TEST_POSTGRES_DSN: postgres://argoclaw_test:argoclaw_test_password@localhost:5432/argoclaw_test?sslmode=disable
+          TEST_JWT_SECRET: ci-jwt-secret-for-tenant-isolation-tests-32b!
+        run: |
+          go test -v -race -count=1 -timeout 120s ./tests/tenant_isolation/...
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tenant-isolation-results
+          path: tests/tenant_isolation/
+          retention-days: 7
