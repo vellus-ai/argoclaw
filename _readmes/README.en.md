@@ -1,7 +1,7 @@
 <!-- TODO: Replace _statics/ images with ArgoClaw branding -->
 
 <p align="center">
-  <img src="../_statics/argoclaw.png" alt="ArgoClaw" />
+  <img src="../_statics/goclaw.png" alt="ArgoClaw" />
 </p>
 
 <h1 align="center">ArgoClaw</h1>
@@ -9,7 +9,7 @@
 <p align="center"><strong>Enterprise AI Agent Platform by Vellus AI</strong></p>
 
 <p align="center">
-Multi-tenant AI agent gateway built in Go. Fork of ArgoClaw with PCI DSS authentication, enterprise multi-tenancy, white-label, and ARGO presets.<br/>
+Multi-tenant AI agent gateway built in Go. Fork of GoClaw with PCI DSS authentication, enterprise multi-tenancy, white-label, and ARGO presets.<br/>
 20+ LLM providers. 7 messaging channels. Single binary. Production-ready.
 </p>
 
@@ -30,7 +30,7 @@ Multi-tenant AI agent gateway built in Go. Fork of ArgoClaw with PCI DSS authent
   <img src="https://img.shields.io/badge/License-CC_BY--NC_4.0-lightgrey?style=flat-square" alt="License: CC BY-NC 4.0" />
 </p>
 
-A Go fork of [ArgoClaw](https://github.com/vellus-ai/argoclaw) by [Vellus AI](https://github.com/vellus-ai), adding PCI DSS authentication, enterprise multi-tenancy, full white-label support, and 6 ARGO agent presets.
+A Go fork of [GoClaw](https://github.com/vellus-ai/argoclaw) by [Vellus AI](https://github.com/vellus-ai), adding PCI DSS authentication, enterprise multi-tenancy, full white-label support, and 6 ARGO agent presets.
 
 **Languages:**
 [Portugues (pt-BR)](../README.md) &middot;
@@ -56,7 +56,7 @@ A Go fork of [ArgoClaw](https://github.com/vellus-ai/argoclaw) by [Vellus AI](ht
 
 ## Claw Ecosystem
 
-|                 | OpenClaw        | ZeroClaw | PicoClaw | ArgoClaw                                  | **ArgoClaw**                            |
+|                 | OpenClaw        | ZeroClaw | PicoClaw | GoClaw                                    | **ArgoClaw**                            |
 | --------------- | --------------- | -------- | -------- | --------------------------------------- | --------------------------------------- |
 | Language        | TypeScript      | Rust     | Go       | Go                                      | **Go**                                  |
 | Binary size     | 28 MB + Node.js | 3.4 MB   | ~8 MB    | ~25 MB (base) / ~36 MB (+ OTel)        | **~25 MB** (base) / **~36 MB** (+ OTel) |
@@ -65,7 +65,7 @@ A Go fork of [ArgoClaw](https://github.com/vellus-ai/argoclaw) by [Vellus AI](ht
 | Startup         | > 5 s           | < 10 ms  | < 1 s    | < 1 s                                   | **< 1 s**                               |
 | Target hardware | $599+ Mac Mini  | $10 edge | $10 edge | $5 VPS+                                 | **$5 VPS+**                             |
 
-| Feature                    | OpenClaw                             | ZeroClaw                                     | PicoClaw                              | ArgoClaw                         | **ArgoClaw**                         |
+| Feature                    | OpenClaw                             | ZeroClaw                                     | PicoClaw                              | GoClaw                           | **ArgoClaw**                         |
 | -------------------------- | ------------------------------------ | -------------------------------------------- | ------------------------------------- | ------------------------------ | ------------------------------------ |
 | Multi-tenant (PostgreSQL)  | --                                   | --                                           | --                                    | Yes                            | **Yes (enterprise-grade)**           |
 | PCI DSS auth               | --                                   | --                                           | --                                    | --                             | **Yes (Argon2id + token rotation)**  |
@@ -109,7 +109,7 @@ docker pull ghcr.io/vellus-ai/argoclaw:latest
 # Generate .env with auto-generated secrets
 chmod +x prepare-env.sh && ./prepare-env.sh
 
-# Add at least one GOCLAW_*_API_KEY to .env, then:
+# Add at least one ARGOCLAW_*_API_KEY to .env, then:
 docker compose -f docker-compose.yml -f docker-compose.postgres.yml \
   -f docker-compose.selfservice.yml up -d
 
@@ -117,7 +117,7 @@ docker compose -f docker-compose.yml -f docker-compose.postgres.yml \
 # Health check: curl http://localhost:18790/health
 ```
 
-When `GOCLAW_*_API_KEY` environment variables are set, the gateway auto-onboards without interactive prompts -- detects provider, runs migrations, and seeds default data.
+When `ARGOCLAW_*_API_KEY` environment variables are set, the gateway auto-onboards without interactive prompts -- detects provider, runs migrations, and seeds default data.
 
 > For build variants (OTel, Tailscale, Redis), Docker image tags, and compose overlays, see the [Deployment Guide](https://docs.argoclaw.vellus.tech/#deploy-docker-compose).
 
@@ -228,7 +228,7 @@ go test -v ./tests/integration/ -timeout 120s    # Integration tests (requires r
 
 ## Acknowledgments
 
-ArgoClaw is a fork of [ArgoClaw](https://github.com/vellus-ai/argoclaw), which is itself a Go port of [OpenClaw](https://github.com/openclaw/openclaw). We are grateful for the architecture and vision that inspired both projects.
+ArgoClaw is a fork of [GoClaw](https://github.com/vellus-ai/argoclaw), which is itself a Go port of [OpenClaw](https://github.com/openclaw/openclaw). We are grateful for the architecture and vision that inspired both projects.
 
 Built and maintained by [Vellus AI](https://github.com/vellus-ai).
 
