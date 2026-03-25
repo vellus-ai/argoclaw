@@ -28,11 +28,7 @@ func extractBearerToken(r *http.Request) string {
 }
 
 // tokenMatch performs a constant-time comparison of a provided token against the expected token.
-// Returns true if expected is empty (no auth configured) or if tokens match.
 func tokenMatch(provided, expected string) bool {
-	if expected == "" {
-		return true
-	}
 	return subtle.ConstantTimeCompare([]byte(provided), []byte(expected)) == 1
 }
 
@@ -114,7 +110,7 @@ type authResult struct {
 }
 
 // resolveAuth determines the caller's role from the request.
-// Priority: gateway token → API key → no-auth fallback.
+// Priority: gateway token → API key → browser pairing.
 func resolveAuth(r *http.Request, gatewayToken string) authResult {
 	return resolveAuthBearer(r, gatewayToken, extractBearerToken(r))
 }
@@ -141,10 +137,6 @@ func resolveAuthBearer(r *http.Request, gatewayToken, bearer string) authResult 
 		} else {
 			slog.Warn("security.http_pairing_auth_failed", "sender_id", senderID, "ip", r.RemoteAddr)
 		}
-	}
-	// No auth configured → admin (no token = dev/single-user mode, full access)
-	if gatewayToken == "" {
-		return authResult{Role: permissions.RoleAdmin, Authenticated: true}
 	}
 	return authResult{}
 }
