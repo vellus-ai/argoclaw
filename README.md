@@ -1,20 +1,23 @@
+<!-- TODO: Substituir imagens _statics/ por branding ArgoClaw -->
+
 <p align="center">
-  <img src="_statics/goclaw.png" alt="GoClaw" />
+  <img src="_statics/goclaw.png" alt="ArgoClaw" />
 </p>
 
-<h1 align="center">GoClaw</h1>
+<h1 align="center">ArgoClaw</h1>
 
-<p align="center"><strong>Enterprise AI Agent Platform</strong></p>
+<p align="center"><strong>Plataforma de Agentes IA Empresarial — por Vellus AI</strong></p>
 
 <p align="center">
-Multi-agent AI gateway built in Go. 20+ LLM providers. 7 channels. Multi-tenant PostgreSQL.<br/>
-Single binary. Production-tested. Agents that orchestrate for you.
+Gateway de agentes IA multi-tenant construído em Go. Fork do GoClaw com autenticação PCI DSS, multi-tenancy empresarial, white-label e presets ARGO.<br/>
+20+ provedores LLM. 7 canais de mensageria. PostgreSQL multi-tenant.<br/>
+Binário único. Testado em produção. Agentes que orquestram por você.
 </p>
 
 <p align="center">
-  <a href="https://docs.goclaw.sh">Documentation</a> •
-  <a href="https://docs.goclaw.sh/#quick-start">Quick Start</a> •
-  <a href="https://x.com/nlb_io">Twitter / X</a>
+  <a href="https://github.com/vellus-ai/argoclaw">GitHub</a> &bull;
+  <a href="#início-rápido">Início Rápido</a> &bull;
+  <a href="https://vellus.tech">Vellus AI</a>
 </p>
 
 <p align="center">
@@ -25,222 +28,241 @@ Single binary. Production-tested. Agents that orchestrate for you.
   <a href="https://opentelemetry.io/"><img src="https://img.shields.io/badge/OpenTelemetry-000000?style=flat-square&logo=opentelemetry&logoColor=white" alt="OpenTelemetry" /></a>
   <a href="https://www.anthropic.com/"><img src="https://img.shields.io/badge/Anthropic-191919?style=flat-square&logo=anthropic&logoColor=white" alt="Anthropic" /></a>
   <a href="https://openai.com/"><img src="https://img.shields.io/badge/OpenAI_Compatible-412991?style=flat-square&logo=openai&logoColor=white" alt="OpenAI" /></a>
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="License: MIT" />
+  <img src="https://img.shields.io/badge/License-CC_BY--NC_4.0-lightgrey?style=flat-square" alt="License: CC BY-NC 4.0" />
 </p>
 
-A Go port of [OpenClaw](https://github.com/openclaw/openclaw) with enhanced security, multi-tenant PostgreSQL, and production-grade observability.
+Fork Go do [OpenClaw](https://github.com/openclaw/openclaw) via [GoClaw](https://github.com/vellus-ai/argoclaw), com segurança aprimorada, multi-tenancy empresarial, white-label e presets de agentes ARGO — mantido pela [Vellus AI](https://github.com/vellus-ai).
 
-🌐 **Languages:**
-[🇨🇳 简体中文](_readmes/README.zh-CN.md) ·
-[🇯🇵 日本語](_readmes/README.ja.md) ·
-[🇰🇷 한국어](_readmes/README.ko.md) ·
-[🇻🇳 Tiếng Việt](_readmes/README.vi.md) ·
-[🇵🇭 Tagalog](_readmes/README.tl.md) ·
-[🇪🇸 Español](_readmes/README.es.md) ·
-[🇧🇷 Português](_readmes/README.pt.md) ·
-[🇮🇹 Italiano](_readmes/README.it.md) ·
-[🇩🇪 Deutsch](_readmes/README.de.md) ·
-[🇫🇷 Français](_readmes/README.fr.md) ·
-[🇸🇦 العربية](_readmes/README.ar.md) ·
-[🇮🇳 हिन्दी](_readmes/README.hi.md) ·
-[🇷🇺 Русский](_readmes/README.ru.md) ·
-[🇧🇩 বাংলা](_readmes/README.bn.md) ·
-[🇮🇱 עברית](_readmes/README.he.md) ·
-[🇵🇱 Polski](_readmes/README.pl.md) ·
-[🇨🇿 Čeština](_readmes/README.cs.md) ·
-[🇳🇱 Nederlands](_readmes/README.nl.md) ·
-[🇹🇷 Türkçe](_readmes/README.tr.md) ·
-[🇺🇦 Українська](_readmes/README.uk.md) ·
-[🇮🇩 Bahasa Indonesia](_readmes/README.id.md) ·
-[🇹🇭 ไทย](_readmes/README.th.md) ·
-[🇵🇰 اردو](_readmes/README.ur.md) ·
-[🇷🇴 Română](_readmes/README.ro.md) ·
-[🇸🇪 Svenska](_readmes/README.sv.md) ·
-[🇬🇷 Ελληνικά](_readmes/README.el.md) ·
-[🇭🇺 Magyar](_readmes/README.hu.md) ·
-[🇫🇮 Suomi](_readmes/README.fi.md) ·
-[🇩🇰 Dansk](_readmes/README.da.md) ·
-[🇳🇴 Norsk](_readmes/README.nb.md)
+**Idiomas:**
+[English](_readmes/README.en.md) &middot;
+[Español](_readmes/README.es.md)
 
-## What Makes It Different
+---
 
-- **Agent Teams & Orchestration** — Teams with shared task boards, inter-agent delegation (sync/async), and hybrid agent discovery
-- **Multi-Tenant PostgreSQL** — Per-user workspaces, per-user context files, encrypted API keys (AES-256-GCM), isolated sessions
-- **Single Binary** — ~25 MB static Go binary, no Node.js runtime, <1s startup, runs on a $5 VPS
-- **Production Security** — 5-layer permission system (gateway auth → global tool policy → per-agent → per-channel → owner-only) plus rate limiting, prompt injection detection, SSRF protection, shell deny patterns, and AES-256-GCM encryption
-- **20+ LLM Providers** — Anthropic (native HTTP+SSE with prompt caching), OpenAI, OpenRouter, Groq, DeepSeek, Gemini, Mistral, xAI, MiniMax, Cohere, Perplexity, DashScope, Bailian, Zai, Ollama, Ollama Cloud, Claude CLI, Codex, ACP, and any OpenAI-compatible endpoint
-- **7 Messaging Channels** — Telegram, Discord, Slack, Zalo OA, Zalo Personal, Feishu/Lark, WhatsApp
-- **Extended Thinking** — Per-provider thinking mode (Anthropic budget tokens, OpenAI reasoning effort, DashScope thinking budget) with streaming support
-- **Heartbeat System** — Periodic agent check-ins via HEARTBEAT.md checklists with suppress-on-OK, active hours, retry logic, and channel delivery
-- **Scheduling & Cron** — `at`, `every`, and cron expressions for automated agent tasks with lane-based concurrency
-- **Observability** — Built-in LLM call tracing with spans and prompt cache metrics, optional OpenTelemetry OTLP export
+## O Que Torna Diferente
 
-## Claw Ecosystem
+### Exclusivo ArgoClaw
 
-|                 | OpenClaw        | ZeroClaw | PicoClaw | **GoClaw**                              |
-| --------------- | --------------- | -------- | -------- | --------------------------------------- |
-| Language        | TypeScript      | Rust     | Go       | **Go**                                  |
-| Binary size     | 28 MB + Node.js | 3.4 MB   | ~8 MB    | **~25 MB** (base) / **~36 MB** (+ OTel) |
-| Docker image    | —               | —        | —        | **~50 MB** (Alpine)                     |
-| RAM (idle)      | > 1 GB          | < 5 MB   | < 10 MB  | **~35 MB**                              |
-| Startup         | > 5 s           | < 10 ms  | < 1 s    | **< 1 s**                               |
-| Target hardware | $599+ Mac Mini  | $10 edge | $10 edge | **$5 VPS+**                             |
+- **Autenticação PCI DSS** — Argon2id para hashing de senhas, rotação automática de refresh tokens, bloqueio de conta após tentativas falhas, auditoria de acessos
+- **Multi-tenancy empresarial** — Isolamento completo de dados por tenant, workspaces independentes, administração centralizada com RBAC granular
+- **White-label completo** — Personalização de logo, paleta de cores, domínio customizado, e-mail com remetente próprio, branding totalmente configurável por tenant
+- **6 presets de agente ARGO** — Agentes pré-configurados para diferentes funções empresariais:
+  - **Capitão** — Orquestrador principal, coordena equipes e toma decisões estratégicas
+  - **Timoneiro** — Gerenciamento de fluxos e processos operacionais
+  - **Vigia** — Monitoramento, alertas e observabilidade
+  - **Artilheiro** — Execução de tarefas intensivas e processamento em lote
+  - **Navegador** — Pesquisa, busca de informações e navegação web
+  - **Ferreiro** — Criação e manutenção de ferramentas, integração e automação
+- **i18n em 8 idiomas** — Interface e mensagens em português, inglês, espanhol, chinês, vietnamita, japonês, coreano e árabe
 
-| Feature                    | OpenClaw                             | ZeroClaw                                     | PicoClaw                              | **GoClaw**                     |
-| -------------------------- | ------------------------------------ | -------------------------------------------- | ------------------------------------- | ------------------------------ |
-| Multi-tenant (PostgreSQL)  | —                                    | —                                            | —                                     | ✅                             |
-| MCP integration            | — (uses ACP)                         | —                                            | —                                     | ✅ (stdio/SSE/streamable-http) |
-| Agent teams                | —                                    | —                                            | —                                     | ✅ Task board + mailbox        |
-| Security hardening         | ✅ (SSRF, path traversal, injection) | ✅ (sandbox, rate limit, injection, pairing) | Basic (workspace restrict, exec deny) | ✅ 5-layer defense             |
-| OTel observability         | ✅ (opt-in extension)                | ✅ (Prometheus + OTLP)                       | —                                     | ✅ OTLP (opt-in build tag)     |
-| Prompt caching             | —                                    | —                                            | —                                     | ✅ Anthropic + OpenAI-compat   |
-| Knowledge graph            | —                                    | —                                            | —                                     | ✅ LLM extraction + traversal  |
-| Skill system               | ✅ Embeddings/semantic               | ✅ SKILL.md + TOML                           | ✅ Basic                              | ✅ BM25 + pgvector hybrid      |
-| Lane-based scheduler       | ✅                                   | Bounded concurrency                          | —                                     | ✅ (main/subagent/team/cron)   |
-| Messaging channels         | 37+                                  | 15+                                          | 10+                                   | 7+                             |
-| Companion apps             | macOS, iOS, Android                  | Python SDK                                   | —                                     | Web dashboard                  |
-| Live Canvas / Voice        | ✅ (A2UI + TTS/STT)                  | —                                            | Voice transcription                   | TTS (4 providers)              |
-| LLM providers              | 10+                                  | 8 native + 29 compat                         | 13+                                   | **20+**                        |
-| Per-user workspaces        | ✅ (file-based)                      | —                                            | —                                     | ✅ (PostgreSQL)                |
-| Encrypted secrets          | — (env vars only)                    | ✅ ChaCha20-Poly1305                         | — (plaintext JSON)                    | ✅ AES-256-GCM in DB           |
+### Herdado do GoClaw
 
-## Architecture
+- **Equipes de Agentes e Orquestração** — Equipes com quadro de tarefas compartilhado, delegação entre agentes (síncrona/assíncrona) e descoberta híbrida de agentes
+- **Multi-Tenant PostgreSQL** — Workspaces por usuário, arquivos de contexto por usuário, chaves de API criptografadas (AES-256-GCM), sessões isoladas
+- **Binário Único** — ~25 MB binário estático Go, sem runtime Node.js, startup <1s, roda em VPS de $5
+- **Segurança de Produção** — Sistema de permissões em 5 camadas (auth do gateway -> política global de tools -> por agente -> por canal -> apenas proprietário) + rate limiting, detecção de prompt injection, proteção SSRF, padrões de bloqueio de shell e criptografia AES-256-GCM
+- **20+ Provedores LLM** — Anthropic (HTTP+SSE nativo com cache de prompt), OpenAI, OpenRouter, Groq, DeepSeek, Gemini, Mistral, xAI, MiniMax, Cohere, Perplexity, DashScope, Bailian, Zai, Ollama, Ollama Cloud, Claude CLI, Codex, ACP e qualquer endpoint compatível com OpenAI
+- **7 Canais de Mensageria** — Telegram, Discord, Slack, Zalo OA, Zalo Personal, Feishu/Lark, WhatsApp
+- **Extended Thinking** — Modo de raciocínio por provedor (Anthropic budget tokens, OpenAI reasoning effort, DashScope thinking budget) com suporte a streaming
+- **Sistema de Heartbeat** — Check-ins periódicos do agente via checklists HEARTBEAT.md com suppress-on-OK, horários ativos, lógica de retry e entrega por canal
+- **Agendamento e Cron** — Expressões `at`, `every` e cron para tarefas automatizadas de agentes com concorrência baseada em lanes
+- **Observabilidade** — Tracing integrado de chamadas LLM com spans e métricas de cache de prompt, exportação OTLP OpenTelemetry opcional
+
+---
+
+## Ecossistema Claw
+
+|                  | OpenClaw        | ZeroClaw | PicoClaw | GoClaw                                  | **ArgoClaw**                            |
+| ---------------- | --------------- | -------- | -------- | --------------------------------------- | --------------------------------------- |
+| Linguagem        | TypeScript      | Rust     | Go       | Go                                      | **Go**                                  |
+| Tamanho binário  | 28 MB + Node.js | 3.4 MB   | ~8 MB    | ~25 MB                                  | **~25 MB** (base) / **~36 MB** (+ OTel) |
+| Imagem Docker    | —               | —        | —        | ~50 MB (Alpine)                         | **~50 MB** (Alpine)                     |
+| RAM (ocioso)     | > 1 GB          | < 5 MB   | < 10 MB  | ~35 MB                                  | **~40 MB**                              |
+| Startup          | > 5 s           | < 10 ms  | < 1 s    | < 1 s                                   | **< 1 s**                               |
+| Hardware alvo    | $599+ Mac Mini  | $10 edge | $10 edge | $5 VPS+                                 | **$5 VPS+**                             |
+
+| Recurso                       | OpenClaw                             | ZeroClaw                                     | PicoClaw                              | GoClaw                         | **ArgoClaw**                        |
+| ----------------------------- | ------------------------------------ | -------------------------------------------- | ------------------------------------- | ------------------------------ | ----------------------------------- |
+| Multi-tenant (PostgreSQL)     | —                                    | —                                            | —                                     | Sim                            | **Sim + isolamento por tenant**     |
+| Integração MCP                | — (usa ACP)                          | —                                            | —                                     | Sim (stdio/SSE/streamable-http)| **Sim (stdio/SSE/streamable-http)** |
+| Equipes de agentes            | —                                    | —                                            | —                                     | Sim (Task board + mailbox)     | **Sim + presets ARGO**              |
+| Segurança                     | Sim (SSRF, path traversal, injection)| Sim (sandbox, rate limit, injection, pairing) | Básica                               | 5 camadas                      | **5 camadas + PCI DSS**            |
+| Observabilidade OTel          | Sim (opt-in)                         | Sim (Prometheus + OTLP)                      | —                                     | Sim (OTLP opt-in)             | **Sim (OTLP opt-in)**              |
+| Cache de prompt               | —                                    | —                                            | —                                     | Sim (Anthropic + OpenAI)       | **Sim (Anthropic + OpenAI)**        |
+| Grafo de conhecimento         | —                                    | —                                            | —                                     | Sim (LLM + traversal)          | **Sim (LLM + traversal)**           |
+| Sistema de skills             | Embeddings/semântico                 | SKILL.md + TOML                              | Básico                                | BM25 + pgvector híbrido        | **BM25 + pgvector híbrido**         |
+| Agendador por lanes           | Sim                                  | Concorrência limitada                        | —                                     | Sim (main/subagent/team/cron)  | **Sim (main/subagent/team/cron)**   |
+| Canais de mensageria          | 37+                                  | 15+                                          | 10+                                   | 7+                             | **7+**                              |
+| Apps complementares           | macOS, iOS, Android                  | Python SDK                                   | —                                     | Web dashboard                  | **Web dashboard + white-label**     |
+| Live Canvas / Voz             | Sim (A2UI + TTS/STT)                | —                                            | Transcrição de voz                    | TTS (4 provedores)             | **TTS (4 provedores)**              |
+| Provedores LLM                | 10+                                  | 8 nativos + 29 compat                        | 13+                                   | 20+                            | **20+**                             |
+| Workspaces por usuário        | Sim (baseado em arquivos)            | —                                            | —                                     | Sim (PostgreSQL)               | **Sim (PostgreSQL + tenant)**       |
+| Segredos criptografados       | — (env vars apenas)                  | ChaCha20-Poly1305                            | — (JSON plaintext)                    | AES-256-GCM no DB              | **AES-256-GCM no DB**              |
+| White-label                   | —                                    | —                                            | —                                     | —                              | **Sim (logo, cores, domínio)**      |
+| Presets de agentes            | —                                    | —                                            | —                                     | —                              | **6 presets ARGO**                  |
+| i18n                          | —                                    | —                                            | —                                     | 3 idiomas                      | **8 idiomas**                       |
+
+---
+
+## Arquitetura
 
 <p align="center">
-  <img src="_statics/architecture.jpg" alt="GoClaw Architecture" width="800" />
+  <img src="_statics/architecture.jpg" alt="Arquitetura ArgoClaw" width="800" />
 </p>
 
-## Quick Start
+---
 
-**Prerequisites:** Go 1.26+, PostgreSQL 18 with pgvector, Docker (optional)
+## Início Rápido
 
-### From Source
+**Pré-requisitos:** Go 1.26+, PostgreSQL 18 com pgvector, Docker (opcional)
+
+### A Partir do Código Fonte
 
 ```bash
-git clone https://github.com/nextlevelbuilder/goclaw.git && cd goclaw
+git clone https://github.com/vellus-ai/argoclaw.git && cd argoclaw
 make build
-./goclaw onboard        # Interactive setup wizard
-source .env.local && ./goclaw
+./argoclaw onboard        # Assistente de configuração interativo
+source .env.local && ./argoclaw
 ```
 
-### With Docker
+### Com Docker
 
 ```bash
-# Generate .env with auto-generated secrets
+# Gerar .env com segredos auto-gerados
 chmod +x prepare-env.sh && ./prepare-env.sh
 
-# Add at least one GOCLAW_*_API_KEY to .env, then:
+# Adicione pelo menos uma ARGOCLAW_*_API_KEY ao .env, depois:
 docker compose -f docker-compose.yml -f docker-compose.postgres.yml \
   -f docker-compose.selfservice.yml up -d
 
-# Web Dashboard at http://localhost:3000
+# Web Dashboard em http://localhost:3000
 # Health check: curl http://localhost:18790/health
 ```
 
-When `GOCLAW_*_API_KEY` environment variables are set, the gateway auto-onboards without interactive prompts — detects provider, runs migrations, and seeds default data.
+Quando variáveis de ambiente `ARGOCLAW_*_API_KEY` estão definidas, o gateway faz onboarding automático sem prompts interativos — detecta o provedor, executa migrations e popula dados iniciais.
 
-> For build variants (OTel, Tailscale, Redis), Docker image tags, and compose overlays, see the [Deployment Guide](https://docs.goclaw.sh/#deploy-docker-compose).
+> Para variantes de build (OTel, Tailscale, Redis), tags de imagem Docker e overlays de compose, consulte o [Guia de Deploy](https://docs.argoclaw.vellus.tech/#deploy-docker-compose).
 
-## Multi-Agent Orchestration
-
-GoClaw supports agent teams and inter-agent delegation — each agent runs with its own identity, tools, LLM provider, and context files.
-
-### Agent Delegation
-
-<p align="center">
-  <img src="_statics/agent-delegation.jpg" alt="Agent Delegation" width="700" />
-</p>
-
-| Mode | How it works | Best for |
-|------|-------------|----------|
-| **Sync** | Agent A asks Agent B and **waits** for the answer | Quick lookups, fact checks |
-| **Async** | Agent A asks Agent B and **moves on**. B announces later | Long tasks, reports, deep analysis |
-
-Agents communicate through explicit **permission links** with direction control (`outbound`, `inbound`, `bidirectional`) and concurrency limits at both per-link and per-agent levels.
-
-### Agent Teams
-
-<p align="center">
-  <img src="_statics/agent-teams.jpg" alt="Agent Teams Workflow" width="800" />
-</p>
-
-- **Shared task board** — Create, claim, complete, search tasks with `blocked_by` dependencies
-- **Team mailbox** — Direct peer-to-peer messaging and broadcasts
-- **Tools**: `team_tasks` for task management, `team_message` for mailbox
-
-> For delegation details, permission links, and concurrency control, see the [Agent Teams docs](https://docs.goclaw.sh/#teams-what-are-teams).
-
-## Built-in Tools
-
-| Tool               | Group         | Description                                                  |
-| ------------------ | ------------- | ------------------------------------------------------------ |
-| `read_file`        | fs            | Read file contents (with virtual FS routing)                 |
-| `write_file`       | fs            | Write/create files                                           |
-| `edit_file`        | fs            | Apply targeted edits to existing files                       |
-| `list_files`       | fs            | List directory contents                                      |
-| `search`           | fs            | Search file contents by pattern                              |
-| `glob`             | fs            | Find files by glob pattern                                   |
-| `exec`             | runtime       | Execute shell commands (with approval workflow)              |
-| `web_search`       | web           | Search the web (Brave, DuckDuckGo)                           |
-| `web_fetch`        | web           | Fetch and parse web content                                  |
-| `memory_search`    | memory        | Search long-term memory (FTS + vector)                       |
-| `memory_get`       | memory        | Retrieve memory entries                                      |
-| `skill_search`     | —             | Search skills (BM25 + embedding hybrid)                      |
-| `knowledge_graph_search` | memory  | Search entities and traverse knowledge graph relationships   |
-| `create_image`     | media         | Image generation (DashScope, MiniMax)                        |
-| `create_audio`     | media         | Audio generation (OpenAI, ElevenLabs, MiniMax, Suno)         |
-| `create_video`     | media         | Video generation (MiniMax, Veo)                              |
-| `read_document`    | media         | Document reading (Gemini File API, provider chain)           |
-| `read_image`       | media         | Image analysis                                               |
-| `read_audio`       | media         | Audio transcription and analysis                             |
-| `read_video`       | media         | Video analysis                                               |
-| `message`          | messaging     | Send messages to channels                                    |
-| `tts`              | —             | Text-to-Speech synthesis                                     |
-| `spawn`            | —             | Spawn a subagent                                             |
-| `subagents`        | sessions      | Control running subagents                                    |
-| `team_tasks`       | teams         | Shared task board (list, create, claim, complete, search)    |
-| `team_message`     | teams         | Team mailbox (send, broadcast, read)                         |
-| `sessions_list`    | sessions      | List active sessions                                         |
-| `sessions_history` | sessions      | View session history                                         |
-| `sessions_send`    | sessions      | Send message to a session                                    |
-| `sessions_spawn`   | sessions      | Spawn a new session                                          |
-| `session_status`   | sessions      | Check session status                                         |
-| `cron`             | automation    | Schedule and manage cron jobs                                |
-| `gateway`          | automation    | Gateway administration                                       |
-| `browser`          | ui            | Browser automation (navigate, click, type, screenshot)       |
-| `announce_queue`   | automation    | Async result announcement (for async delegations)            |
-
-## Documentation
-
-Full documentation at **[docs.goclaw.sh](https://docs.goclaw.sh)** — or browse the source in [`goclaw-docs/`](https://github.com/nextlevelbuilder/goclaw-docs)
-
-| Section | Topics |
-|---------|--------|
-| [Getting Started](https://docs.goclaw.sh/#what-is-goclaw) | Installation, Quick Start, Configuration, Web Dashboard Tour |
-| [Core Concepts](https://docs.goclaw.sh/#how-goclaw-works) | Agent Loop, Sessions, Tools, Memory, Multi-Tenancy |
-| [Agents](https://docs.goclaw.sh/#creating-agents) | Creating Agents, Context Files, Personality, Sharing & Access |
-| [Providers](https://docs.goclaw.sh/#providers-overview) | Anthropic, OpenAI, OpenRouter, Gemini, DeepSeek, +15 more |
-| [Channels](https://docs.goclaw.sh/#channels-overview) | Telegram, Discord, Slack, Feishu, Zalo, WhatsApp, WebSocket |
-| [Agent Teams](https://docs.goclaw.sh/#teams-what-are-teams) | Teams, Task Board, Messaging, Delegation & Handoff |
-| [Advanced](https://docs.goclaw.sh/#custom-tools) | Custom Tools, MCP, Skills, Cron, Sandbox, Hooks, RBAC |
-| [Deployment](https://docs.goclaw.sh/#deploy-docker-compose) | Docker Compose, Database, Security, Observability, Tailscale |
-| [Reference](https://docs.goclaw.sh/#cli-commands) | CLI Commands, REST API, WebSocket Protocol, Environment Variables |
-
-## Testing
+### Imagem Docker
 
 ```bash
-go test ./...                                    # Unit tests
-go test -v ./tests/integration/ -timeout 120s    # Integration tests (requires running gateway)
+docker pull ghcr.io/vellus-ai/argoclaw:latest
 ```
 
-## Project Status
+---
 
-See [CHANGELOG.md](CHANGELOG.md) for detailed feature status including what's been tested in production and what's still in progress.
+## Orquestração Multi-Agente
 
-## Acknowledgments
+ArgoClaw suporta equipes de agentes e delegação entre agentes — cada agente opera com sua própria identidade, ferramentas, provedor LLM e arquivos de contexto.
 
-GoClaw is built upon the original [OpenClaw](https://github.com/openclaw/openclaw) project. We are grateful for the architecture and vision that inspired this Go port.
+### Delegação de Agentes
 
-## License
+<p align="center">
+  <img src="_statics/agent-delegation.jpg" alt="Delegação de Agentes" width="700" />
+</p>
 
-MIT
+| Modo | Como funciona | Melhor para |
+|------|--------------|-------------|
+| **Síncrono** | Agente A pergunta ao Agente B e **aguarda** a resposta | Consultas rápidas, verificação de fatos |
+| **Assíncrono** | Agente A pergunta ao Agente B e **segue em frente**. B anuncia depois | Tarefas longas, relatórios, análises profundas |
+
+Agentes se comunicam através de **links de permissão** explícitos com controle de direção (`outbound`, `inbound`, `bidirectional`) e limites de concorrência nos níveis por link e por agente.
+
+### Equipes de Agentes
+
+<p align="center">
+  <img src="_statics/agent-teams.jpg" alt="Fluxo de Equipes de Agentes" width="800" />
+</p>
+
+- **Quadro de tarefas compartilhado** — Criar, reivindicar, concluir, buscar tarefas com dependências `blocked_by`
+- **Caixa de mensagens da equipe** — Mensagens diretas ponto a ponto e broadcasts
+- **Ferramentas**: `team_tasks` para gerenciamento de tarefas, `team_message` para caixa de mensagens
+
+> Para detalhes sobre delegação, links de permissão e controle de concorrência, consulte a [documentação de Equipes de Agentes](https://docs.argoclaw.vellus.tech/#teams-what-are-teams).
+
+---
+
+## Ferramentas Integradas
+
+| Ferramenta          | Grupo        | Descrição                                                     |
+| ------------------- | ------------ | ------------------------------------------------------------- |
+| `read_file`         | fs           | Ler conteúdo de arquivos (com roteamento FS virtual)          |
+| `write_file`        | fs           | Escrever/criar arquivos                                       |
+| `edit_file`         | fs           | Aplicar edições direcionadas em arquivos existentes           |
+| `list_files`        | fs           | Listar conteúdo de diretórios                                 |
+| `search`            | fs           | Buscar conteúdo de arquivos por padrão                        |
+| `glob`              | fs           | Encontrar arquivos por padrão glob                            |
+| `exec`              | runtime      | Executar comandos shell (com fluxo de aprovação)              |
+| `web_search`        | web          | Buscar na web (Brave, DuckDuckGo)                             |
+| `web_fetch`         | web          | Buscar e processar conteúdo web                               |
+| `memory_search`     | memory       | Buscar memória de longo prazo (FTS + vetor)                   |
+| `memory_get`        | memory       | Recuperar entradas de memória                                 |
+| `skill_search`      | —            | Buscar skills (híbrido BM25 + embedding)                      |
+| `knowledge_graph_search` | memory  | Buscar entidades e percorrer relacionamentos do grafo         |
+| `create_image`      | media        | Geração de imagens (DashScope, MiniMax)                       |
+| `create_audio`      | media        | Geração de áudio (OpenAI, ElevenLabs, MiniMax, Suno)          |
+| `create_video`      | media        | Geração de vídeo (MiniMax, Veo)                               |
+| `read_document`     | media        | Leitura de documentos (Gemini File API, cadeia de provedores) |
+| `read_image`        | media        | Análise de imagens                                            |
+| `read_audio`        | media        | Transcrição e análise de áudio                                |
+| `read_video`        | media        | Análise de vídeo                                              |
+| `message`           | messaging    | Enviar mensagens para canais                                  |
+| `tts`               | —            | Síntese de texto para fala                                    |
+| `spawn`             | —            | Iniciar um subagente                                          |
+| `subagents`         | sessions     | Controlar subagentes em execução                              |
+| `team_tasks`        | teams        | Quadro de tarefas (listar, criar, reivindicar, concluir, buscar) |
+| `team_message`      | teams        | Caixa de mensagens da equipe (enviar, broadcast, ler)         |
+| `sessions_list`     | sessions     | Listar sessões ativas                                         |
+| `sessions_history`  | sessions     | Visualizar histórico de sessões                               |
+| `sessions_send`     | sessions     | Enviar mensagem para uma sessão                               |
+| `sessions_spawn`    | sessions     | Iniciar nova sessão                                           |
+| `session_status`    | sessions     | Verificar status da sessão                                    |
+| `cron`              | automation   | Agendar e gerenciar jobs cron                                 |
+| `gateway`           | automation   | Administração do gateway                                      |
+| `browser`           | ui           | Automação de navegador (navegar, clicar, digitar, screenshot) |
+| `announce_queue`    | automation   | Fila de anúncios assíncronos (para delegações assíncronas)    |
+
+---
+
+## Documentação
+
+Documentação completa em **[docs.argoclaw.vellus.tech](https://docs.argoclaw.vellus.tech)** — ou navegue pelo código fonte em [`argoclaw-docs/`](https://github.com/vellus-ai/argoclaw-docs)
+
+| Seção | Tópicos |
+|-------|---------|
+| [Primeiros Passos](https://docs.argoclaw.vellus.tech/#what-is-argoclaw) | Instalação, Início Rápido, Configuração, Tour do Web Dashboard |
+| [Conceitos Principais](https://docs.argoclaw.vellus.tech/#how-argoclaw-works) | Loop do Agente, Sessões, Ferramentas, Memória, Multi-Tenancy |
+| [Agentes](https://docs.argoclaw.vellus.tech/#creating-agents) | Criando Agentes, Arquivos de Contexto, Personalidade, Compartilhamento e Acesso |
+| [Provedores](https://docs.argoclaw.vellus.tech/#providers-overview) | Anthropic, OpenAI, OpenRouter, Gemini, DeepSeek e +15 |
+| [Canais](https://docs.argoclaw.vellus.tech/#channels-overview) | Telegram, Discord, Slack, Feishu, Zalo, WhatsApp, WebSocket |
+| [Equipes de Agentes](https://docs.argoclaw.vellus.tech/#teams-what-are-teams) | Equipes, Quadro de Tarefas, Mensageria, Delegação e Handoff |
+| [Avançado](https://docs.argoclaw.vellus.tech/#custom-tools) | Ferramentas Customizadas, MCP, Skills, Cron, Sandbox, Hooks, RBAC |
+| [Deploy](https://docs.argoclaw.vellus.tech/#deploy-docker-compose) | Docker Compose, Banco de Dados, Segurança, Observabilidade, Tailscale |
+| [Referência](https://docs.argoclaw.vellus.tech/#cli-commands) | Comandos CLI, API REST, Protocolo WebSocket, Variáveis de Ambiente |
+
+---
+
+## Testes
+
+```bash
+go test ./...                                    # Testes unitários
+go test -v ./tests/integration/ -timeout 120s    # Testes de integração (requer gateway em execução)
+```
+
+---
+
+## Status do Projeto
+
+Consulte o [CHANGELOG.md](CHANGELOG.md) para o status detalhado de funcionalidades, incluindo o que foi testado em produção e o que ainda está em desenvolvimento.
+
+---
+
+## Agradecimentos
+
+ArgoClaw é construído sobre o projeto original [OpenClaw](https://github.com/openclaw/openclaw) e seu port em Go, [GoClaw](https://github.com/vellus-ai/argoclaw). Somos gratos pela arquitetura e visão que inspiraram este fork empresarial.
+
+---
+
+## Licença
+
+[CC BY-NC 4.0](LICENSE) — Creative Commons Attribution-NonCommercial 4.0 International

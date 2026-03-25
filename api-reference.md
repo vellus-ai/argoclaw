@@ -22,7 +22,7 @@ Define shell-based tools at runtime via HTTP API — no recompile or restart nee
 **How it works:**
 1. Admin creates a tool via `POST /v1/tools/custom` with a shell command template
 2. LLM generates a tool call with the custom tool name
-3. GoClaw renders the command template with shell-escaped arguments, checks deny patterns, and executes with timeout
+3. ArgoClaw renders the command template with shell-escaped arguments, checks deny patterns, and executes with timeout
 
 **Capabilities:**
 - **Scope** — Global (all agents) or per-agent (`agent_id` field)
@@ -63,7 +63,7 @@ Define shell-based tools at runtime via HTTP API — no recompile or restart nee
 
 ## MCP Integration
 
-Connect external [Model Context Protocol](https://modelcontextprotocol.io) servers to extend agent capabilities. MCP tools are registered transparently into GoClaw's tool registry and invoked like any built-in tool.
+Connect external [Model Context Protocol](https://modelcontextprotocol.io) servers to extend agent capabilities. MCP tools are registered transparently into ArgoClaw's tool registry and invoked like any built-in tool.
 
 **Supported transports:** `stdio`, `sse`, `streamable-http`
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Extended thinking allows LLM providers to "think out loud" before producing a final response. When enabled, the model generates internal reasoning tokens that improve response quality for complex tasks — at the cost of additional token usage and latency. GoClaw supports extended thinking across multiple providers with a unified `thinking_level` configuration.
+Extended thinking allows LLM providers to "think out loud" before producing a final response. When enabled, the model generates internal reasoning tokens that improve response quality for complex tasks — at the cost of additional token usage and latency. ArgoClaw supports extended thinking across multiple providers with a unified `thinking_level` configuration.
 
 ---
 
@@ -139,7 +139,7 @@ flowchart TD
 
 ### Anthropic Thinking Block Preservation
 
-Anthropic requires thinking blocks (including their cryptographic signatures) to be echoed back in subsequent turns. GoClaw handles this through `RawAssistantContent`:
+Anthropic requires thinking blocks (including their cryptographic signatures) to be echoed back in subsequent turns. ArgoClaw handles this through `RawAssistantContent`:
 
 1. During streaming, raw content blocks are accumulated — including `thinking` type blocks with their `signature` fields
 2. When the assistant message is appended to history, the raw blocks are preserved

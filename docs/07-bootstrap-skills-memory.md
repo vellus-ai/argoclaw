@@ -148,7 +148,7 @@ Two agent types determine which context files live at the agent level versus the
 
 ```mermaid
 flowchart TD
-    START["BuildSystemPrompt()"] --> S1["1. Identity<br/>'You are a personal assistant<br/>running inside GoClaw'"]
+    START["BuildSystemPrompt()"] --> S1["1. Identity<br/>'You are a personal assistant<br/>running inside ArgoClaw'"]
     S1 --> S1_5{"1.5 BOOTSTRAP.md present?"}
     S1_5 -->|Yes| BOOT["First-run Bootstrap Override<br/>(mandatory BOOTSTRAP.md instructions)"]
     S1_5 -->|No| S2
@@ -253,7 +253,7 @@ flowchart TD
     T1["Tier 1 (highest): Workspace skills<br/>workspace/skills/name/SKILL.md"] --> T2
     T2["Tier 2: Project agent skills<br/>workspace/.agents/skills/"] --> T3
     T3["Tier 3: Personal agent skills<br/>~/.agents/skills/"] --> T4
-    T4["Tier 4: Global/managed skills<br/>~/.goclaw/skills/"] --> T5
+    T4["Tier 4: Global/managed skills<br/>~/.argoclaw/skills/"] --> T5
     T5["Tier 5 (lowest): Builtin skills<br/>(bundled with binary)"]
 
     style T1 fill:#e1f5fe

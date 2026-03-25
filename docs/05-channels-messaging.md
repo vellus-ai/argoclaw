@@ -1,6 +1,6 @@
 # 05 - Channels and Messaging
 
-Channels connect external messaging platforms to the GoClaw agent runtime via a shared message bus. Each channel implementation translates platform-specific events into a unified `InboundMessage`, and converts agent responses into platform-appropriate outbound messages.
+Channels connect external messaging platforms to the ArgoClaw agent runtime via a shared message bus. Each channel implementation translates platform-specific events into a unified `InboundMessage`, and converts agent responses into platform-appropriate outbound messages.
 
 ---
 
@@ -354,7 +354,7 @@ Each update increments a sequence number for ordering. Updates are throttled at 
 
 ### Mention Resolution
 
-Feishu sends content with placeholder tokens (e.g., `@_user_1`) for mentioned users. GoClaw processes these:
+Feishu sends content with placeholder tokens (e.g., `@_user_1`) for mentioned users. ArgoClaw processes these:
 
 - **Bot mentions**: Stripped entirely (just the trigger, not meaningful content)
 - **User mentions**: Replaced with `@DisplayName` from the mention list
@@ -430,7 +430,7 @@ Auto-enables when both bot_token and app_token are set.
 
 ## 9. WhatsApp
 
-The WhatsApp channel communicates through an external WebSocket bridge (e.g., whatsapp-web.js based). GoClaw does not implement the WhatsApp protocol directly.
+The WhatsApp channel communicates through an external WebSocket bridge (e.g., whatsapp-web.js based). ArgoClaw does not implement the WhatsApp protocol directly.
 
 ### Key Behaviors
 
