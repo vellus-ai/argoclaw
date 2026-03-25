@@ -303,6 +303,12 @@ func TestPBT_AgentKeyNeverLeaksCrossTenant(t *testing.T) {
 		}
 	})
 
+	// Build a set of Tenant A agent IDs for O(1) lookup
+	agentIDSet := make(map[uuid.UUID]bool, numAgents)
+	for _, id := range agentIDs {
+		agentIDSet[id] = true
+	}
+
 	// Property: random agent_key lookup by Tenant B never returns a Tenant A agent
 	f := func(seed int64) bool {
 		r := rand.New(rand.NewSource(seed))
@@ -321,10 +327,8 @@ func TestPBT_AgentKeyNeverLeaksCrossTenant(t *testing.T) {
 		if got == nil {
 			return true
 		}
-		// If Tenant B got an agent, verify it's not Tenant A's
-		// We check by trying to get the same agent as Tenant A
-		gotA, _ := env.agentStore.GetByID(ctxA, got.ID)
-		return gotA == nil // if A can also see it, it's a leak
+		// If Tenant B found an agent, it MUST NOT be one of Tenant A's agents
+		return !agentIDSet[got.ID]
 	}
 
 	if err := quick.Check(f, &quick.Config{MaxCount: 200}); err != nil {
@@ -396,9 +400,3 @@ func TestTenantSlugIsolation(t *testing.T) {
 	}
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}

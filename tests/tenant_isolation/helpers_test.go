@@ -199,7 +199,7 @@ func ctxForTenant(tenantID uuid.UUID) context.Context {
 	return store.WithTenantID(context.Background(), tenantID)
 }
 
-// httpClientWithToken creates an HTTP request with the given JWT Bearer token.
+// httpReqWithToken creates an HTTP request with the given JWT Bearer token.
 func httpReqWithToken(method, url, token string) (*http.Request, error) {
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
@@ -220,16 +220,3 @@ func mustGenerateToken(t *testing.T, claims auth.TokenClaims) string {
 	return token
 }
 
-// mustGenerateExpiredToken creates an expired JWT for testing.
-func mustGenerateExpiredToken(t *testing.T, claims auth.TokenClaims) string {
-	t.Helper()
-	// Use internal function via reflection or build manually
-	// For safety, we build a token with exp in the past
-	token, err := auth.GenerateAccessToken(claims, env.jwtSecret)
-	if err != nil {
-		t.Fatalf("failed to generate token: %v", err)
-	}
-	// Note: This will be a valid token, not expired.
-	// For expired token tests, we manipulate at the JWT level
-	return token
-}

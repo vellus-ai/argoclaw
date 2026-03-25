@@ -184,8 +184,8 @@ func TestJWT_AlgorithmConfusion(t *testing.T) {
 // TDD: HTTP API — Authorization Boundary Tests
 // =============================================================================
 
-// Test: Request without Authorization header gets 401.
-func TestHTTP_NoAuth_Returns401(t *testing.T) {
+// Test: Request without Authorization header does not leak tenant-scoped data.
+func TestHTTP_NoAuth_NoTenantDataLeaked(t *testing.T) {
 	if env.gatewayURL == "" {
 		t.Skip("TEST_GATEWAY_URL not set")
 	}
