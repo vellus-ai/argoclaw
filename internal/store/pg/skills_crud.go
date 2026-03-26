@@ -39,6 +39,25 @@ func (s *PGSkillStore) CreateSkill(name, slug string, description *string, owner
 	return err
 }
 
+// CreateSkillWithCtx is like CreateSkill but accepts context for tenant isolation.
+func (s *PGSkillStore) CreateSkillWithCtx(ctx context.Context, name, slug string, description *string, ownerID, visibility string, version int, filePath string, fileSize int64, fileHash *string) error {
+	tid := tenantIDFromCtx(ctx)
+	id := store.GenNewID()
+	var tenantIDPtr *uuid.UUID
+	if tid != uuid.Nil {
+		tenantIDPtr = &tid
+	}
+	_, err := s.db.ExecContext(ctx,
+		`INSERT INTO skills (id, name, slug, description, owner_id, visibility, version, status, file_path, file_size, file_hash, tenant_id, created_at, updated_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, 'active', $8, $9, $10, $11, NOW(), NOW())`,
+		id, name, slug, description, ownerID, visibility, version, filePath, fileSize, fileHash, tenantIDPtr,
+	)
+	if err == nil {
+		s.BumpVersion()
+	}
+	return err
+}
+
 func (s *PGSkillStore) UpdateSkill(id uuid.UUID, updates map[string]any) error {
 	if err := execMapUpdate(context.Background(), s.db, "skills", id, updates); err != nil {
 		return err
@@ -47,34 +66,69 @@ func (s *PGSkillStore) UpdateSkill(id uuid.UUID, updates map[string]any) error {
 	return nil
 }
 
+// UpdateSkillWithCtx is like UpdateSkill but uses context for tenant isolation.
+func (s *PGSkillStore) UpdateSkillWithCtx(ctx context.Context, id uuid.UUID, updates map[string]any) error {
+	tid := tenantIDFromCtx(ctx)
+	if tid != uuid.Nil {
+		if err := execMapUpdateTenant(ctx, s.db, "skills", id, updates); err != nil {
+			return err
+		}
+	} else {
+		if err := execMapUpdate(ctx, s.db, "skills", id, updates); err != nil {
+			return err
+		}
+	}
+	s.BumpVersion()
+	return nil
+}
+
 func (s *PGSkillStore) DeleteSkill(id uuid.UUID) error {
+	return s.DeleteSkillWithCtx(context.Background(), id)
+}
+
+// DeleteSkillWithCtx is like DeleteSkill but uses context for tenant isolation.
+func (s *PGSkillStore) DeleteSkillWithCtx(ctx context.Context, id uuid.UUID) error {
+	tid := tenantIDFromCtx(ctx)
+
 	// Reject deletion of system skills
 	var isSystem bool
-	if err := s.db.QueryRow("SELECT is_system FROM skills WHERE id = $1", id).Scan(&isSystem); err != nil {
+	q := "SELECT is_system FROM skills WHERE id = $1"
+	args := []any{id}
+	if tid != uuid.Nil {
+		q += " AND tenant_id = $2"
+		args = append(args, tid)
+	}
+	if err := s.db.QueryRowContext(ctx, q, args...).Scan(&isSystem); err != nil {
 		return fmt.Errorf("check skill: %w", err)
 	}
 	if isSystem {
 		return fmt.Errorf("cannot delete system skill")
 	}
 
-	tx, err := s.db.Begin()
+	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 
 	// Cascade: remove all agent grants for this skill
-	if _, err := tx.Exec("DELETE FROM skill_agent_grants WHERE skill_id = $1", id); err != nil {
+	if _, err := tx.ExecContext(ctx, "DELETE FROM skill_agent_grants WHERE skill_id = $1", id); err != nil {
 		return fmt.Errorf("delete skill grants: %w", err)
 	}
 
 	// Cascade: remove all user grants for this skill
-	if _, err := tx.Exec("DELETE FROM skill_user_grants WHERE skill_id = $1", id); err != nil {
+	if _, err := tx.ExecContext(ctx, "DELETE FROM skill_user_grants WHERE skill_id = $1", id); err != nil {
 		return fmt.Errorf("delete skill user grants: %w", err)
 	}
 
 	// Soft-delete the skill (use 'deleted' status, distinct from 'archived' which means missing deps)
-	if _, err := tx.Exec("UPDATE skills SET status = 'deleted' WHERE id = $1", id); err != nil {
+	deleteQ := "UPDATE skills SET status = 'deleted' WHERE id = $1"
+	deleteArgs := []any{id}
+	if tid != uuid.Nil {
+		deleteQ += " AND tenant_id = $2"
+		deleteArgs = append(deleteArgs, tid)
+	}
+	if _, err := tx.ExecContext(ctx, deleteQ, deleteArgs...); err != nil {
 		return fmt.Errorf("delete skill: %w", err)
 	}
 
@@ -132,11 +186,17 @@ func (s *PGSkillStore) CreateSkillManaged(ctx context.Context, p SkillCreatePara
 		return uuid.Nil, fmt.Errorf("get next version: %w", err)
 	}
 
+	tid := tenantIDFromCtx(ctx)
+	var tenantIDPtr *uuid.UUID
+	if tid != uuid.Nil {
+		tenantIDPtr = &tid
+	}
+
 	id := store.GenNewID()
 	var returnedID uuid.UUID
 	err = tx.QueryRowContext(ctx,
-		`INSERT INTO skills (id, name, slug, description, owner_id, visibility, version, status, frontmatter, file_path, file_size, file_hash, created_at, updated_at)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, 'active', $8, $9, $10, $11, NOW(), NOW())
+		`INSERT INTO skills (id, name, slug, description, owner_id, visibility, version, status, frontmatter, file_path, file_size, file_hash, tenant_id, created_at, updated_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, 'active', $8, $9, $10, $11, $12, NOW(), NOW())
 		 ON CONFLICT (slug) DO UPDATE SET
 		   name = EXCLUDED.name, description = EXCLUDED.description,
 		   version = EXCLUDED.version, frontmatter = EXCLUDED.frontmatter,
@@ -146,7 +206,7 @@ func (s *PGSkillStore) CreateSkillManaged(ctx context.Context, p SkillCreatePara
 		   status = 'active', updated_at = NOW()
 		 RETURNING id`,
 		id, p.Name, p.Slug, p.Description, p.OwnerID, p.Visibility, version,
-		fmJSON, p.FilePath, p.FileSize, p.FileHash,
+		fmJSON, p.FilePath, p.FileSize, p.FileHash, tenantIDPtr,
 	).Scan(&returnedID)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("upsert skill: %w", err)
@@ -214,6 +274,22 @@ func (s *PGSkillStore) ToggleSkill(id uuid.UUID, enabled bool) error {
 		`UPDATE skills SET enabled = $1, updated_at = NOW() WHERE id = $2`,
 		enabled, id,
 	)
+	if err == nil {
+		s.BumpVersion()
+	}
+	return err
+}
+
+// ToggleSkillWithCtx is like ToggleSkill but uses context for tenant isolation.
+func (s *PGSkillStore) ToggleSkillWithCtx(ctx context.Context, id uuid.UUID, enabled bool) error {
+	tid := tenantIDFromCtx(ctx)
+	q := `UPDATE skills SET enabled = $1, updated_at = NOW() WHERE id = $2`
+	args := []any{enabled, id}
+	if tid != uuid.Nil {
+		q += " AND tenant_id = $3"
+		args = append(args, tid)
+	}
+	_, err := s.db.ExecContext(ctx, q, args...)
 	if err == nil {
 		s.BumpVersion()
 	}

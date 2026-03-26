@@ -1,6 +1,9 @@
 package store
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 // CronJob represents a scheduled job.
 type CronJob struct {
@@ -90,13 +93,13 @@ type CronEvent struct {
 
 // CronStore manages scheduled jobs.
 type CronStore interface {
-	AddJob(name string, schedule CronSchedule, message string, deliver bool, channel, to, agentID, userID string) (*CronJob, error)
-	GetJob(jobID string) (*CronJob, bool)
-	ListJobs(includeDisabled bool, agentID, userID string) []CronJob
-	RemoveJob(jobID string) error
-	UpdateJob(jobID string, patch CronJobPatch) (*CronJob, error)
-	EnableJob(jobID string, enabled bool) error
-	GetRunLog(jobID string, limit, offset int) ([]CronRunLogEntry, int)
+	AddJob(ctx context.Context, name string, schedule CronSchedule, message string, deliver bool, channel, to, agentID, userID string) (*CronJob, error)
+	GetJob(ctx context.Context, jobID string) (*CronJob, bool)
+	ListJobs(ctx context.Context, includeDisabled bool, agentID, userID string) []CronJob
+	RemoveJob(ctx context.Context, jobID string) error
+	UpdateJob(ctx context.Context, jobID string, patch CronJobPatch) (*CronJob, error)
+	EnableJob(ctx context.Context, jobID string, enabled bool) error
+	GetRunLog(ctx context.Context, jobID string, limit, offset int) ([]CronRunLogEntry, int)
 	Status() map[string]any
 
 	// Lifecycle
@@ -106,7 +109,7 @@ type CronStore interface {
 	// Job execution
 	SetOnJob(handler func(job *CronJob) (*CronJobResult, error))
 	SetOnEvent(handler func(event CronEvent))
-	RunJob(jobID string, force bool) (ran bool, reason string, err error)
+	RunJob(ctx context.Context, jobID string, force bool) (ran bool, reason string, err error)
 	SetDefaultTimezone(tz string)
 
 	// Due job detection (for scheduler)

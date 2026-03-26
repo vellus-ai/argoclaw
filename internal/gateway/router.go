@@ -275,7 +275,7 @@ func (r *MethodRouter) handleStatus(ctx context.Context, client *Client, req *pr
 
 	sessionCount := 0
 	if r.server.sessions != nil {
-		sessionCount = len(r.server.sessions.List(""))
+		sessionCount = len(r.server.sessions.List(ctx, ""))
 	}
 
 	// Agents are lazily resolved — router only has loaded agents.

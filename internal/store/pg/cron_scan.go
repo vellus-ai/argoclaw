@@ -1,6 +1,7 @@
 package pg
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"time"
@@ -16,6 +17,18 @@ func (s *PGCronStore) scanJob(id uuid.UUID) (*store.CronJob, error) {
 		`SELECT id, agent_id, user_id, name, enabled, schedule_kind, cron_expression, run_at, timezone,
 		 interval_ms, payload, delete_after_run, next_run_at, last_run_at, last_status, last_error,
 		 created_at, updated_at FROM cron_jobs WHERE id = $1`, id)
+	return scanCronSingleRow(row)
+}
+
+// scanJobTenant is like scanJob but adds a tenant_id filter when tid != uuid.Nil.
+func (s *PGCronStore) scanJobTenant(ctx context.Context, id, tid uuid.UUID) (*store.CronJob, error) {
+	if tid == uuid.Nil {
+		return s.scanJob(id)
+	}
+	row := s.db.QueryRowContext(ctx,
+		`SELECT id, agent_id, user_id, name, enabled, schedule_kind, cron_expression, run_at, timezone,
+		 interval_ms, payload, delete_after_run, next_run_at, last_run_at, last_status, last_error,
+		 created_at, updated_at FROM cron_jobs WHERE id = $1 AND tenant_id = $2`, id, tid)
 	return scanCronSingleRow(row)
 }
 

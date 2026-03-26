@@ -232,7 +232,7 @@ func (m *ChatMethods) handleSend(ctx context.Context, client *gateway.Client, re
 					return
 				}
 				m.sessions.SetLabel(sessionKey, title)
-				if err := m.sessions.Save(sessionKey); err != nil {
+				if err := m.sessions.Save(context.Background(), sessionKey); err != nil {
 					slog.Warn("failed to save session title", "sessionKey", sessionKey, "error", err)
 					return
 				}

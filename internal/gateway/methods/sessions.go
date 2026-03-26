@@ -36,7 +36,7 @@ type sessionsListParams struct {
 	Offset  int    `json:"offset"`
 }
 
-func (m *SessionsMethods) handleList(_ context.Context, client *gateway.Client, req *protocol.RequestFrame) {
+func (m *SessionsMethods) handleList(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
 	var params sessionsListParams
 	if req.Params != nil {
 		json.Unmarshal(req.Params, &params)
@@ -58,7 +58,7 @@ func (m *SessionsMethods) handleList(_ context.Context, client *gateway.Client, 
 		opts.UserID = client.UserID()
 	}
 
-	result := m.sessions.ListPagedRich(opts)
+	result := m.sessions.ListPagedRich(ctx, opts)
 	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{
 		"sessions": result.Sessions,
 		"total":    result.Total,
@@ -125,7 +125,7 @@ func (m *SessionsMethods) handlePatch(ctx context.Context, client *gateway.Clien
 	}
 
 	// Save changes to DB
-	m.sessions.Save(params.Key)
+	m.sessions.Save(ctx, params.Key)
 
 	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{
 		"ok":  true,
@@ -142,7 +142,7 @@ func (m *SessionsMethods) handleDelete(ctx context.Context, client *gateway.Clie
 		return
 	}
 
-	if err := m.sessions.Delete(params.Key); err != nil {
+	if err := m.sessions.Delete(ctx, params.Key); err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal, err.Error()))
 		return
 	}

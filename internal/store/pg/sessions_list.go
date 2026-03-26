@@ -1,6 +1,7 @@
 package pg
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -16,7 +17,8 @@ import (
 // buildSessionFilter builds a dynamic WHERE clause from SessionListOpts.
 // Returns the WHERE string (with leading " WHERE ") and the positional args.
 // The tableAlias is prepended to column names (e.g. "s" → "s.session_key").
-func buildSessionFilter(opts store.SessionListOpts, tableAlias string) (string, []any) {
+// When tid != uuid.Nil, a tenant_id filter is added.
+func buildSessionFilter(opts store.SessionListOpts, tableAlias string, tid uuid.UUID) (string, []any) {
 	prefix := ""
 	if tableAlias != "" {
 		prefix = tableAlias + "."
@@ -25,6 +27,11 @@ func buildSessionFilter(opts store.SessionListOpts, tableAlias string) (string, 
 	var args []any
 	idx := 1
 
+	if tid != uuid.Nil {
+		conditions = append(conditions, fmt.Sprintf("%stenant_id = $%d", prefix, idx))
+		args = append(args, tid)
+		idx++
+	}
 	if opts.AgentID != "" {
 		conditions = append(conditions, fmt.Sprintf("%ssession_key LIKE $%d", prefix, idx))
 		args = append(args, "agent:"+opts.AgentID+":%")
@@ -48,17 +55,28 @@ func buildSessionFilter(opts store.SessionListOpts, tableAlias string) (string, 
 	return " WHERE " + strings.Join(conditions, " AND "), args
 }
 
-func (s *PGSessionStore) List(agentID string) []store.SessionInfo {
+func (s *PGSessionStore) List(ctx context.Context, agentID string) []store.SessionInfo {
+	tid := tenantIDFromCtx(ctx)
 	var rows *sql.Rows
 	var err error
-	if agentID != "" {
-		prefix := "agent:" + agentID + ":%"
-		rows, err = s.db.Query(
-			"SELECT session_key, messages, created_at, updated_at, label, channel, user_id, COALESCE(metadata, '{}') FROM sessions WHERE session_key LIKE $1 ORDER BY updated_at DESC", prefix)
-	} else {
-		rows, err = s.db.Query(
-			"SELECT session_key, messages, created_at, updated_at, label, channel, user_id, COALESCE(metadata, '{}') FROM sessions ORDER BY updated_at DESC")
+
+	q := "SELECT session_key, messages, created_at, updated_at, label, channel, user_id, COALESCE(metadata, '{}') FROM sessions WHERE 1=1"
+	var args []any
+	idx := 1
+
+	if tid != uuid.Nil {
+		q += fmt.Sprintf(" AND tenant_id = $%d", idx)
+		args = append(args, tid)
+		idx++
 	}
+	if agentID != "" {
+		q += fmt.Sprintf(" AND session_key LIKE $%d", idx)
+		args = append(args, "agent:"+agentID+":%")
+		idx++
+	}
+	q += " ORDER BY updated_at DESC"
+
+	rows, err = s.db.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil
 	}
@@ -94,19 +112,20 @@ func (s *PGSessionStore) List(agentID string) []store.SessionInfo {
 	return result
 }
 
-func (s *PGSessionStore) ListPaged(opts store.SessionListOpts) store.SessionListResult {
+func (s *PGSessionStore) ListPaged(ctx context.Context, opts store.SessionListOpts) store.SessionListResult {
+	tid := tenantIDFromCtx(ctx)
 	limit := opts.Limit
 	if limit <= 0 {
 		limit = 20
 	}
 	offset := max(opts.Offset, 0)
 
-	where, whereArgs := buildSessionFilter(opts, "")
+	where, whereArgs := buildSessionFilter(opts, "", tid)
 
 	// Count total
 	var total int
 	countQ := "SELECT COUNT(*) FROM sessions" + where
-	if err := s.db.QueryRow(countQ, whereArgs...).Scan(&total); err != nil {
+	if err := s.db.QueryRowContext(ctx, countQ, whereArgs...).Scan(&total); err != nil {
 		return store.SessionListResult{Sessions: []store.SessionInfo{}, Total: 0}
 	}
 
@@ -116,7 +135,7 @@ func (s *PGSessionStore) ListPaged(opts store.SessionListOpts) store.SessionList
 		FROM sessions%s ORDER BY updated_at DESC LIMIT $%d OFFSET $%d`, where, nextIdx, nextIdx+1)
 	selectArgs := append(append([]any{}, whereArgs...), limit, offset)
 
-	rows, err := s.db.Query(selectQ, selectArgs...)
+	rows, err := s.db.QueryContext(ctx, selectQ, selectArgs...)
 	if err != nil {
 		return store.SessionListResult{Sessions: []store.SessionInfo{}, Total: total}
 	}
@@ -154,19 +173,20 @@ func (s *PGSessionStore) ListPaged(opts store.SessionListOpts) store.SessionList
 }
 
 // ListPagedRich returns enriched session info for API responses (includes model, tokens, agent name).
-func (s *PGSessionStore) ListPagedRich(opts store.SessionListOpts) store.SessionListRichResult {
+func (s *PGSessionStore) ListPagedRich(ctx context.Context, opts store.SessionListOpts) store.SessionListRichResult {
+	tid := tenantIDFromCtx(ctx)
 	limit := opts.Limit
 	if limit <= 0 {
 		limit = 20
 	}
 	offset := max(opts.Offset, 0)
 
-	where, whereArgs := buildSessionFilter(opts, "s")
+	where, whereArgs := buildSessionFilter(opts, "s", tid)
 
 	// Count total
 	var total int
 	countQ := "SELECT COUNT(*) FROM sessions s" + where
-	if err := s.db.QueryRow(countQ, whereArgs...).Scan(&total); err != nil {
+	if err := s.db.QueryRowContext(ctx, countQ, whereArgs...).Scan(&total); err != nil {
 		return store.SessionListRichResult{Sessions: []store.SessionInfoRich{}, Total: 0}
 	}
 
@@ -185,7 +205,7 @@ func (s *PGSessionStore) ListPagedRich(opts store.SessionListOpts) store.Session
 		%s ORDER BY s.updated_at DESC LIMIT $%d OFFSET $%d`, richCols, where, nextIdx, nextIdx+1)
 	selectArgs := append(append([]any{}, whereArgs...), limit, offset)
 
-	rows, err := s.db.Query(selectQ, selectArgs...)
+	rows, err := s.db.QueryContext(ctx, selectQ, selectArgs...)
 	if err != nil {
 		return store.SessionListRichResult{Sessions: []store.SessionInfoRich{}, Total: total}
 	}
@@ -238,7 +258,7 @@ func (s *PGSessionStore) ListPagedRich(opts store.SessionListOpts) store.Session
 	return store.SessionListRichResult{Sessions: result, Total: total}
 }
 
-func (s *PGSessionStore) Save(key string) error {
+func (s *PGSessionStore) Save(ctx context.Context, key string) error {
 	s.mu.RLock()
 	data, ok := s.cache[key]
 	if !ok {
@@ -258,15 +278,16 @@ func (s *PGSessionStore) Save(key string) error {
 		metaJSON, _ = json.Marshal(snapshot.Metadata)
 	}
 
-	_, err := s.db.Exec(
-		`UPDATE sessions SET
+	tid := tenantIDFromCtx(ctx)
+	q := `UPDATE sessions SET
 			messages = $1, summary = $2, model = $3, provider = $4, channel = $5,
 			input_tokens = $6, output_tokens = $7, compaction_count = $8,
 			memory_flush_compaction_count = $9, memory_flush_at = $10,
 			label = $11, spawned_by = $12, spawn_depth = $13,
 			agent_id = $14, user_id = $15, metadata = $16, updated_at = $17,
 			team_id = $18
-		 WHERE session_key = $19`,
+		 WHERE session_key = $19`
+	args := []any{
 		msgsJSON, nilStr(snapshot.Summary), nilStr(snapshot.Model), nilStr(snapshot.Provider), nilStr(snapshot.Channel),
 		snapshot.InputTokens, snapshot.OutputTokens, snapshot.CompactionCount,
 		snapshot.MemoryFlushCompactionCount, snapshot.MemoryFlushAt,
@@ -274,24 +295,35 @@ func (s *PGSessionStore) Save(key string) error {
 		nilSessionUUID(snapshot.AgentUUID), nilStr(snapshot.UserID), metaJSON, snapshot.Updated,
 		snapshot.TeamID,
 		key,
-	)
+	}
+	if tid != uuid.Nil {
+		q += " AND tenant_id = $20"
+		args = append(args, tid)
+	}
+	_, err := s.db.ExecContext(ctx, q, args...)
 	return err
 }
 
-func (s *PGSessionStore) LastUsedChannel(agentID string) (string, string) {
+func (s *PGSessionStore) LastUsedChannel(ctx context.Context, agentID string) (string, string) {
+	tid := tenantIDFromCtx(ctx)
 	prefix := "agent:" + agentID + ":%"
-	var sessionKey string
-	err := s.db.QueryRow(
-		`SELECT session_key FROM sessions
+	q := `SELECT session_key FROM sessions
 		 WHERE session_key LIKE $1
 		   AND session_key NOT LIKE $2
-		   AND session_key NOT LIKE $3
-		 ORDER BY updated_at DESC LIMIT 1`,
+		   AND session_key NOT LIKE $3`
+	args := []any{
 		prefix,
-		"agent:"+agentID+":cron:%",
-		"agent:"+agentID+":subagent:%",
-	).Scan(&sessionKey)
-	if err != nil {
+		"agent:" + agentID + ":cron:%",
+		"agent:" + agentID + ":subagent:%",
+	}
+	if tid != uuid.Nil {
+		q += " AND tenant_id = $4"
+		args = append(args, tid)
+	}
+	q += " ORDER BY updated_at DESC LIMIT 1"
+
+	var sessionKey string
+	if err := s.db.QueryRowContext(ctx, q, args...).Scan(&sessionKey); err != nil {
 		return "", ""
 	}
 	parts := strings.SplitN(sessionKey, ":", 5)
@@ -308,8 +340,10 @@ func (s *PGSessionStore) getOrInit(key string) *store.SessionData {
 		return data
 	}
 
-	// Try loading from DB first to avoid overwriting existing messages
-	data := s.loadFromDB(key)
+	// Try loading from DB first to avoid overwriting existing messages.
+	// getOrInit is called from in-memory-only methods (SetLabel, etc.) which don't have ctx.
+	// Use uuid.Nil for tenant — these methods operate on already-cached sessions.
+	data := s.loadFromDB(key, uuid.Nil)
 	if data != nil {
 		s.cache[key] = data
 		return data
@@ -334,7 +368,8 @@ func (s *PGSessionStore) getOrInit(key string) *store.SessionData {
 	return data
 }
 
-func (s *PGSessionStore) loadFromDB(key string) *store.SessionData {
+// loadFromDB loads a session from the database. When tid != uuid.Nil, adds a tenant_id filter.
+func (s *PGSessionStore) loadFromDB(key string, tid uuid.UUID) *store.SessionData {
 	var sessionKey string
 	var msgsJSON []byte
 	var summary, model, provider, channel, label, spawnedBy, userID *string
@@ -345,14 +380,19 @@ func (s *PGSessionStore) loadFromDB(key string) *store.SessionData {
 	var createdAt, updatedAt time.Time
 	var metaJSON *[]byte
 
-	err := s.db.QueryRow(
-		`SELECT session_key, messages, summary, model, provider, channel,
+	q := `SELECT session_key, messages, summary, model, provider, channel,
 		 input_tokens, output_tokens, compaction_count,
 		 memory_flush_compaction_count, memory_flush_at,
 		 label, spawned_by, spawn_depth, agent_id, user_id,
 		 COALESCE(metadata, '{}'), created_at, updated_at, team_id
-		 FROM sessions WHERE session_key = $1`, key,
-	).Scan(&sessionKey, &msgsJSON, &summary, &model, &provider, &channel,
+		 FROM sessions WHERE session_key = $1`
+	args := []any{key}
+	if tid != uuid.Nil {
+		q += " AND tenant_id = $2"
+		args = append(args, tid)
+	}
+
+	err := s.db.QueryRow(q, args...).Scan(&sessionKey, &msgsJSON, &summary, &model, &provider, &channel,
 		&inputTokens, &outputTokens, &compactionCount,
 		&memoryFlushCompactionCount, &memoryFlushAt,
 		&label, &spawnedBy, &spawnDepth, &agentID, &userID,

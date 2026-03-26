@@ -1420,7 +1420,7 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 		l.sessions.SetLastPromptTokens(req.SessionKey, totalUsage.PromptTokens, msgCount)
 	}
 
-	l.sessions.Save(req.SessionKey)
+	l.sessions.Save(ctx, req.SessionKey)
 
 	// Bootstrap auto-cleanup: after enough conversation turns, remove BOOTSTRAP.md
 	// as a safety net in case the LLM didn't clear it itself.

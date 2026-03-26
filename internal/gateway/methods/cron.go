@@ -36,7 +36,7 @@ func (m *CronMethods) Register(router *gateway.MethodRouter) {
 	router.Register(protocol.MethodCronRuns, m.handleRuns)
 }
 
-func (m *CronMethods) handleList(_ context.Context, client *gateway.Client, req *protocol.RequestFrame) {
+func (m *CronMethods) handleList(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
 	var params struct {
 		IncludeDisabled bool `json:"includeDisabled"`
 	}
@@ -44,7 +44,7 @@ func (m *CronMethods) handleList(_ context.Context, client *gateway.Client, req 
 		json.Unmarshal(req.Params, &params)
 	}
 
-	jobs := m.service.ListJobs(params.IncludeDisabled, "", "")
+	jobs := m.service.ListJobs(ctx, params.IncludeDisabled, "", "")
 
 	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{
 		"jobs":   jobs,
@@ -80,7 +80,7 @@ func (m *CronMethods) handleCreate(ctx context.Context, client *gateway.Client, 
 		return
 	}
 
-	job, err := m.service.AddJob(params.Name, params.Schedule, params.Message, params.Deliver, params.Channel, params.To, params.AgentID, client.UserID())
+	job, err := m.service.AddJob(ctx, params.Name, params.Schedule, params.Message, params.Deliver, params.Channel, params.To, params.AgentID, client.UserID())
 	if err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, err.Error()))
 		return
@@ -106,7 +106,7 @@ func (m *CronMethods) handleDelete(ctx context.Context, client *gateway.Client, 
 		return
 	}
 
-	if err := m.service.RemoveJob(params.JobID); err != nil {
+	if err := m.service.RemoveJob(ctx, params.JobID); err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrNotFound, err.Error()))
 		return
 	}
@@ -132,7 +132,7 @@ func (m *CronMethods) handleToggle(ctx context.Context, client *gateway.Client, 
 		return
 	}
 
-	if err := m.service.EnableJob(params.JobID, params.Enabled); err != nil {
+	if err := m.service.EnableJob(ctx, params.JobID, params.Enabled); err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrNotFound, err.Error()))
 		return
 	}
@@ -168,7 +168,7 @@ func (m *CronMethods) handleUpdate(ctx context.Context, client *gateway.Client, 
 		return
 	}
 
-	job, err := m.service.UpdateJob(jobID, params.Patch)
+	job, err := m.service.UpdateJob(ctx, jobID, params.Patch)
 	if err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, err.Error()))
 		return
@@ -203,7 +203,7 @@ func (m *CronMethods) handleRun(ctx context.Context, client *gateway.Client, req
 	force := params.Mode == "force"
 
 	// Validate job exists before responding
-	_, ok := m.service.GetJob(jobID)
+	_, ok := m.service.GetJob(ctx, jobID)
 	if !ok {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, i18n.T(locale, i18n.MsgJobNotFound)))
 		return
@@ -217,13 +217,13 @@ func (m *CronMethods) handleRun(ctx context.Context, client *gateway.Client, req
 	emitAudit(m.eventBus, client, "cron.run", "cron", jobID)
 
 	go func() {
-		if _, _, err := m.service.RunJob(jobID, force); err != nil {
+		if _, _, err := m.service.RunJob(context.Background(), jobID, force); err != nil {
 			slog.Warn("cron.run background error", "jobId", jobID, "error", err)
 		}
 	}()
 }
 
-func (m *CronMethods) handleRuns(_ context.Context, client *gateway.Client, req *protocol.RequestFrame) {
+func (m *CronMethods) handleRuns(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
 	var params struct {
 		JobID  string `json:"jobId"`
 		ID     string `json:"id"`
@@ -239,7 +239,7 @@ func (m *CronMethods) handleRuns(_ context.Context, client *gateway.Client, req 
 		jobID = params.ID
 	}
 
-	entries, total := m.service.GetRunLog(jobID, params.Limit, params.Offset)
+	entries, total := m.service.GetRunLog(ctx, jobID, params.Limit, params.Offset)
 	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{
 		"entries": entries,
 		"total":   total,

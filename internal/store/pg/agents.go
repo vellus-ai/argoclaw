@@ -53,9 +53,15 @@ func (s *PGAgentStore) BackfillAgentEmbeddings(ctx context.Context) (int, error)
 	if s.embProvider == nil {
 		return 0, nil
 	}
-	rows, err := s.db.QueryContext(ctx,
-		`SELECT id, COALESCE(display_name, ''), COALESCE(frontmatter, '')
-		 FROM agents WHERE deleted_at IS NULL AND frontmatter IS NOT NULL AND frontmatter != '' AND embedding IS NULL`)
+	tid := tenantIDFromCtx(ctx)
+	q := `SELECT id, COALESCE(display_name, ''), COALESCE(frontmatter, '')
+		 FROM agents WHERE deleted_at IS NULL AND frontmatter IS NOT NULL AND frontmatter != '' AND embedding IS NULL`
+	var args []any
+	if tid != uuid.Nil {
+		q += " AND tenant_id = $1"
+		args = append(args, tid)
+	}
+	rows, err := s.db.QueryContext(ctx, q, args...)
 	if err != nil {
 		return 0, err
 	}

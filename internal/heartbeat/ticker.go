@@ -336,7 +336,7 @@ func (t *Ticker) finishRun(ctx context.Context, hb store.AgentHeartbeat, session
 
 	// Cleanup isolated session — data is already in heartbeat_run_logs.
 	if hb.IsolatedSession && t.sessions != nil && sessionKey != "" {
-		if err := t.sessions.Delete(sessionKey); err != nil {
+		if err := t.sessions.Delete(ctx, sessionKey); err != nil {
 			slog.Debug("heartbeat.session_cleanup_failed", "session_key", sessionKey, "error", err)
 		}
 	}

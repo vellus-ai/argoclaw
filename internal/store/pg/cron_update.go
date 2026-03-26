@@ -12,7 +12,7 @@ import (
 	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
-func (s *PGCronStore) UpdateJob(jobID string, patch store.CronJobPatch) (*store.CronJob, error) {
+func (s *PGCronStore) UpdateJob(ctx context.Context, jobID string, patch store.CronJobPatch) (*store.CronJob, error) {
 	id, err := uuid.Parse(jobID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid job ID: %s", jobID)
@@ -178,11 +178,18 @@ func (s *PGCronStore) UpdateJob(jobID string, patch store.CronJobPatch) (*store.
 
 	updates["updated_at"] = time.Now()
 
-	if err := execMapUpdate(context.Background(), s.db, "cron_jobs", id, updates); err != nil {
-		return nil, err
+	tid := tenantIDFromCtx(ctx)
+	if tid != uuid.Nil {
+		if err := execMapUpdateTenant(ctx, s.db, "cron_jobs", id, updates); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := execMapUpdate(ctx, s.db, "cron_jobs", id, updates); err != nil {
+			return nil, err
+		}
 	}
 
 	s.cacheLoaded = false
-	job, _ := s.scanJob(id)
+	job, _ := s.scanJobTenant(ctx, id, tid)
 	return job, nil
 }

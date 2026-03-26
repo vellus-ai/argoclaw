@@ -204,7 +204,7 @@ func (l *Loop) runMemoryFlush(ctx context.Context, sessionKey string, settings *
 
 	// Mark flush as done
 	l.sessions.SetMemoryFlushDone(sessionKey)
-	l.sessions.Save(sessionKey)
+	l.sessions.Save(ctx, sessionKey)
 
 	slog.Info("memory flush: completed", "session", sessionKey)
 }

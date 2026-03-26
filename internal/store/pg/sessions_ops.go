@@ -1,8 +1,11 @@
 package pg
 
 import (
+	"context"
+	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/vellus-ai/argoclaw/internal/providers"
 )
 
@@ -38,7 +41,7 @@ func (s *PGSessionStore) Reset(key string) {
 	}
 }
 
-func (s *PGSessionStore) Delete(key string) error {
+func (s *PGSessionStore) Delete(ctx context.Context, key string) error {
 	s.mu.Lock()
 	delete(s.cache, key)
 	s.mu.Unlock()
@@ -48,6 +51,21 @@ func (s *PGSessionStore) Delete(key string) error {
 		s.OnDelete(key)
 	}
 
-	_, err := s.db.Exec("DELETE FROM sessions WHERE session_key = $1", key)
-	return err
+	tid := tenantIDFromCtx(ctx)
+	q := "DELETE FROM sessions WHERE session_key = $1"
+	args := []any{key}
+	if tid != uuid.Nil {
+		q += " AND tenant_id = $2"
+		args = append(args, tid)
+	}
+	result, err := s.db.ExecContext(ctx, q, args...)
+	if err != nil {
+		return err
+	}
+	if tid != uuid.Nil {
+		if n, _ := result.RowsAffected(); n == 0 {
+			return fmt.Errorf("session not found or tenant mismatch: %s", key)
+		}
+	}
+	return nil
 }

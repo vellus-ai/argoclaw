@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -86,7 +87,7 @@ type SessionListRichResult struct {
 
 // SessionStore manages conversation sessions.
 type SessionStore interface {
-	GetOrCreate(key string) *SessionData
+	GetOrCreate(ctx context.Context, key string) *SessionData
 	AddMessage(key string, msg providers.Message)
 	GetHistory(key string) []providers.Message
 	GetSummary(key string) string
@@ -110,10 +111,10 @@ type SessionStore interface {
 	TruncateHistory(key string, keepLast int)
 	SetHistory(key string, msgs []providers.Message)
 	Reset(key string)
-	Delete(key string) error
-	List(agentID string) []SessionInfo
-	ListPaged(opts SessionListOpts) SessionListResult
-	ListPagedRich(opts SessionListOpts) SessionListRichResult
-	Save(key string) error
-	LastUsedChannel(agentID string) (channel, chatID string)
+	Delete(ctx context.Context, key string) error
+	List(ctx context.Context, agentID string) []SessionInfo
+	ListPaged(ctx context.Context, opts SessionListOpts) SessionListResult
+	ListPagedRich(ctx context.Context, opts SessionListOpts) SessionListRichResult
+	Save(ctx context.Context, key string) error
+	LastUsedChannel(ctx context.Context, agentID string) (channel, chatID string)
 }
