@@ -42,15 +42,9 @@ func (s *PGSessionStore) Reset(key string) {
 }
 
 func (s *PGSessionStore) Delete(ctx context.Context, key string) error {
-	s.mu.Lock()
-	delete(s.cache, key)
-	s.mu.Unlock()
-
-	// Clean up associated media files before deleting from DB.
-	if s.OnDelete != nil {
-		s.OnDelete(key)
-	}
-
+	// DB DELETE first — verify tenant owns session before any side effects.
+	// Evicting cache and cleaning up media files before the DB check would leave
+	// inconsistent state if the session belongs to a different tenant.
 	tid := tenantIDFromCtx(ctx)
 	q := "DELETE FROM sessions WHERE session_key = $1"
 	args := []any{key}
@@ -66,6 +60,15 @@ func (s *PGSessionStore) Delete(ctx context.Context, key string) error {
 		if n, _ := result.RowsAffected(); n == 0 {
 			return fmt.Errorf("session not found or tenant mismatch: %s", key)
 		}
+	}
+
+	// DB DELETE confirmed — now evict cache and clean up associated media files.
+	s.mu.Lock()
+	delete(s.cache, key)
+	s.mu.Unlock()
+
+	if s.OnDelete != nil {
+		s.OnDelete(key)
 	}
 	return nil
 }

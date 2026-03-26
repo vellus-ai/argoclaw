@@ -261,7 +261,10 @@ func (s *PGSessionStore) getOrInit(key string) *store.SessionData {
 		return data
 	}
 
-	// Not in DB — create new
+	// Not in DB — initialize in-memory only (no ctx/tenant_id available here).
+	// Sessions must be persisted via GetOrCreate(ctx) to include the correct tenant_id.
+	// Inserting without tenant_id would create an orphaned row that bypasses tenant isolation.
+	slog.Warn("sessions.getOrInit: session not in DB, creating in-memory only — caller should use GetOrCreate first", "key", key)
 	now := time.Now()
 	data = &store.SessionData{
 		Key:      key,
@@ -270,13 +273,6 @@ func (s *PGSessionStore) getOrInit(key string) *store.SessionData {
 		Updated:  now,
 	}
 	s.cache[key] = data
-
-	msgsJSON, _ := json.Marshal([]providers.Message{})
-	s.db.Exec(
-		`INSERT INTO sessions (id, session_key, messages, created_at, updated_at)
-		 VALUES ($1, $2, $3, $4, $5) ON CONFLICT (session_key) DO NOTHING`,
-		uuid.Must(uuid.NewV7()), key, msgsJSON, now, now,
-	)
 	return data
 }
 
