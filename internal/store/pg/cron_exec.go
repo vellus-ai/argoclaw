@@ -1,6 +1,7 @@
 package pg
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -10,8 +11,8 @@ import (
 	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
-func (s *PGCronStore) RunJob(jobID string, force bool) (bool, string, error) {
-	job, ok := s.GetJob(jobID)
+func (s *PGCronStore) RunJob(ctx context.Context, jobID string, force bool) (bool, string, error) {
+	job, ok := s.GetJob(ctx, jobID)
 	if !ok {
 		return false, "", fmt.Errorf("job %s not found", jobID)
 	}
@@ -42,7 +43,7 @@ func (s *PGCronStore) RunJob(jobID string, force bool) (bool, string, error) {
 	return true, "", nil
 }
 
-func (s *PGCronStore) GetRunLog(jobID string, limit, offset int) ([]store.CronRunLogEntry, int) {
+func (s *PGCronStore) GetRunLog(ctx context.Context, jobID string, limit, offset int) ([]store.CronRunLogEntry, int) {
 	if limit <= 0 {
 		limit = 20
 	}
@@ -50,24 +51,46 @@ func (s *PGCronStore) GetRunLog(jobID string, limit, offset int) ([]store.CronRu
 		offset = 0
 	}
 
-	const cols = "job_id, status, error, summary, ran_at, COALESCE(duration_ms, 0), COALESCE(input_tokens, 0), COALESCE(output_tokens, 0)"
+	tid := tenantIDFromCtx(ctx)
+	const cols = "r.job_id, r.status, r.error, r.summary, r.ran_at, COALESCE(r.duration_ms, 0), COALESCE(r.input_tokens, 0), COALESCE(r.output_tokens, 0)"
 
 	var total int
 	var rows *sql.Rows
 	var err error
-	if jobID != "" {
-		id, parseErr := uuid.Parse(jobID)
-		if parseErr != nil {
-			return nil, 0
+
+	// When tenant is set, JOIN with cron_jobs to verify tenant ownership.
+	if tid != uuid.Nil {
+		baseJoin := "FROM cron_run_logs r JOIN cron_jobs j ON r.job_id = j.id"
+		if jobID != "" {
+			id, parseErr := uuid.Parse(jobID)
+			if parseErr != nil {
+				return nil, 0
+			}
+			s.db.QueryRowContext(ctx, "SELECT COUNT(*) "+baseJoin+" WHERE r.job_id = $1 AND j.tenant_id = $2", id, tid).Scan(&total)
+			rows, err = s.db.QueryContext(ctx,
+				"SELECT "+cols+" "+baseJoin+" WHERE r.job_id = $1 AND j.tenant_id = $2 ORDER BY r.ran_at DESC LIMIT $3 OFFSET $4",
+				id, tid, limit, offset)
+		} else {
+			s.db.QueryRowContext(ctx, "SELECT COUNT(*) "+baseJoin+" WHERE j.tenant_id = $1", tid).Scan(&total)
+			rows, err = s.db.QueryContext(ctx,
+				"SELECT "+cols+" "+baseJoin+" WHERE j.tenant_id = $1 ORDER BY r.ran_at DESC LIMIT $2 OFFSET $3",
+				tid, limit, offset)
 		}
-		s.db.QueryRow("SELECT COUNT(*) FROM cron_run_logs WHERE job_id = $1", id).Scan(&total)
-		rows, err = s.db.Query(
-			"SELECT "+cols+" FROM cron_run_logs WHERE job_id = $1 ORDER BY ran_at DESC LIMIT $2 OFFSET $3",
-			id, limit, offset)
 	} else {
-		s.db.QueryRow("SELECT COUNT(*) FROM cron_run_logs").Scan(&total)
-		rows, err = s.db.Query(
-			"SELECT "+cols+" FROM cron_run_logs ORDER BY ran_at DESC LIMIT $1 OFFSET $2", limit, offset)
+		if jobID != "" {
+			id, parseErr := uuid.Parse(jobID)
+			if parseErr != nil {
+				return nil, 0
+			}
+			s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM cron_run_logs r WHERE r.job_id = $1", id).Scan(&total)
+			rows, err = s.db.QueryContext(ctx,
+				"SELECT "+cols+" FROM cron_run_logs r WHERE r.job_id = $1 ORDER BY r.ran_at DESC LIMIT $2 OFFSET $3",
+				id, limit, offset)
+		} else {
+			s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM cron_run_logs r").Scan(&total)
+			rows, err = s.db.QueryContext(ctx,
+				"SELECT "+cols+" FROM cron_run_logs r ORDER BY r.ran_at DESC LIMIT $1 OFFSET $2", limit, offset)
+		}
 	}
 	if err != nil {
 		return nil, 0

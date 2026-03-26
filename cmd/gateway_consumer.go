@@ -390,7 +390,7 @@ func consumeInboundMessages(ctx context.Context, msgBus *bus.MessageBus, agents 
 				}
 			}
 			sessStore.Reset(sessionKey)
-			sessStore.Save(sessionKey)
+			sessStore.Save(context.Background(), sessionKey)
 			providers.ResetCLISession("", sessionKey)
 			slog.Info("inbound: /reset command", "session", sessionKey)
 			continue

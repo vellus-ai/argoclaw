@@ -232,7 +232,7 @@ func (l *Loop) buildMessages(ctx context.Context, history []providers.Message, s
 			"session", sessionKey, "dropped", droppedCount)
 		cleanedHistory, _ := sanitizeHistory(history)
 		l.sessions.SetHistory(sessionKey, cleanedHistory)
-		l.sessions.Save(sessionKey)
+		l.sessions.Save(ctx, sessionKey)
 	}
 
 	// Current user message
@@ -582,7 +582,7 @@ func (l *Loop) maybeSummarize(ctx context.Context, sessionKey string) {
 		l.sessions.SetSummary(sessionKey, SanitizeAssistantContent(resp.Content))
 		l.sessions.TruncateHistory(sessionKey, keepLast)
 		l.sessions.IncrementCompaction(sessionKey)
-		l.sessions.Save(sessionKey)
+		l.sessions.Save(ctx, sessionKey)
 	}()
 }
 

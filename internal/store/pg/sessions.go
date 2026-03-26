@@ -1,8 +1,10 @@
 package pg
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"maps"
 	"strings"
@@ -58,7 +60,7 @@ func (s *PGSessionStore) migrateLegacyWSKeys() {
 	}
 }
 
-func (s *PGSessionStore) GetOrCreate(key string) *store.SessionData {
+func (s *PGSessionStore) GetOrCreate(ctx context.Context, key string) *store.SessionData {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -66,7 +68,8 @@ func (s *PGSessionStore) GetOrCreate(key string) *store.SessionData {
 		return cached
 	}
 
-	data := s.loadFromDB(key)
+	tid := tenantIDFromCtx(ctx)
+	data := s.loadFromDB(key, tid)
 	if data != nil {
 		s.cache[key] = data
 		return data
@@ -84,18 +87,22 @@ func (s *PGSessionStore) GetOrCreate(key string) *store.SessionData {
 	// Extract team_id from team session keys (agent:{agentId}:team:{teamId}:{chatId}).
 	var teamID *uuid.UUID
 	if parts := strings.SplitN(key, ":", 5); len(parts) >= 4 && parts[2] == "team" {
-		if tid, err := uuid.Parse(parts[3]); err == nil {
-			teamID = &tid
+		if teamUUID, err := uuid.Parse(parts[3]); err == nil {
+			teamID = &teamUUID
 			data.TeamID = teamID
 		}
 	}
 	s.cache[key] = data
 
 	msgsJSON, _ := json.Marshal([]providers.Message{})
-	s.db.Exec(
-		`INSERT INTO sessions (id, session_key, messages, created_at, updated_at, team_id)
-		 VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (session_key) DO NOTHING`,
-		uuid.Must(uuid.NewV7()), key, msgsJSON, now, now, teamID,
+	var tenantIDPtr *uuid.UUID
+	if tid != uuid.Nil {
+		tenantIDPtr = &tid
+	}
+	s.db.ExecContext(ctx,
+		`INSERT INTO sessions (id, session_key, messages, created_at, updated_at, team_id, tenant_id)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (session_key) DO NOTHING`,
+		uuid.Must(uuid.NewV7()), key, msgsJSON, now, now, teamID, tenantIDPtr,
 	)
 
 	return data
@@ -131,7 +138,9 @@ func (s *PGSessionStore) GetHistory(key string) []providers.Message {
 		return msgs
 	}
 
-	data := s.loadFromDB(key)
+	// GetHistory is called from hot path without ctx; use uuid.Nil (no tenant filter).
+	// Session was already loaded via GetOrCreate with proper tenant check.
+	data := s.loadFromDB(key, uuid.Nil)
 	if data == nil {
 		return nil
 	}
@@ -225,4 +234,15 @@ func (s *PGSessionStore) UpdateMetadata(key, model, provider, channel string) {
 			data.Channel = channel
 		}
 	}
+}
+
+// tenantFilter returns an additional " AND tenant_id = $N" clause and appended args
+// when the tenant ID is not nil. nextIdx should be the next positional parameter index.
+func tenantFilter(tid uuid.UUID, nextIdx int, args []any) (string, []any, int) {
+	if tid == uuid.Nil {
+		return "", args, nextIdx
+	}
+	clause := fmt.Sprintf(" AND tenant_id = $%d", nextIdx)
+	args = append(args, tid)
+	return clause, args, nextIdx + 1
 }
