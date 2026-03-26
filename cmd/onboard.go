@@ -1,27 +1,56 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/spf13/cobra"
 
 	"github.com/vellus-ai/argoclaw/internal/config"
 )
 
+var nonInteractive bool
+
+type nonInteractiveOpts struct {
+	configPath string
+	envPath    string
+	skipDB     bool // only for unit tests
+}
+
 func onboardCmd() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "onboard",
 		Short: "Quick setup — configure database, generate keys, run migrations",
 		Run: func(cmd *cobra.Command, args []string) {
 			runOnboard()
 		},
 	}
+	cmd.Flags().BoolVar(&nonInteractive, "non-interactive", false,
+		"Skip all interactive prompts; read all inputs from environment variables.\n"+
+			"Required: ARGOCLAW_POSTGRES_DSN\n"+
+			"Optional: ARGOCLAW_GATEWAY_TOKEN, ARGOCLAW_ENCRYPTION_KEY (auto-generated if absent)")
+	return cmd
 }
 
 func runOnboard() {
+	if nonInteractive {
+		cfgPath := resolveConfigPath()
+		cfgDir := filepath.Dir(cfgPath)
+		opts := nonInteractiveOpts{
+			configPath: cfgPath,
+			envPath:    filepath.Join(cfgDir, ".env.local"),
+		}
+		if err := runOnboardNonInteractiveE(opts); err != nil {
+			log.Fatalf("onboard failed: %v", err)
+		}
+		return
+	}
+
 	fmt.Println("╔══════════════════════════════════════════════╗")
 	fmt.Println("║        ArgoClaw — Quick Setup                 ║")
 	fmt.Println("╚══════════════════════════════════════════════╝")
@@ -74,14 +103,24 @@ func runOnboard() {
 	}
 	generatedToken := false
 	if gatewayToken == "" {
-		gatewayToken = onboardGenerateToken(16)
+		var err error
+		gatewayToken, err = onboardGenerateToken(16)
+		if err != nil {
+			fmt.Printf("  Error generating gateway token: %v\n", err)
+			os.Exit(1)
+		}
 		generatedToken = true
 	}
 
 	encryptionKey := os.Getenv("ARGOCLAW_ENCRYPTION_KEY")
 	generatedEncKey := false
 	if encryptionKey == "" {
-		encryptionKey = onboardGenerateToken(32)
+		var err error
+		encryptionKey, err = onboardGenerateToken(32)
+		if err != nil {
+			fmt.Printf("  Error generating encryption key: %v\n", err)
+			os.Exit(1)
+		}
 		generatedEncKey = true
 	}
 	os.Setenv("ARGOCLAW_ENCRYPTION_KEY", encryptionKey)
@@ -93,7 +132,7 @@ func runOnboard() {
 		fmt.Printf("FAILED: %v\n", err)
 		fmt.Println("  You can run it manually later: ./argoclaw migrate up")
 	} else {
-		if err := m.Up(); err != nil && err.Error() != "no change" {
+		if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 			fmt.Printf("FAILED: %v\n", err)
 			fmt.Println("  You can run it manually later: ./argoclaw migrate up")
 		} else {
@@ -128,7 +167,10 @@ func runOnboard() {
 
 	// ── Step 7: Save .env.local ──
 	envPath := filepath.Join(filepath.Dir(cfgPath), ".env.local")
-	onboardWriteEnvFile(envPath, postgresDSN, gatewayToken, encryptionKey)
+	if err := onboardWriteEnvFile(envPath, postgresDSN, gatewayToken, encryptionKey); err != nil {
+		fmt.Printf("  Error writing .env.local: %v\n", err)
+		os.Exit(1)
+	}
 
 	// ── Summary ──
 	port := strconv.Itoa(cfg.Gateway.Port)
@@ -177,4 +219,65 @@ func runOnboard() {
 	fmt.Println("  Tip: Use 'goclaw auth anthropic' to authenticate with an")
 	fmt.Println("  Anthropic setup token (from 'claude setup-token').")
 	fmt.Println()
+}
+
+// runOnboardNonInteractiveE executes the onboard flow without any interactive prompts.
+// All inputs are read from environment variables. Returns an error instead of calling log.Fatal
+// to allow unit testing.
+func runOnboardNonInteractiveE(opts nonInteractiveOpts) error {
+	dsn := os.Getenv("ARGOCLAW_POSTGRES_DSN")
+	if dsn == "" {
+		return fmt.Errorf("--non-interactive requires ARGOCLAW_POSTGRES_DSN to be set")
+	}
+
+	token := os.Getenv("ARGOCLAW_GATEWAY_TOKEN")
+	if token == "" {
+		var err error
+		token, err = onboardGenerateToken(16)
+		if err != nil {
+			return fmt.Errorf("generate gateway token: %w", err)
+		}
+	}
+
+	encKey := os.Getenv("ARGOCLAW_ENCRYPTION_KEY")
+	if encKey == "" {
+		var err error
+		encKey, err = onboardGenerateToken(32)
+		if err != nil {
+			return fmt.Errorf("generate encryption key: %w", err)
+		}
+	}
+
+	if !opts.skipDB {
+		if err := testPostgresConnection(dsn); err != nil {
+			return fmt.Errorf("postgres connection failed: %w", err)
+		}
+
+		m, err := newMigrator(dsn)
+		if err != nil {
+			return fmt.Errorf("create migrator: %w", err)
+		}
+		if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+			return fmt.Errorf("run migrations: %w", err)
+		}
+
+		if err := seedOnboardPlaceholders(dsn); err != nil {
+			return fmt.Errorf("seed providers: %w", err)
+		}
+	}
+
+	// Build minimal config (no secrets stored in config file)
+	cfg := config.Default()
+	if err := config.Save(opts.configPath, cfg); err != nil {
+		return fmt.Errorf("save config: %w", err)
+	}
+
+	if err := onboardWriteEnvFile(opts.envPath, dsn, token, encKey); err != nil {
+		return fmt.Errorf("write env file: %w", err)
+	}
+
+	fmt.Printf("✓ ArgoClaw onboard complete (non-interactive)\n")
+	fmt.Printf("  Config:  %s\n", opts.configPath)
+	fmt.Printf("  Secrets: %s\n", opts.envPath)
+	return nil
 }
