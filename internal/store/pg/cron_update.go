@@ -190,6 +190,6 @@ func (s *PGCronStore) UpdateJob(ctx context.Context, jobID string, patch store.C
 	}
 
 	s.cacheLoaded = false
-	job, _ := s.scanJobTenant(id, tid)
+	job, _ := s.scanJobTenant(ctx, id, tid)
 	return job, nil
 }

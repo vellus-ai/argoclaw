@@ -94,7 +94,7 @@ func (s *PGCronStore) GetJob(ctx context.Context, jobID string) (*store.CronJob,
 		return nil, false
 	}
 	tid := tenantIDFromCtx(ctx)
-	job, err := s.scanJobTenant(id, tid)
+	job, err := s.scanJobTenant(ctx, id, tid)
 	if err != nil {
 		return nil, false
 	}
@@ -189,9 +189,14 @@ func (s *PGCronStore) EnableJob(ctx context.Context, jobID string, enabled bool)
 		q += " AND tenant_id = $4"
 		args = append(args, tid)
 	}
-	_, err = s.db.ExecContext(ctx, q, args...)
+	result, err := s.db.ExecContext(ctx, q, args...)
 	if err != nil {
 		return err
+	}
+	if tid != uuid.Nil {
+		if n, _ := result.RowsAffected(); n == 0 {
+			return fmt.Errorf("job not found or tenant mismatch: %s", jobID)
+		}
 	}
 	s.cacheLoaded = false
 	return nil
