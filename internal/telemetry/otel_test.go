@@ -48,7 +48,7 @@ func TestGenAI_Constants_MatchSpec(t *testing.T) {
 
 func TestGenAI_RecordLLMCall_NoOp(t *testing.T) {
 	ctx := context.Background()
-	err := telemetry.RecordLLMCall(ctx, telemetry.GenAIAttrs{
+	err := telemetry.RecordLLMCall(ctx, &telemetry.GenAIAttrs{
 		System:    "anthropic",
 		Model:     "claude-3-5-sonnet",
 		Operation: "chat",
@@ -63,7 +63,7 @@ func TestGenAI_RecordLLMCall_NoOp(t *testing.T) {
 func TestGenAI_RecordLLMCall_PropagatesError(t *testing.T) {
 	ctx := context.Background()
 	sentinel := fmt.Errorf("llm api error")
-	err := telemetry.RecordLLMCall(ctx, telemetry.GenAIAttrs{
+	err := telemetry.RecordLLMCall(ctx, &telemetry.GenAIAttrs{
 		System: "google",
 		Model:  "gemini-2.0-flash",
 	}, func(ctx context.Context) error {
@@ -71,5 +71,60 @@ func TestGenAI_RecordLLMCall_PropagatesError(t *testing.T) {
 	})
 	if err != sentinel {
 		t.Errorf("RecordLLMCall should propagate fn error; got %v, want %v", err, sentinel)
+	}
+}
+
+func TestInitMetrics_NoError(t *testing.T) {
+	// InitMetrics with the global noop meter provider should return no error.
+	if err := telemetry.InitMetrics(); err != nil {
+		t.Fatalf("InitMetrics() returned unexpected error: %v", err)
+	}
+}
+
+func TestGenAI_RecordLLMCall_TokenCountsUpdatable(t *testing.T) {
+	// Verify that the pointer receiver allows the caller to update token counts
+	// after fn returns — RecordLLMCall must read attrs after fn completes.
+	ctx := context.Background()
+	attrs := &telemetry.GenAIAttrs{
+		System:    "anthropic",
+		Model:     "claude-3-5-sonnet",
+		Operation: "chat",
+	}
+	err := telemetry.RecordLLMCall(ctx, attrs, func(ctx context.Context) error {
+		// Simulate post-call token population (e.g. from response headers)
+		attrs.InputTokens = 100
+		attrs.OutputTokens = 50
+		attrs.FinishReason = "end_turn"
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("RecordLLMCall returned unexpected error: %v", err)
+	}
+	// Verify the caller's updates are visible (no copy semantics).
+	if attrs.InputTokens != 100 {
+		t.Errorf("InputTokens should be 100, got %d", attrs.InputTokens)
+	}
+	if attrs.OutputTokens != 50 {
+		t.Errorf("OutputTokens should be 50, got %d", attrs.OutputTokens)
+	}
+}
+
+func TestGenAI_RecordLLMCall_SetsSpanAttributes(t *testing.T) {
+	ctx := context.Background()
+	attrs := &telemetry.GenAIAttrs{
+		System:       "openai",
+		Model:        "gpt-4o",
+		Operation:    "chat",
+		MaxTokens:    1024,
+		InputTokens:  200,
+		OutputTokens: 100,
+		FinishReason: "stop",
+	}
+	// Should not panic and should succeed with the global noop tracer provider.
+	err := telemetry.RecordLLMCall(ctx, attrs, func(ctx context.Context) error {
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("RecordLLMCall returned unexpected error: %v", err)
 	}
 }

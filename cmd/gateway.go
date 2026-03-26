@@ -63,21 +63,29 @@ func runGateway() {
 	}
 
 	// Initialize OpenTelemetry (graceful noop if OTEL_EXPORTER_OTLP_ENDPOINT not set)
+	otelEnv := os.Getenv("ARGOCLAW_ENVIRONMENT")
+	if otelEnv == "" {
+		otelEnv = "production"
+	}
 	otelShutdown, otelErr := telemetry.Setup(context.Background(), telemetry.Config{
 		ServiceName: "argoclaw",
-		Environment: "production",
+		Environment: otelEnv,
 	})
 	if otelErr != nil {
 		slog.Warn("OTel initialization failed (degraded telemetry)", "err", otelErr)
 	}
 	defer func() {
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if err := otelShutdown(shutdownCtx); err != nil {
-			slog.Warn("OTel shutdown error", "err", err)
+		if otelShutdown != nil {
+			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			if err := otelShutdown(shutdownCtx); err != nil {
+				slog.Error("OTel shutdown error", "error", err)
+			}
 		}
 	}()
-	_ = telemetry.InitMetrics() // Initialize GenAI metrics (best-effort)
+	if err := telemetry.InitMetrics(); err != nil {
+		slog.Warn("failed to initialize OTel metrics", "error", err)
+	}
 
 	// Create core components
 	msgBus := bus.New()

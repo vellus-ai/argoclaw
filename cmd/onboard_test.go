@@ -4,8 +4,11 @@ package cmd
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"pgregory.net/rapid"
 )
 
 func setTestEnv(t *testing.T, key, val string) {
@@ -123,6 +126,91 @@ func TestNonInteractive_PreservesExistingToken(t *testing.T) {
 	}
 	if !strings.Contains(content, "mykey1234567890123456789012345678") {
 		t.Errorf("encryption key not preserved; env file:\n%s", content)
+	}
+}
+
+func TestPBT_NonInteractive_NeverPanics(t *testing.T) {
+	// Use RuneFrom with explicit printable ASCII runes to avoid null bytes rejected by os.Setenv.
+	printableRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_=+/.:@!#%^&*()")
+	printable := rapid.StringOf(rapid.RuneFrom(printableRunes))
+	rapid.Check(t, func(rt *rapid.T) {
+		dsn := printable.Draw(rt, "dsn")
+		token := printable.Draw(rt, "token")
+		key := printable.Draw(rt, "key")
+
+		// rapid.T doesn't have Setenv; set and restore env vars manually.
+		setTestEnv(t, "ARGOCLAW_POSTGRES_DSN", dsn)
+		setTestEnv(t, "ARGOCLAW_GATEWAY_TOKEN", token)
+		setTestEnv(t, "ARGOCLAW_ENCRYPTION_KEY", key)
+
+		dir := t.TempDir()
+		opts := nonInteractiveOpts{
+			configPath: filepath.Join(dir, "argoclaw.json"),
+			envPath:    filepath.Join(dir, ".env.local"),
+			skipDB:     true,
+		}
+		// Verify no panic occurs with any combination of string inputs.
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					rt.Fatalf("runOnboardNonInteractiveE panicked: %v", r)
+				}
+			}()
+			_ = runOnboardNonInteractiveE(opts)
+		}()
+	})
+}
+
+func TestPBT_OnboardWriteEnvFile_NeverPanics(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		dsn := rapid.String().Draw(rt, "dsn")
+		token := rapid.String().Draw(rt, "token")
+		key := rapid.String().Draw(rt, "key")
+
+		dir := t.TempDir()
+		path := filepath.Join(dir, ".env.local")
+		// Verify it never panics with arbitrary string inputs.
+		_ = onboardWriteEnvFile(path, dsn, token, key)
+	})
+}
+
+func TestOnboardWriteEnvFile_SingleQuotesValues(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, ".env.local")
+
+	dsn := "postgres://user:p@$$w0rd!@localhost/db"
+	token := "tok$en"
+	key := "key with spaces"
+
+	if err := onboardWriteEnvFile(path, dsn, token, key); err != nil {
+		t.Fatalf("onboardWriteEnvFile returned error: %v", err)
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	text := string(content)
+	for _, want := range []string{
+		"export ARGOCLAW_POSTGRES_DSN='" + dsn + "'",
+		"export ARGOCLAW_GATEWAY_TOKEN='" + token + "'",
+		"export ARGOCLAW_ENCRYPTION_KEY='" + key + "'",
+	} {
+		if !strings.Contains(text, want) {
+			t.Errorf("env file missing %q\nactual:\n%s", want, text)
+		}
+	}
+}
+
+func TestOnboardGenerateToken_ReturnsHexOfCorrectLength(t *testing.T) {
+	for _, length := range []int{1, 8, 16, 32, 64} {
+		tok, err := onboardGenerateToken(length)
+		if err != nil {
+			t.Fatalf("onboardGenerateToken(%d) unexpected error: %v", length, err)
+		}
+		if got := len(tok); got != length*2 {
+			t.Errorf("onboardGenerateToken(%d) len = %d, want %d", length, got, length*2)
+		}
 	}
 }
 

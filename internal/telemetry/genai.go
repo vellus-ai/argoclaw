@@ -2,6 +2,7 @@ package telemetry
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"go.opentelemetry.io/otel"
@@ -34,43 +35,47 @@ type GenAIAttrs struct {
 }
 
 var (
-	genAITokenUsage    metric.Int64Histogram
-	genAIOpDuration    metric.Float64Histogram
-	metricsInitialized bool
+	metricsOnce     sync.Once
+	genAITokenUsage metric.Int64Histogram
+	genAIOpDuration metric.Float64Histogram
 )
 
 // InitMetrics initializes GenAI metrics. Call after Setup().
+// Safe to call multiple times — initialization runs exactly once via sync.Once.
 func InitMetrics() error {
-	meter := otel.GetMeterProvider().Meter("argoclaw/genai")
+	var initErr error
+	metricsOnce.Do(func() {
+		meter := otel.GetMeterProvider().Meter("argoclaw/genai")
 
-	var err error
-	genAITokenUsage, err = meter.Int64Histogram(
-		"gen_ai.client.token.usage",
-		metric.WithDescription("Number of tokens used per GenAI request"),
-		metric.WithUnit("{token}"),
-	)
-	if err != nil {
-		return err
-	}
+		var err error
+		genAITokenUsage, err = meter.Int64Histogram(
+			"gen_ai.client.token.usage",
+			metric.WithDescription("Number of tokens used per GenAI request"),
+			metric.WithUnit("{token}"),
+		)
+		if err != nil {
+			initErr = err
+			return
+		}
 
-	genAIOpDuration, err = meter.Float64Histogram(
-		"gen_ai.client.operation.duration",
-		metric.WithDescription("Duration of GenAI client operations in milliseconds"),
-		metric.WithUnit("ms"),
-		metric.WithExplicitBucketBoundaries(0, 100, 250, 500, 1000, 2500, 5000, 10000, 30000),
-	)
-	if err != nil {
-		return err
-	}
-
-	metricsInitialized = true
-	return nil
+		genAIOpDuration, err = meter.Float64Histogram(
+			"gen_ai.client.operation.duration",
+			metric.WithDescription("Duration of GenAI client operations in milliseconds"),
+			metric.WithUnit("ms"),
+			metric.WithExplicitBucketBoundaries(0, 100, 250, 500, 1000, 2500, 5000, 10000, 30000),
+		)
+		if err != nil {
+			initErr = err
+			return
+		}
+	})
+	return initErr
 }
 
 // RecordLLMCall wraps an LLM API call with OpenTelemetry tracing and metrics.
-// Attrs.InputTokens and Attrs.OutputTokens should be set before or after fn returns
-// by updating the GenAIAttrs pointer if using a post-call callback pattern.
-func RecordLLMCall(ctx context.Context, attrs GenAIAttrs, fn func(context.Context) error) error {
+// attrs is passed as a pointer so callers can update InputTokens/OutputTokens/FinishReason
+// after fn returns (post-call callback pattern) and have those values reflected in metrics.
+func RecordLLMCall(ctx context.Context, attrs *GenAIAttrs, fn func(context.Context) error) error {
 	op := attrs.Operation
 	if op == "" {
 		op = "chat"
@@ -104,14 +109,14 @@ func RecordLLMCall(ctx context.Context, attrs GenAIAttrs, fn func(context.Contex
 			attribute.Int(AttrGenAIUsageInputTokens, attrs.InputTokens),
 			attribute.Int(AttrGenAIUsageOutputTokens, attrs.OutputTokens),
 		)
-		if metricsInitialized && genAITokenUsage != nil {
+		if genAITokenUsage != nil {
 			total := int64(attrs.InputTokens + attrs.OutputTokens)
 			genAITokenUsage.Record(ctx, total,
 				metric.WithAttributeSet(commonAttrs))
 		}
 	}
 
-	if metricsInitialized && genAIOpDuration != nil {
+	if genAIOpDuration != nil {
 		genAIOpDuration.Record(ctx, durationMs,
 			metric.WithAttributeSet(commonAttrs))
 	}
