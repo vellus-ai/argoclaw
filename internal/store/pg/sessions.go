@@ -246,3 +246,104 @@ func tenantFilter(tid uuid.UUID, nextIdx int, args []any) (string, []any, int) {
 	args = append(args, tid)
 	return clause, args, nextIdx + 1
 }
+
+func (s *PGSessionStore) getOrInit(key string) *store.SessionData {
+	if data, ok := s.cache[key]; ok {
+		return data
+	}
+
+	// Try loading from DB first to avoid overwriting existing messages.
+	// getOrInit is called from in-memory-only methods (SetLabel, etc.) which don't have ctx.
+	// Use uuid.Nil for tenant — these methods operate on already-cached sessions.
+	data := s.loadFromDB(key, uuid.Nil)
+	if data != nil {
+		s.cache[key] = data
+		return data
+	}
+
+	// Not in DB — initialize in-memory only (no ctx/tenant_id available here).
+	// Sessions must be persisted via GetOrCreate(ctx) to include the correct tenant_id.
+	// Inserting without tenant_id would create an orphaned row that bypasses tenant isolation.
+	slog.Warn("sessions.getOrInit: session not in DB, creating in-memory only — caller should use GetOrCreate first", "key", key)
+	now := time.Now()
+	data = &store.SessionData{
+		Key:      key,
+		Messages: []providers.Message{},
+		Created:  now,
+		Updated:  now,
+	}
+	s.cache[key] = data
+	return data
+}
+
+// loadFromDB loads a session from the database. When tid != uuid.Nil, adds a tenant_id filter.
+func (s *PGSessionStore) loadFromDB(key string, tid uuid.UUID) *store.SessionData {
+	var sessionKey string
+	var msgsJSON []byte
+	var summary, model, provider, channel, label, spawnedBy, userID *string
+	var agentID, teamID *uuid.UUID
+	var inputTokens, outputTokens int64
+	var compactionCount, memoryFlushCompactionCount, spawnDepth int
+	var memoryFlushAt int64
+	var createdAt, updatedAt time.Time
+	var metaJSON *[]byte
+
+	q := `SELECT session_key, messages, summary, model, provider, channel,
+		 input_tokens, output_tokens, compaction_count,
+		 memory_flush_compaction_count, memory_flush_at,
+		 label, spawned_by, spawn_depth, agent_id, user_id,
+		 COALESCE(metadata, '{}'), created_at, updated_at, team_id
+		 FROM sessions WHERE session_key = $1`
+	args := []any{key}
+	if tid != uuid.Nil {
+		q += " AND tenant_id = $2"
+		args = append(args, tid)
+	}
+
+	err := s.db.QueryRow(q, args...).Scan(&sessionKey, &msgsJSON, &summary, &model, &provider, &channel,
+		&inputTokens, &outputTokens, &compactionCount,
+		&memoryFlushCompactionCount, &memoryFlushAt,
+		&label, &spawnedBy, &spawnDepth, &agentID, &userID,
+		&metaJSON, &createdAt, &updatedAt, &teamID)
+	if err != nil {
+		return nil
+	}
+
+	var msgs []providers.Message
+	json.Unmarshal(msgsJSON, &msgs)
+
+	var meta map[string]string
+	if metaJSON != nil {
+		json.Unmarshal(*metaJSON, &meta)
+	}
+
+	return &store.SessionData{
+		Key:                        sessionKey,
+		Messages:                   msgs,
+		Summary:                    derefStr(summary),
+		Created:                    createdAt,
+		Updated:                    updatedAt,
+		AgentUUID:                  derefUUID(agentID),
+		UserID:                     derefStr(userID),
+		TeamID:                     teamID,
+		Model:                      derefStr(model),
+		Provider:                   derefStr(provider),
+		Channel:                    derefStr(channel),
+		InputTokens:                inputTokens,
+		OutputTokens:               outputTokens,
+		CompactionCount:            compactionCount,
+		MemoryFlushCompactionCount: memoryFlushCompactionCount,
+		MemoryFlushAt:              memoryFlushAt,
+		Label:                      derefStr(label),
+		SpawnedBy:                  derefStr(spawnedBy),
+		SpawnDepth:                 spawnDepth,
+		Metadata:                   meta,
+	}
+}
+
+func nilSessionUUID(u uuid.UUID) *uuid.UUID {
+	if u == uuid.Nil {
+		return nil
+	}
+	return &u
+}
