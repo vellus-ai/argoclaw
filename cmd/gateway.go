@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -35,6 +36,7 @@ import (
 	"github.com/vellus-ai/argoclaw/internal/store"
 	"github.com/vellus-ai/argoclaw/internal/store/pg"
 	"github.com/vellus-ai/argoclaw/internal/tasks"
+	"github.com/vellus-ai/argoclaw/internal/telemetry"
 	"github.com/vellus-ai/argoclaw/internal/tools"
 	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
@@ -59,6 +61,23 @@ func runGateway() {
 		slog.Error("failed to load config", "error", err)
 		os.Exit(1)
 	}
+
+	// Initialize OpenTelemetry (graceful noop if OTEL_EXPORTER_OTLP_ENDPOINT not set)
+	otelShutdown, otelErr := telemetry.Setup(context.Background(), telemetry.Config{
+		ServiceName: "argoclaw",
+		Environment: "production",
+	})
+	if otelErr != nil {
+		slog.Warn("OTel initialization failed (degraded telemetry)", "err", otelErr)
+	}
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := otelShutdown(shutdownCtx); err != nil {
+			slog.Warn("OTel shutdown error", "err", err)
+		}
+	}()
+	_ = telemetry.InitMetrics() // Initialize GenAI metrics (best-effort)
 
 	// Create core components
 	msgBus := bus.New()
