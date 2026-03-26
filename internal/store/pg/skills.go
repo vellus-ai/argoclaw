@@ -1,6 +1,7 @@
 package pg
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"log/slog"
@@ -142,6 +143,49 @@ func (s *PGSkillStore) ListAllSkills() []store.SkillInfo {
 	}
 	if err := rows.Err(); err != nil {
 		slog.Warn("ListAllSkills: rows iteration error", "error", err)
+	}
+	return result
+}
+
+// ListSkillsByTenant returns active skills scoped to the tenant in ctx.
+func (s *PGSkillStore) ListSkillsByTenant(ctx context.Context) []store.SkillInfo {
+	tid := tenantIDFromCtx(ctx)
+	q := `SELECT id, name, slug, description, visibility, tags, version, is_system, status, enabled, deps, file_path
+		  FROM skills WHERE status != 'deleted'`
+	var args []any
+	if tid != uuid.Nil {
+		q += " AND tenant_id = $1"
+		args = append(args, tid)
+	}
+	q += " ORDER BY name"
+
+	rows, err := s.db.QueryContext(ctx, q, args...)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+
+	var result []store.SkillInfo
+	for rows.Next() {
+		var id uuid.UUID
+		var name, slug, visibility, status string
+		var desc *string
+		var tags []string
+		var version int
+		var isSystem, enabled bool
+		var depsRaw []byte
+		var filePath *string
+		if err := rows.Scan(&id, &name, &slug, &desc, &visibility, pq.Array(&tags), &version, &isSystem, &status, &enabled, &depsRaw, &filePath); err != nil {
+			continue
+		}
+		info := buildSkillInfo(id.String(), name, slug, desc, version, s.baseDir, filePath)
+		info.Visibility = visibility
+		info.Tags = tags
+		info.IsSystem = isSystem
+		info.Status = status
+		info.Enabled = enabled
+		info.MissingDeps = parseDepsColumn(depsRaw)
+		result = append(result, info)
 	}
 	return result
 }

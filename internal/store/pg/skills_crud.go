@@ -90,7 +90,8 @@ func (s *PGSkillStore) DeleteSkill(id uuid.UUID) error {
 func (s *PGSkillStore) DeleteSkillWithCtx(ctx context.Context, id uuid.UUID) error {
 	tid := tenantIDFromCtx(ctx)
 
-	// Reject deletion of system skills
+	// Reject deletion of system skills.
+	// Include tenant filter when present to avoid cross-tenant info leakage.
 	var isSystem bool
 	q := "SELECT is_system FROM skills WHERE id = $1"
 	args := []any{id}
@@ -121,15 +122,23 @@ func (s *PGSkillStore) DeleteSkillWithCtx(ctx context.Context, id uuid.UUID) err
 		return fmt.Errorf("delete skill user grants: %w", err)
 	}
 
-	// Soft-delete the skill (use 'deleted' status, distinct from 'archived' which means missing deps)
+	// Soft-delete the skill (use 'deleted' status, distinct from 'archived' which means missing deps).
+	// When tenant context present, restrict to own tenant to prevent cross-tenant deletion.
+	// Check RowsAffected to detect silent cross-tenant rejection.
 	deleteQ := "UPDATE skills SET status = 'deleted' WHERE id = $1"
 	deleteArgs := []any{id}
 	if tid != uuid.Nil {
 		deleteQ += " AND tenant_id = $2"
 		deleteArgs = append(deleteArgs, tid)
 	}
-	if _, err := tx.ExecContext(ctx, deleteQ, deleteArgs...); err != nil {
+	result, err := tx.ExecContext(ctx, deleteQ, deleteArgs...)
+	if err != nil {
 		return fmt.Errorf("delete skill: %w", err)
+	}
+	if tid != uuid.Nil {
+		if n, _ := result.RowsAffected(); n == 0 {
+			return fmt.Errorf("skill not found or access denied")
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
