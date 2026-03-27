@@ -9,7 +9,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/disintegration/imaging"
+	"golang.org/x/image/draw"
+
+	// Register standard decoders for image.Decode.
+	_ "golang.org/x/image/webp"
 )
 
 // Image sanitization constants (moved from telegram/image_sanitize.go).
@@ -31,23 +34,30 @@ func init() {
 
 // SanitizeImage resizes and compresses an image for LLM vision input.
 // Applied uniformly to all channels at the agent loop level.
-// Pipeline: decode → auto-orient EXIF → resize if >1200px → JPEG compress until <5MB.
+// Pipeline: decode → resize if >1200px → JPEG compress until <5MB.
 func SanitizeImage(inputPath string) (string, error) {
-	img, err := imaging.Open(inputPath, imaging.AutoOrientation(true))
+	f, err := os.Open(inputPath)
 	if err != nil {
 		return "", fmt.Errorf("open image: %w", err)
 	}
+	defer f.Close()
 
-	bounds := img.Bounds()
+	src, _, err := image.Decode(f)
+	if err != nil {
+		return "", fmt.Errorf("decode image: %w", err)
+	}
+
+	bounds := src.Bounds()
 	w, h := bounds.Dx(), bounds.Dy()
 
+	// Resize if either dimension exceeds the max side.
 	if w > imageMaxSide || h > imageMaxSide {
-		img = imaging.Fit(img, imageMaxSide, imageMaxSide, imaging.Lanczos)
+		src = fitImage(src, imageMaxSide, imageMaxSide)
 	}
 
 	for _, quality := range jpegQualities {
 		var buf bytes.Buffer
-		if err := jpeg.Encode(&buf, img, &jpeg.Options{Quality: quality}); err != nil {
+		if err := jpeg.Encode(&buf, src, &jpeg.Options{Quality: quality}); err != nil {
 			return "", fmt.Errorf("encode jpeg (q=%d): %w", quality, err)
 		}
 		if buf.Len() <= imageSanitizeMaxBytes {
@@ -60,4 +70,25 @@ func SanitizeImage(inputPath string) (string, error) {
 	}
 
 	return "", fmt.Errorf("image too large even at lowest quality (dimensions: %dx%d)", w, h)
+}
+
+// fitImage scales the image to fit within maxW x maxH preserving aspect ratio.
+// Uses Catmull-Rom (bicubic) interpolation for quality similar to Lanczos.
+func fitImage(src image.Image, maxW, maxH int) image.Image {
+	bounds := src.Bounds()
+	srcW := bounds.Dx()
+	srcH := bounds.Dy()
+
+	ratio := float64(srcW) / float64(srcH)
+	newW, newH := maxW, maxH
+
+	if float64(maxW)/float64(maxH) > ratio {
+		newW = int(float64(maxH) * ratio)
+	} else {
+		newH = int(float64(maxW) / ratio)
+	}
+
+	dst := image.NewRGBA(image.Rect(0, 0, newW, newH))
+	draw.CatmullRom.Scale(dst, dst.Bounds(), src, bounds, draw.Over, nil)
+	return dst
 }
