@@ -24,9 +24,9 @@ RUN set -eux; \
     if [ "$ENABLE_WEB_UI" = "true" ]; then \
         apt-get update && apt-get install -y --no-install-recommends nodejs npm; \
         npm install -g pnpm@10; \
-        cd ui/web && pnpm install --frozen-lockfile && pnpm build; \
+        cd /src/ui/web && pnpm install --frozen-lockfile && pnpm build; \
         rm -f /src/internal/http/ui_dist/.gitkeep; \
-        cp -r dist/* /src/internal/http/ui_dist/; \
+        cp -r /src/ui/web/dist/* /src/internal/http/ui_dist/; \
         echo "Web UI built and embedded"; \
     fi
 
