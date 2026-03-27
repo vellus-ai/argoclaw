@@ -1,7 +1,9 @@
 # syntax=docker/dockerfile:1
 
 # ── Stage 0: Build Web UI (optional) ──
-FROM node:22-bookworm-slim AS ui-builder
+# node:22-bookworm-slim linux/amd64 digest pinned for reproducible builds (supply chain hardening).
+# To update: docker manifest inspect node:22-bookworm-slim | jq '.manifests[] | select(.platform.architecture=="amd64") | .digest'
+FROM node:22-bookworm-slim@sha256:3efebb4f5f2952af4c86fe443a4e219129cc36f90e93d1ea2c4aa6cf65bdecf2 AS ui-builder
 
 ARG ENABLE_WEB_UI=false
 
@@ -10,7 +12,7 @@ WORKDIR /ui
 # Only copy and build if ENABLE_WEB_UI=true
 COPY ui/web/package.json ui/web/pnpm-lock.yaml ./
 RUN if [ "$ENABLE_WEB_UI" = "true" ]; then \
-        corepack enable && corepack prepare pnpm@10 --activate && \
+        corepack enable && corepack prepare pnpm@10.30.1 --activate && \
         pnpm install --frozen-lockfile; \
     fi
 
