@@ -334,6 +334,12 @@ func (s *Server) BuildMux() *http.ServeMux {
 		mux.Handle("/mcp/bridge", handler)
 	}
 
+	// Web UI (SPA) — served last as catch-all for "/"
+	if uiFS := httpapi.UIDistFS(); uiFS != nil {
+		mux.Handle("/", httpapi.NewWebUIHandler(uiFS))
+		slog.Info("web_ui: embedded dashboard enabled at /")
+	}
+
 	s.mux = mux
 	return mux
 }

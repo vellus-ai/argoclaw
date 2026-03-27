@@ -16,7 +16,19 @@ COPY . .
 ARG ENABLE_OTEL=false
 ARG ENABLE_TSNET=false
 ARG ENABLE_REDIS=false
+ARG ENABLE_WEB_UI=false
 ARG VERSION=dev
+
+# Build Web UI (optional — embeds dashboard into the Go binary)
+RUN set -eux; \
+    if [ "$ENABLE_WEB_UI" = "true" ]; then \
+        apt-get update && apt-get install -y --no-install-recommends nodejs npm; \
+        npm install -g pnpm@10; \
+        cd ui/web && pnpm install --frozen-lockfile && pnpm build; \
+        rm -f /src/internal/http/ui_dist/.gitkeep; \
+        cp -r dist/* /src/internal/http/ui_dist/; \
+        echo "Web UI built and embedded"; \
+    fi
 
 # Build static binary (CGO disabled for scratch/alpine compatibility)
 RUN set -eux; \
