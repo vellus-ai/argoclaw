@@ -334,6 +334,18 @@ func (s *Server) BuildMux() *http.ServeMux {
 		mux.Handle("/mcp/bridge", handler)
 	}
 
+	// Web UI (SPA) — served last as catch-all for "/".
+	// Static assets are intentionally public so the login page loads before
+	// the user has a token. All sensitive data access is protected at the API
+	// layer (/v1/*, /ws, /mcp/*). See NewWebUIHandler for security headers.
+	if uiFS := httpapi.UIDistFS(); uiFS != nil {
+		if s.cfg.Gateway.Token == "" {
+			slog.Warn("security.web_ui: gateway token not configured — dashboard API access will be unauthenticated")
+		}
+		mux.Handle("/", httpapi.NewWebUIHandler(uiFS))
+		slog.Info("web_ui: embedded dashboard enabled at /")
+	}
+
 	s.mux = mux
 	return mux
 }

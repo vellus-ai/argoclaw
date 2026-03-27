@@ -1,6 +1,29 @@
 # syntax=docker/dockerfile:1
 
-# ── Stage 1: Build ──
+# ── Stage 0: Build Web UI (optional) ──
+# node:22-bookworm-slim linux/amd64 digest pinned for reproducible builds (supply chain hardening).
+# To update: docker manifest inspect node:22-bookworm-slim | jq '.manifests[] | select(.platform.architecture=="amd64") | .digest'
+FROM node:22-bookworm-slim@sha256:3efebb4f5f2952af4c86fe443a4e219129cc36f90e93d1ea2c4aa6cf65bdecf2 AS ui-builder
+
+ARG ENABLE_WEB_UI=false
+
+WORKDIR /ui
+
+# Only copy and build if ENABLE_WEB_UI=true
+COPY ui/web/package.json ui/web/pnpm-lock.yaml ./
+RUN if [ "$ENABLE_WEB_UI" = "true" ]; then \
+        corepack enable && corepack prepare pnpm@10.30.1 --activate && \
+        pnpm install --frozen-lockfile; \
+    fi
+
+COPY ui/web/ ./
+RUN if [ "$ENABLE_WEB_UI" = "true" ]; then \
+        pnpm build; \
+    else \
+        mkdir -p dist; \
+    fi
+
+# ── Stage 1: Build Go binary ──
 FROM golang:1.26-bookworm AS builder
 
 WORKDIR /src
@@ -11,6 +34,9 @@ RUN go mod download
 
 # Copy source
 COPY . .
+
+# Copy UI dist from ui-builder (empty if ENABLE_WEB_UI=false)
+COPY --from=ui-builder /ui/dist/ /src/internal/http/ui_dist/
 
 # Build args
 ARG ENABLE_OTEL=false
