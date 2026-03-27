@@ -1,6 +1,27 @@
 # syntax=docker/dockerfile:1
 
-# ── Stage 1: Build ──
+# ── Stage 0: Build Web UI (optional) ──
+FROM node:22-bookworm-slim AS ui-builder
+
+ARG ENABLE_WEB_UI=false
+
+WORKDIR /ui
+
+# Only copy and build if ENABLE_WEB_UI=true
+COPY ui/web/package.json ui/web/pnpm-lock.yaml ./
+RUN if [ "$ENABLE_WEB_UI" = "true" ]; then \
+        corepack enable && corepack prepare pnpm@10 --activate && \
+        pnpm install --frozen-lockfile; \
+    fi
+
+COPY ui/web/ ./
+RUN if [ "$ENABLE_WEB_UI" = "true" ]; then \
+        pnpm build; \
+    else \
+        mkdir -p dist; \
+    fi
+
+# ── Stage 1: Build Go binary ──
 FROM golang:1.26-bookworm AS builder
 
 WORKDIR /src
@@ -12,23 +33,14 @@ RUN go mod download
 # Copy source
 COPY . .
 
+# Copy UI dist from ui-builder (empty if ENABLE_WEB_UI=false)
+COPY --from=ui-builder /ui/dist/ /src/internal/http/ui_dist/
+
 # Build args
 ARG ENABLE_OTEL=false
 ARG ENABLE_TSNET=false
 ARG ENABLE_REDIS=false
-ARG ENABLE_WEB_UI=false
 ARG VERSION=dev
-
-# Build Web UI (optional — embeds dashboard into the Go binary)
-RUN set -eux; \
-    if [ "$ENABLE_WEB_UI" = "true" ]; then \
-        apt-get update && apt-get install -y --no-install-recommends nodejs npm; \
-        npm install -g pnpm@10; \
-        cd /src/ui/web && pnpm install --frozen-lockfile && pnpm build; \
-        rm -f /src/internal/http/ui_dist/.gitkeep; \
-        cp -r /src/ui/web/dist/* /src/internal/http/ui_dist/; \
-        echo "Web UI built and embedded"; \
-    fi
 
 # Build static binary (CGO disabled for scratch/alpine compatibility)
 RUN set -eux; \
