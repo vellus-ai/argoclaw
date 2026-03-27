@@ -16,6 +16,7 @@ tmp/
 .claude/
 .vscode/
 .idea/
-ui/
+ui/web/node_modules/
+ui/web/dist/
 plans/
 skills-store/
