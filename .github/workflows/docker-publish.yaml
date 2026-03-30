@@ -24,6 +24,7 @@ jobs:
           # ── Runtime variants ──
           - variant: latest
             suffix: ""
+            enable_web_ui: "false"
             enable_otel: "false"
             enable_tsnet: "false"
             enable_redis: "false"
@@ -32,6 +33,7 @@ jobs:
             enable_full_skills: "false"
           - variant: node
             suffix: "-node"
+            enable_web_ui: "false"
             enable_otel: "false"
             enable_tsnet: "false"
             enable_redis: "false"
@@ -40,6 +42,7 @@ jobs:
             enable_full_skills: "false"
           - variant: python
             suffix: "-python"
+            enable_web_ui: "false"
             enable_otel: "false"
             enable_tsnet: "false"
             enable_redis: "false"
@@ -48,15 +51,29 @@ jobs:
             enable_full_skills: "false"
           - variant: full
             suffix: "-full"
+            enable_web_ui: "false"
             enable_otel: "false"
             enable_tsnet: "false"
             enable_redis: "false"
             enable_node: "true"
             enable_python: "true"
             enable_full_skills: "true"
+          # ── Web UI variant (React SPA embedded in binary) ──
+          # Issue #33: combines security patches (appsec-tenant-isolation, appsec-branding-validation)
+          # with the embedded React SPA. Built from main HEAD which already includes both.
+          - variant: webui
+            suffix: "-webui"
+            enable_web_ui: "true"
+            enable_otel: "false"
+            enable_tsnet: "false"
+            enable_redis: "false"
+            enable_node: "false"
+            enable_python: "false"
+            enable_full_skills: "false"
           # ── Build-tag variants ──
           - variant: otel
             suffix: "-otel"
+            enable_web_ui: "false"
             enable_otel: "true"
             enable_tsnet: "false"
             enable_redis: "false"
@@ -65,6 +82,7 @@ jobs:
             enable_full_skills: "false"
           - variant: tsnet
             suffix: "-tsnet"
+            enable_web_ui: "false"
             enable_otel: "false"
             enable_tsnet: "true"
             enable_redis: "false"
@@ -73,6 +91,7 @@ jobs:
             enable_full_skills: "false"
           - variant: redis
             suffix: "-redis"
+            enable_web_ui: "false"
             enable_otel: "false"
             enable_tsnet: "false"
             enable_redis: "true"
@@ -140,6 +159,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
+            ENABLE_WEB_UI=${{ matrix.enable_web_ui || 'false' }}
             ENABLE_OTEL=${{ matrix.enable_otel }}
             ENABLE_TSNET=${{ matrix.enable_tsnet }}
             ENABLE_REDIS=${{ matrix.enable_redis }}

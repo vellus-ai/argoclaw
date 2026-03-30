@@ -1,0 +1,115 @@
+name: Rebuild hardened WebUI image (issue #33)
+
+# Triggered manually or on push to the fix branch.
+# Produces: argoclaw:<tag>-webui combining security patches + embedded React SPA.
+#
+# Context:
+#   - v1.79.0-webui: built from claude/feat/embed-web-ui branch (pre-merge). Has WebUI, missing
+#     the final adjustments committed at 402d322f.
+#   - v0.1.1-sec: built from main before embed-web-ui merge. Has security patches, no WebUI.
+#   - main HEAD (402d322f): squash-merge of embed-web-ui over a base that already contained all
+#     appsec patches (tenant isolation #21/#22, branding validation #14). This is the source
+#     of truth for the combined image.
+#
+# Resolution: build with ENABLE_WEB_UI=true from main HEAD. The Dockerfile already supports
+# this via the optional ui-builder stage (node:22-bookworm-slim with pinned digest).
+
+on:
+  push:
+    branches:
+      - claude/fix/issue-33-security-webui-merge
+  workflow_dispatch:
+    inputs:
+      tag_override:
+        description: "Image tag (default: v1.79.1-webui)"
+        required: false
+        default: "v1.79.1-webui"
+
+env:
+  GAR_IMAGE: us-central1-docker.pkg.dev/vellus-ai-agent-platform/argoclaw/argoclaw
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write  # Workload Identity Federation para GAR
+
+jobs:
+  build-webui-hardened:
+    name: Build argoclaw with WebUI + security patches
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Authenticate to Google Cloud (Workload Identity Federation)
+        id: gcp-auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Log in to Google Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: us-central1-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.gcp-auth.outputs.access_token }}
+
+      - name: Compute image tag
+        id: tag
+        run: |
+          TAG="${{ github.event.inputs.tag_override || 'v1.79.1-webui' }}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Building image with tag: ${TAG}"
+
+      - name: Build and push hardened WebUI image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          # linux/amd64 matches the K8s node pool (GKE Standard, us-central1).
+          # arm64 added for future multi-arch support without blocking.
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.GAR_IMAGE }}:${{ steps.tag.outputs.tag }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/vellus-ai/argoclaw
+            org.opencontainers.image.revision=${{ github.sha }}
+            vellus.ai/issue=33
+            vellus.ai/variant=webui-hardened
+          build-args: |
+            ENABLE_WEB_UI=true
+            ENABLE_OTEL=false
+            ENABLE_TSNET=false
+            ENABLE_REDIS=false
+            ENABLE_NODE=false
+            ENABLE_PYTHON=false
+            ENABLE_FULL_SKILLS=false
+            VERSION=${{ steps.tag.outputs.tag }}
+          cache-from: type=gha,scope=webui-hardened
+          cache-to: type=gha,mode=max,scope=webui-hardened
+
+      - name: Summary
+        run: |
+          echo "## Image built successfully" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Tag:** \`${{ steps.tag.outputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Image:** \`${{ env.GAR_IMAGE }}:${{ steps.tag.outputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Security patches included (from main HEAD 402d322f)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- fix(security): tenant_id isolation in Sessions, Cron, Skills stores (#22)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- fix(store): tenant isolation in SessionStore/CronStore/SkillStore (#21)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- fix(security): input validation in branding handler (#14)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- feat: embed Web UI dashboard in gateway binary (#33 resolution)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Next step" >> "$GITHUB_STEP_SUMMARY"
+          echo "Update \`k8s/argoclaw-vellus/03-deployment.yaml\` image tag to \`${{ steps.tag.outputs.tag }}\` and remove the issue #33 comments." >> "$GITHUB_STEP_SUMMARY"
