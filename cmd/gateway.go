@@ -300,6 +300,12 @@ func runGateway() {
 	server.SetOAuthHandler(httpapi.NewOAuthHandler(cfg.Gateway.Token, pgStores.Providers, pgStores.ConfigSecrets, providerRegistry, msgBus))
 	server.SetAnthropicAuthHandler(httpapi.NewAnthropicAuthHandler(cfg.Gateway.Token, pgStores.Providers, providerRegistry, msgBus))
 
+	// User auth (email/password) — only wired when JWT secret is configured.
+	if cfg.Gateway.JWTSecret != "" {
+		server.SetUserAuthHandler(httpapi.NewUserAuthHandler(pgStores.Users, cfg.Gateway.JWTSecret))
+		slog.Info("user_auth: email/password endpoints enabled at /v1/auth/*")
+	}
+
 	// contextFileInterceptor is created inside wireExtras.
 	// Declared here so it can be passed to registerAllMethods → AgentsMethods
 	// for immediate cache invalidation on agents.files.set.

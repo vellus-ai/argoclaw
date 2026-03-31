@@ -30,4 +30,5 @@ type Stores struct {
 	APIKeys           APIKeyStore
 	Heartbeats        HeartbeatStore
 	ConfigPermissions ConfigPermissionStore
+	Users             UserStore
 }

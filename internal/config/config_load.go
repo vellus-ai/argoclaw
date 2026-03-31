@@ -115,6 +115,7 @@ func (c *Config) applyEnvOverrides() {
 	envStr("ARGOCLAW_OLLAMA_CLOUD_API_KEY", &c.Providers.OllamaCloud.APIKey)
 	envStr("ARGOCLAW_OLLAMA_CLOUD_API_BASE", &c.Providers.OllamaCloud.APIBase)
 	envStr("ARGOCLAW_GATEWAY_TOKEN", &c.Gateway.Token)
+	envStr("ARGOCLAW_JWT_SECRET", &c.Gateway.JWTSecret)
 	envStr("ARGOCLAW_TELEGRAM_TOKEN", &c.Channels.Telegram.Token)
 	envStr("ARGOCLAW_DISCORD_TOKEN", &c.Channels.Discord.Token)
 	envStr("ARGOCLAW_ZALO_TOKEN", &c.Channels.Zalo.Token)
