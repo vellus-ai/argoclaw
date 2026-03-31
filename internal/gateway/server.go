@@ -357,7 +357,6 @@ func (s *Server) BuildMux() *http.ServeMux {
 }
 
 // securityHeadersMiddleware adds OWASP baseline security headers to all responses.
-// Addresses Gap G4 (RNF-16): HSTS, X-Content-Type-Options, X-Frame-Options.
 func securityHeadersMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
@@ -442,7 +441,6 @@ func tokenAuthMiddleware(token string, next http.Handler) http.Handler {
 func (s *Server) Start(ctx context.Context) error {
 	mux := s.BuildMux()
 
-	// Security headers middleware (OWASP baseline — Gap G4).
 	var handler http.Handler = securityHeadersMiddleware(mux)
 
 	// Wrap with JWT middleware when JWT secret is configured.

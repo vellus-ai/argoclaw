@@ -1,4 +1,4 @@
-package http
+package http_test
 
 import (
 	"bytes"
@@ -12,8 +12,16 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/vellus-ai/argoclaw/internal/auth"
+	httpapi "github.com/vellus-ai/argoclaw/internal/http"
 	"github.com/vellus-ai/argoclaw/internal/store"
 )
+
+// testAuthResp mirrors the JSON shape of the auth response.
+type testAuthResp struct {
+	AccessToken  string      `json:"access_token"`
+	RefreshToken string      `json:"refresh_token"`
+	User         *store.User `json:"user"`
+}
 
 // --- in-memory stub of store.UserStore ---
 
@@ -150,7 +158,7 @@ const testJWTSecret = "test-jwt-secret-key-min-32-chars!!!"
 
 func TestUserAuth_Register_Success(t *testing.T) {
 	us := newStubUserStore()
-	h := NewUserAuthHandler(us, testJWTSecret)
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -164,7 +172,7 @@ func TestUserAuth_Register_Success(t *testing.T) {
 		t.Fatalf("status = %d, want %d; body = %s", w.Code, http.StatusCreated, w.Body.String())
 	}
 
-	var resp authResponse
+	var resp testAuthResp
 	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
@@ -197,7 +205,7 @@ func TestUserAuth_Register_DuplicateEmail(t *testing.T) {
 		Role: "member", Status: "active",
 	}
 
-	h := NewUserAuthHandler(us, testJWTSecret)
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -214,7 +222,7 @@ func TestUserAuth_Register_DuplicateEmail(t *testing.T) {
 
 func TestUserAuth_Register_WeakPassword(t *testing.T) {
 	us := newStubUserStore()
-	h := NewUserAuthHandler(us, testJWTSecret)
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -238,7 +246,7 @@ func TestUserAuth_Login_Success(t *testing.T) {
 		Role: "admin", Status: "active", TenantID: ptrUUID(uuid.New()),
 	}
 
-	h := NewUserAuthHandler(us, testJWTSecret)
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -252,7 +260,7 @@ func TestUserAuth_Login_Success(t *testing.T) {
 		t.Fatalf("status = %d, want %d; body = %s", w.Code, http.StatusOK, w.Body.String())
 	}
 
-	var resp authResponse
+	var resp testAuthResp
 	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
@@ -290,7 +298,7 @@ func TestUserAuth_Login_WrongPassword(t *testing.T) {
 		Role: "member", Status: "active",
 	}
 
-	h := NewUserAuthHandler(us, testJWTSecret)
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -312,7 +320,7 @@ func TestUserAuth_Login_WrongPassword(t *testing.T) {
 
 func TestUserAuth_Login_NonExistentUser(t *testing.T) {
 	us := newStubUserStore()
-	h := NewUserAuthHandler(us, testJWTSecret)
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -337,7 +345,7 @@ func TestUserAuth_Login_Lockout(t *testing.T) {
 		Role: "member", Status: "active", FailedAttempts: 5, LockedUntil: &lockTime,
 	}
 
-	h := NewUserAuthHandler(us, testJWTSecret)
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -361,7 +369,7 @@ func TestUserAuth_Logout_Revokes(t *testing.T) {
 	}
 	us.users[user.Email] = user
 
-	h := NewUserAuthHandler(us, testJWTSecret)
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -376,7 +384,7 @@ func TestUserAuth_Logout_Revokes(t *testing.T) {
 		t.Fatalf("login status = %d, want %d", loginW.Code, http.StatusOK)
 	}
 
-	var loginResp authResponse
+	var loginResp testAuthResp
 	json.Unmarshal(loginW.Body.Bytes(), &loginResp)
 
 	// Logout

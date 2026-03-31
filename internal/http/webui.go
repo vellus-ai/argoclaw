@@ -8,7 +8,7 @@ import (
 
 // NewWebUIHandler creates an http.Handler that serves a SPA (Single Page
 // Application) from an fs.FS. It:
-//   - Adds security headers (CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
+//   - Adds a Content-Security-Policy header (baseline OWASP headers are set globally by securityHeadersMiddleware)
 //   - Serves static files directly for existing, non-directory paths
 //   - Falls back to index.html for unknown paths and directories — replicating
 //     nginx's "try_files $uri $uri/ /index.html" for client-side routing
@@ -21,10 +21,8 @@ func NewWebUIHandler(fsys fs.FS) nethttp.Handler {
 	fileServer := nethttp.FileServer(nethttp.FS(fsys))
 
 	return nethttp.HandlerFunc(func(w nethttp.ResponseWriter, r *nethttp.Request) {
-		// Security headers — applied to every response from this handler.
-		w.Header().Set("X-Frame-Options", "DENY")
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		// CSP is SPA-specific; baseline headers (HSTS, X-Frame-Options, etc.) are set globally
+		// by securityHeadersMiddleware in gateway/server.go.
 		w.Header().Set("Content-Security-Policy",
 			"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:")
 

@@ -301,7 +301,7 @@ func runGateway() {
 	server.SetAnthropicAuthHandler(httpapi.NewAnthropicAuthHandler(cfg.Gateway.Token, pgStores.Providers, providerRegistry, msgBus))
 
 	// User auth (email/password) — only wired when JWT secret is configured.
-	if cfg.Gateway.JWTSecret != "" && pgStores.Users != nil {
+	if cfg.Gateway.JWTSecret != "" {
 		server.SetUserAuthHandler(httpapi.NewUserAuthHandler(pgStores.Users, cfg.Gateway.JWTSecret))
 		slog.Info("user_auth: email/password endpoints enabled at /v1/auth/*")
 	}

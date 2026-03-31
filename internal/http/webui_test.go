@@ -95,7 +95,9 @@ func TestNewWebUIHandler_DirectoryFallback(t *testing.T) {
 	}
 }
 
-// TestNewWebUIHandler_SecurityHeaders verifies all required security headers are present on every response.
+// TestNewWebUIHandler_SecurityHeaders verifies that the CSP header is set on every response.
+// Baseline headers (X-Frame-Options, X-Content-Type-Options, HSTS, etc.) are applied globally
+// by securityHeadersMiddleware in gateway/server.go — not tested here.
 func TestNewWebUIHandler_SecurityHeaders(t *testing.T) {
 	fsys := fstest.MapFS{
 		"index.html": &fstest.MapFile{Data: []byte("<html></html>")},
@@ -109,16 +111,6 @@ func TestNewWebUIHandler_SecurityHeaders(t *testing.T) {
 			r := httptest.NewRequest("GET", p, nil)
 			handler.ServeHTTP(w, r)
 
-			want := map[string]string{
-				"X-Frame-Options":        "DENY",
-				"X-Content-Type-Options": "nosniff",
-				"Referrer-Policy":        "strict-origin-when-cross-origin",
-			}
-			for h, wantVal := range want {
-				if got := w.Header().Get(h); got != wantVal {
-					t.Errorf("path %s: header %s = %q, want %q", p, h, got, wantVal)
-				}
-			}
 			if csp := w.Header().Get("Content-Security-Policy"); csp == "" {
 				t.Errorf("path %s: Content-Security-Policy header not set", p)
 			}
