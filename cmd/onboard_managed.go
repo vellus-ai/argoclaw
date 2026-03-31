@@ -53,10 +53,19 @@ func seedOnboardPlaceholders(dsn string) error {
 		return nil
 	}
 
-	ctx := context.Background()
+	return seedPlaceholdersWithStore(context.Background(), stores.Providers)
+}
 
+// seedPlaceholdersWithStore seeds placeholder providers using the given ProviderStore.
+// Extracted for unit testing without a real database connection.
+//
+// Uses SeedOnboardProvider (ON CONFLICT DO NOTHING) so that parallel initContainers
+// (replicas >= 2) racing to insert the same row are both safe: the second INSERT is a
+// silent no-op and the final DB state is correct. User-configured values are never
+// overwritten because SeedOnboardProvider has no DO UPDATE clause.
+func seedPlaceholdersWithStore(ctx context.Context, providers store.ProviderStore) error {
 	// Build a set of existing api_base values to avoid overwriting user-configured entries.
-	existing, err := stores.Providers.ListProviders(ctx)
+	existing, err := providers.ListProviders(ctx)
 	if err != nil {
 		return fmt.Errorf("list providers: %w", err)
 	}
@@ -73,8 +82,10 @@ func seedOnboardPlaceholders(dsn string) error {
 			continue
 		}
 		p := ph // copy
-		if err := stores.Providers.CreateProvider(ctx, &p); err != nil {
-			slog.Debug("seed placeholder skipped (may already exist)", "name", ph.Name, "error", err)
+		// SeedOnboardProvider uses ON CONFLICT DO NOTHING, so parallel initContainers
+		// racing to insert the same row are both safe — no duplicate-key errors.
+		if err := providers.SeedOnboardProvider(ctx, &p); err != nil {
+			slog.Warn("onboard: failed to seed placeholder provider", "name", ph.Name, "error", err)
 			continue
 		}
 		seeded++

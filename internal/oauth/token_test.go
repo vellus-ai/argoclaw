@@ -82,6 +82,18 @@ func (m *mockProviderStore) DeleteProvider(_ context.Context, id uuid.UUID) erro
 	return fmt.Errorf("not found")
 }
 
+// SeedOnboardProvider inserts only if the name is not already present (DO NOTHING semantics).
+func (m *mockProviderStore) SeedOnboardProvider(_ context.Context, p *store.LLMProviderData) error {
+	if _, exists := m.providers[p.Name]; exists {
+		return nil // idempotent: no-op when already present
+	}
+	if p.ID == uuid.Nil {
+		p.ID = uuid.New()
+	}
+	m.providers[p.Name] = p
+	return nil
+}
+
 type mockSecretsStore struct {
 	data map[string]string
 }

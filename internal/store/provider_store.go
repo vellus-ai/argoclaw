@@ -76,6 +76,11 @@ type LLMProviderData struct {
 // ProviderStore manages LLM providers.
 type ProviderStore interface {
 	CreateProvider(ctx context.Context, p *LLMProviderData) error
+	// SeedOnboardProvider inserts a placeholder provider using ON CONFLICT DO NOTHING.
+	// Used exclusively by the onboard command to tolerate parallel initContainer execution
+	// (replicas >= 2). Both pods may race to insert the same row; the second INSERT is a
+	// no-op and the final DB state is correct. User-configured values are never overwritten.
+	SeedOnboardProvider(ctx context.Context, p *LLMProviderData) error
 	GetProvider(ctx context.Context, id uuid.UUID) (*LLMProviderData, error)
 	GetProviderByName(ctx context.Context, name string) (*LLMProviderData, error)
 	ListProviders(ctx context.Context) ([]LLMProviderData, error)

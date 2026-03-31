@@ -59,6 +59,35 @@ func (s *PGProviderStore) CreateProvider(ctx context.Context, p *store.LLMProvid
 	return err
 }
 
+// SeedOnboardProvider implements store.ProviderStore.SeedOnboardProvider.
+// Uses ON CONFLICT (name, tenant_id) DO NOTHING so that parallel initContainers
+// (replicas >= 2) racing to seed the same placeholder row are both safe: the second
+// INSERT is silently discarded and the final DB state is correct. User-modified
+// configuration is never overwritten because there is no DO UPDATE clause.
+func (s *PGProviderStore) SeedOnboardProvider(ctx context.Context, p *store.LLMProviderData) error {
+	if p.ID == uuid.Nil {
+		p.ID = store.GenNewID()
+	}
+
+	settings := p.Settings
+	if len(settings) == 0 {
+		settings = []byte("{}")
+	}
+
+	tid := tenantIDFromCtx(ctx)
+	now := time.Now()
+	_, err := s.db.ExecContext(ctx,
+		// ON CONFLICT DO NOTHING: onboarding seed — reference data, immutable after first boot.
+		// Race condition tolerated: parallel initContainers may attempt the same INSERT;
+		// the second one is a silent no-op. No user data is overwritten.
+		`INSERT INTO llm_providers (id, tenant_id, name, display_name, provider_type, api_base, api_key, enabled, settings, created_at, updated_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		 ON CONFLICT (name, tenant_id) DO NOTHING`,
+		p.ID, nilUUID(&tid), p.Name, p.DisplayName, p.ProviderType, p.APIBase, "", p.Enabled, settings, now, now,
+	)
+	return err
+}
+
 func (s *PGProviderStore) GetProvider(ctx context.Context, id uuid.UUID) (*store.LLMProviderData, error) {
 	var p store.LLMProviderData
 	var apiKey string
