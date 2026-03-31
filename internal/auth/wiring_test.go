@@ -130,6 +130,59 @@ func TestPasswordHashAndVerify(t *testing.T) {
 	}
 }
 
+// TestHashRefreshToken verifies SHA-256 hashing of refresh tokens.
+func TestHashRefreshToken(t *testing.T) {
+	raw := "abc123"
+	hash := auth.HashRefreshToken(raw)
+
+	if hash == "" {
+		t.Error("HashRefreshToken returned empty string")
+	}
+	if hash == raw {
+		t.Error("HashRefreshToken returned raw token (not hashed)")
+	}
+	// Deterministic
+	if auth.HashRefreshToken(raw) != hash {
+		t.Error("HashRefreshToken not deterministic")
+	}
+	// Different input → different hash
+	if auth.HashRefreshToken("xyz789") == hash {
+		t.Error("different inputs produced same hash")
+	}
+}
+
+// TestGenerateRefreshToken verifies that generated tokens are unique.
+func TestGenerateRefreshToken(t *testing.T) {
+	raw1, hash1, err := auth.GenerateRefreshToken()
+	if err != nil {
+		t.Fatalf("GenerateRefreshToken: %v", err)
+	}
+	raw2, hash2, err := auth.GenerateRefreshToken()
+	if err != nil {
+		t.Fatalf("GenerateRefreshToken 2: %v", err)
+	}
+	if raw1 == raw2 {
+		t.Error("two calls produced same raw token")
+	}
+	if hash1 == hash2 {
+		t.Error("two calls produced same hash")
+	}
+	// Hash should match raw
+	if auth.HashRefreshToken(raw1) != hash1 {
+		t.Error("hash1 does not match HashRefreshToken(raw1)")
+	}
+}
+
+// TestVerifyPassword_MalformedHash verifies that a malformed hash returns false.
+func TestVerifyPassword_MalformedHash(t *testing.T) {
+	if auth.VerifyPassword("anything", "not-a-valid-argon2-hash") {
+		t.Error("VerifyPassword should return false for malformed hash")
+	}
+	if auth.VerifyPassword("anything", "") {
+		t.Error("VerifyPassword should return false for empty hash")
+	}
+}
+
 // TestCheckPasswordHistory verifies that recent passwords are rejected (1.E, G2).
 func TestCheckPasswordHistory(t *testing.T) {
 	// Generate hashes for 4 previous passwords
