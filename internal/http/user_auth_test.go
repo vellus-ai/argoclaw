@@ -1,0 +1,394 @@
+package http
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/vellus-ai/argoclaw/internal/auth"
+	"github.com/vellus-ai/argoclaw/internal/store"
+)
+
+// --- in-memory stub of store.UserStore ---
+
+type stubUserStore struct {
+	users    map[string]*store.User // keyed by email
+	sessions map[string]*store.UserSession
+	audit    []store.LoginAuditEntry
+	history  map[uuid.UUID][]string // password history per user
+}
+
+func newStubUserStore() *stubUserStore {
+	return &stubUserStore{
+		users:    make(map[string]*store.User),
+		sessions: make(map[string]*store.UserSession),
+		history:  make(map[uuid.UUID][]string),
+	}
+}
+
+func (s *stubUserStore) CreateUser(_ context.Context, u *store.User) error {
+	if u.ID == uuid.Nil {
+		u.ID = uuid.New()
+	}
+	now := time.Now()
+	u.CreatedAt = now
+	u.UpdatedAt = now
+	s.users[u.Email] = u
+	return nil
+}
+
+func (s *stubUserStore) GetByEmail(_ context.Context, email string) (*store.User, error) {
+	u, ok := s.users[email]
+	if !ok {
+		return nil, nil
+	}
+	return u, nil
+}
+
+func (s *stubUserStore) GetByID(_ context.Context, id uuid.UUID) (*store.User, error) {
+	for _, u := range s.users {
+		if u.ID == id {
+			return u, nil
+		}
+	}
+	return nil, nil
+}
+
+func (s *stubUserStore) UpdatePassword(_ context.Context, id uuid.UUID, hash string) error {
+	for _, u := range s.users {
+		if u.ID == id {
+			u.PasswordHash = hash
+			return nil
+		}
+	}
+	return nil
+}
+
+func (s *stubUserStore) IncrementFailedAttempts(_ context.Context, id uuid.UUID, lockUntil *time.Time) (int, error) {
+	for _, u := range s.users {
+		if u.ID == id {
+			u.FailedAttempts++
+			if lockUntil != nil {
+				u.LockedUntil = lockUntil
+			}
+			return u.FailedAttempts, nil
+		}
+	}
+	return 0, nil
+}
+
+func (s *stubUserStore) ResetFailedAttempts(_ context.Context, id uuid.UUID) error {
+	for _, u := range s.users {
+		if u.ID == id {
+			u.FailedAttempts = 0
+			u.LockedUntil = nil
+			return nil
+		}
+	}
+	return nil
+}
+
+func (s *stubUserStore) UpdateLastLogin(_ context.Context, _ uuid.UUID) error { return nil }
+
+func (s *stubUserStore) AddPasswordHistory(_ context.Context, id uuid.UUID, hash string) error {
+	s.history[id] = append(s.history[id], hash)
+	return nil
+}
+
+func (s *stubUserStore) GetPasswordHistory(_ context.Context, id uuid.UUID, limit int) ([]string, error) {
+	h := s.history[id]
+	if len(h) > limit {
+		h = h[len(h)-limit:]
+	}
+	return h, nil
+}
+
+func (s *stubUserStore) CreateSession(_ context.Context, sess *store.UserSession) error {
+	if sess.ID == uuid.Nil {
+		sess.ID = uuid.New()
+	}
+	s.sessions[sess.RefreshToken] = sess
+	return nil
+}
+
+func (s *stubUserStore) GetSessionByToken(_ context.Context, tokenHash string) (*store.UserSession, error) {
+	sess, ok := s.sessions[tokenHash]
+	if !ok {
+		return nil, nil
+	}
+	return sess, nil
+}
+
+func (s *stubUserStore) RevokeSession(_ context.Context, id uuid.UUID) error {
+	for k, sess := range s.sessions {
+		if sess.ID == id {
+			sess.Revoked = true
+			s.sessions[k] = sess
+			return nil
+		}
+	}
+	return nil
+}
+
+func (s *stubUserStore) RevokeAllSessions(_ context.Context, _ uuid.UUID) error { return nil }
+func (s *stubUserStore) CleanExpiredSessions(_ context.Context) error             { return nil }
+
+func (s *stubUserStore) LogAudit(_ context.Context, entry *store.LoginAuditEntry) error {
+	s.audit = append(s.audit, *entry)
+	return nil
+}
+
+// --- tests ---
+
+const testJWTSecret = "test-jwt-secret-key-min-32-chars!!!"
+
+func TestUserAuth_Register_Success(t *testing.T) {
+	us := newStubUserStore()
+	h := NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"email":"new@example.com","password":"Str0ng!Pass#99","display_name":"New User"}`
+	req := httptest.NewRequest("POST", "/v1/auth/register", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusCreated {
+		t.Fatalf("status = %d, want %d; body = %s", w.Code, http.StatusCreated, w.Body.String())
+	}
+
+	var resp authResponse
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if resp.AccessToken == "" {
+		t.Error("access_token is empty")
+	}
+	if resp.RefreshToken == "" {
+		t.Error("refresh_token is empty")
+	}
+	if resp.User == nil || resp.User.Email != "new@example.com" {
+		t.Error("user email mismatch")
+	}
+
+	// Verify user created in store
+	if _, ok := us.users["new@example.com"]; !ok {
+		t.Error("user not created in store")
+	}
+
+	// Verify audit log
+	if len(us.audit) < 1 || us.audit[0].Action != "register" {
+		t.Error("expected register audit entry")
+	}
+}
+
+func TestUserAuth_Register_DuplicateEmail(t *testing.T) {
+	us := newStubUserStore()
+	hash, _ := auth.HashPassword("Str0ng!Pass#99")
+	us.users["existing@example.com"] = &store.User{
+		ID: uuid.New(), Email: "existing@example.com", PasswordHash: hash,
+		Role: "member", Status: "active",
+	}
+
+	h := NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"email":"existing@example.com","password":"Str0ng!Pass#99","display_name":"Dup"}`
+	req := httptest.NewRequest("POST", "/v1/auth/register", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusConflict {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusConflict)
+	}
+}
+
+func TestUserAuth_Register_WeakPassword(t *testing.T) {
+	us := newStubUserStore()
+	h := NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"email":"new@example.com","password":"short","display_name":"Weak"}`
+	req := httptest.NewRequest("POST", "/v1/auth/register", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestUserAuth_Login_Success(t *testing.T) {
+	us := newStubUserStore()
+	password := "Str0ng!Pass#99"
+	hash, _ := auth.HashPassword(password)
+	us.users["user@example.com"] = &store.User{
+		ID: uuid.New(), Email: "user@example.com", PasswordHash: hash,
+		Role: "admin", Status: "active", TenantID: ptrUUID(uuid.New()),
+	}
+
+	h := NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"email":"user@example.com","password":"Str0ng!Pass#99"}`
+	req := httptest.NewRequest("POST", "/v1/auth/login", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d; body = %s", w.Code, http.StatusOK, w.Body.String())
+	}
+
+	var resp authResponse
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if resp.AccessToken == "" {
+		t.Error("access_token is empty")
+	}
+
+	// Validate the access token
+	claims, err := auth.ValidateAccessToken(resp.AccessToken, testJWTSecret)
+	if err != nil {
+		t.Fatalf("ValidateAccessToken: %v", err)
+	}
+	if claims.Email != "user@example.com" {
+		t.Errorf("claims.Email = %q, want user@example.com", claims.Email)
+	}
+
+	// Verify audit log has login_success
+	found := false
+	for _, a := range us.audit {
+		if a.Action == "login_success" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("expected login_success audit entry")
+	}
+}
+
+func TestUserAuth_Login_WrongPassword(t *testing.T) {
+	us := newStubUserStore()
+	hash, _ := auth.HashPassword("Str0ng!Pass#99")
+	us.users["user@example.com"] = &store.User{
+		ID: uuid.New(), Email: "user@example.com", PasswordHash: hash,
+		Role: "member", Status: "active",
+	}
+
+	h := NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"email":"user@example.com","password":"Wrong!Pass#99X"}`
+	req := httptest.NewRequest("POST", "/v1/auth/login", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusUnauthorized)
+	}
+
+	// Verify failed attempt counter incremented
+	if us.users["user@example.com"].FailedAttempts != 1 {
+		t.Errorf("FailedAttempts = %d, want 1", us.users["user@example.com"].FailedAttempts)
+	}
+}
+
+func TestUserAuth_Login_NonExistentUser(t *testing.T) {
+	us := newStubUserStore()
+	h := NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"email":"nobody@example.com","password":"Str0ng!Pass#99"}`
+	req := httptest.NewRequest("POST", "/v1/auth/login", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	// Should return 401 (same as wrong password — no enumeration)
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusUnauthorized)
+	}
+}
+
+func TestUserAuth_Login_Lockout(t *testing.T) {
+	us := newStubUserStore()
+	hash, _ := auth.HashPassword("Str0ng!Pass#99")
+	lockTime := time.Now().Add(30 * time.Minute)
+	us.users["locked@example.com"] = &store.User{
+		ID: uuid.New(), Email: "locked@example.com", PasswordHash: hash,
+		Role: "member", Status: "active", FailedAttempts: 5, LockedUntil: &lockTime,
+	}
+
+	h := NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"email":"locked@example.com","password":"Str0ng!Pass#99"}`
+	req := httptest.NewRequest("POST", "/v1/auth/login", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusTooManyRequests {
+		t.Fatalf("status = %d, want %d; body = %s", w.Code, http.StatusTooManyRequests, w.Body.String())
+	}
+}
+
+func TestUserAuth_Logout_Revokes(t *testing.T) {
+	us := newStubUserStore()
+	hash, _ := auth.HashPassword("Str0ng!Pass#99")
+	user := &store.User{
+		ID: uuid.New(), Email: "user@example.com", PasswordHash: hash,
+		Role: "member", Status: "active",
+	}
+	us.users[user.Email] = user
+
+	h := NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	// Login first
+	loginBody := `{"email":"user@example.com","password":"Str0ng!Pass#99"}`
+	loginReq := httptest.NewRequest("POST", "/v1/auth/login", bytes.NewBufferString(loginBody))
+	loginReq.Header.Set("Content-Type", "application/json")
+	loginW := httptest.NewRecorder()
+	mux.ServeHTTP(loginW, loginReq)
+
+	if loginW.Code != http.StatusOK {
+		t.Fatalf("login status = %d, want %d", loginW.Code, http.StatusOK)
+	}
+
+	var loginResp authResponse
+	json.Unmarshal(loginW.Body.Bytes(), &loginResp)
+
+	// Logout
+	logoutBody := `{"refresh_token":"` + loginResp.RefreshToken + `"}`
+	logoutReq := httptest.NewRequest("POST", "/v1/auth/logout", bytes.NewBufferString(logoutBody))
+	logoutReq.Header.Set("Content-Type", "application/json")
+	logoutW := httptest.NewRecorder()
+	mux.ServeHTTP(logoutW, logoutReq)
+
+	if logoutW.Code != http.StatusOK {
+		t.Fatalf("logout status = %d, want %d; body = %s", logoutW.Code, http.StatusOK, logoutW.Body.String())
+	}
+}
+
+func ptrUUID(id uuid.UUID) *uuid.UUID { return &id }
