@@ -127,7 +127,7 @@ func (s *stubUserStore) CreateSession(_ context.Context, sess *store.UserSession
 
 func (s *stubUserStore) GetSessionByToken(_ context.Context, tokenHash string) (*store.UserSession, error) {
 	sess, ok := s.sessions[tokenHash]
-	if !ok {
+	if !ok || sess.Revoked {
 		return nil, nil
 	}
 	return sess, nil
@@ -157,6 +157,7 @@ func (s *stubUserStore) LogAudit(_ context.Context, entry *store.LoginAuditEntry
 const testJWTSecret = "test-jwt-secret-key-min-32-chars!!!"
 
 func TestUserAuth_Register_Success(t *testing.T) {
+	t.Parallel()
 	us := newStubUserStore()
 	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
 	mux := http.NewServeMux()
@@ -198,6 +199,7 @@ func TestUserAuth_Register_Success(t *testing.T) {
 }
 
 func TestUserAuth_Register_DuplicateEmail(t *testing.T) {
+	t.Parallel()
 	us := newStubUserStore()
 	hash, _ := auth.HashPassword("Str0ng!Pass#99")
 	us.users["existing@example.com"] = &store.User{
@@ -221,6 +223,7 @@ func TestUserAuth_Register_DuplicateEmail(t *testing.T) {
 }
 
 func TestUserAuth_Register_WeakPassword(t *testing.T) {
+	t.Parallel()
 	us := newStubUserStore()
 	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
 	mux := http.NewServeMux()
@@ -238,6 +241,7 @@ func TestUserAuth_Register_WeakPassword(t *testing.T) {
 }
 
 func TestUserAuth_Login_Success(t *testing.T) {
+	t.Parallel()
 	us := newStubUserStore()
 	password := "Str0ng!Pass#99"
 	hash, _ := auth.HashPassword(password)
@@ -291,6 +295,7 @@ func TestUserAuth_Login_Success(t *testing.T) {
 }
 
 func TestUserAuth_Login_WrongPassword(t *testing.T) {
+	t.Parallel()
 	us := newStubUserStore()
 	hash, _ := auth.HashPassword("Str0ng!Pass#99")
 	us.users["user@example.com"] = &store.User{
@@ -319,6 +324,7 @@ func TestUserAuth_Login_WrongPassword(t *testing.T) {
 }
 
 func TestUserAuth_Login_NonExistentUser(t *testing.T) {
+	t.Parallel()
 	us := newStubUserStore()
 	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
 	mux := http.NewServeMux()
@@ -337,6 +343,7 @@ func TestUserAuth_Login_NonExistentUser(t *testing.T) {
 }
 
 func TestUserAuth_Login_Lockout(t *testing.T) {
+	t.Parallel()
 	us := newStubUserStore()
 	hash, _ := auth.HashPassword("Str0ng!Pass#99")
 	lockTime := time.Now().Add(30 * time.Minute)
@@ -361,6 +368,7 @@ func TestUserAuth_Login_Lockout(t *testing.T) {
 }
 
 func TestUserAuth_Logout_Revokes(t *testing.T) {
+	t.Parallel()
 	us := newStubUserStore()
 	hash, _ := auth.HashPassword("Str0ng!Pass#99")
 	user := &store.User{
@@ -396,6 +404,257 @@ func TestUserAuth_Logout_Revokes(t *testing.T) {
 
 	if logoutW.Code != http.StatusOK {
 		t.Fatalf("logout status = %d, want %d; body = %s", logoutW.Code, http.StatusOK, logoutW.Body.String())
+	}
+}
+
+// --- Refresh tests ---
+
+func TestUserAuth_Refresh_Success(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	password := "Str0ng!Pass#99"
+	hash, _ := auth.HashPassword(password)
+	user := &store.User{
+		ID: uuid.New(), Email: "user@example.com", PasswordHash: hash,
+		Role: "admin", Status: "active", TenantID: ptrUUID(uuid.New()),
+	}
+	us.users[user.Email] = user
+
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	// Login first to get a refresh token
+	loginBody := `{"email":"user@example.com","password":"Str0ng!Pass#99"}`
+	loginReq := httptest.NewRequest("POST", "/v1/auth/login", bytes.NewBufferString(loginBody))
+	loginReq.Header.Set("Content-Type", "application/json")
+	loginW := httptest.NewRecorder()
+	mux.ServeHTTP(loginW, loginReq)
+
+	if loginW.Code != http.StatusOK {
+		t.Fatalf("login status = %d, want %d", loginW.Code, http.StatusOK)
+	}
+
+	var loginResp testAuthResp
+	json.Unmarshal(loginW.Body.Bytes(), &loginResp)
+
+	// Refresh
+	refreshBody := `{"refresh_token":"` + loginResp.RefreshToken + `"}`
+	refreshReq := httptest.NewRequest("POST", "/v1/auth/refresh", bytes.NewBufferString(refreshBody))
+	refreshReq.Header.Set("Content-Type", "application/json")
+	refreshW := httptest.NewRecorder()
+	mux.ServeHTTP(refreshW, refreshReq)
+
+	if refreshW.Code != http.StatusOK {
+		t.Fatalf("refresh status = %d, want %d; body = %s", refreshW.Code, http.StatusOK, refreshW.Body.String())
+	}
+
+	var refreshResp testAuthResp
+	if err := json.Unmarshal(refreshW.Body.Bytes(), &refreshResp); err != nil {
+		t.Fatalf("unmarshal refresh: %v", err)
+	}
+	if refreshResp.AccessToken == "" {
+		t.Error("new access_token is empty")
+	}
+	if refreshResp.RefreshToken == "" {
+		t.Error("new refresh_token is empty")
+	}
+	// New refresh token should differ from original (rotation)
+	if refreshResp.RefreshToken == loginResp.RefreshToken {
+		t.Error("refresh token was not rotated")
+	}
+}
+
+func TestUserAuth_Refresh_InvalidToken(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"refresh_token":"nonexistent-token-value"}`
+	req := httptest.NewRequest("POST", "/v1/auth/refresh", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusUnauthorized)
+	}
+}
+
+func TestUserAuth_Refresh_RevokedToken(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	password := "Str0ng!Pass#99"
+	hash, _ := auth.HashPassword(password)
+	user := &store.User{
+		ID: uuid.New(), Email: "user@example.com", PasswordHash: hash,
+		Role: "member", Status: "active",
+	}
+	us.users[user.Email] = user
+
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	// Login
+	loginBody := `{"email":"user@example.com","password":"Str0ng!Pass#99"}`
+	loginReq := httptest.NewRequest("POST", "/v1/auth/login", bytes.NewBufferString(loginBody))
+	loginReq.Header.Set("Content-Type", "application/json")
+	loginW := httptest.NewRecorder()
+	mux.ServeHTTP(loginW, loginReq)
+
+	var loginResp testAuthResp
+	json.Unmarshal(loginW.Body.Bytes(), &loginResp)
+
+	// Use refresh once (this revokes the old session)
+	refreshBody := `{"refresh_token":"` + loginResp.RefreshToken + `"}`
+	refreshReq := httptest.NewRequest("POST", "/v1/auth/refresh", bytes.NewBufferString(refreshBody))
+	refreshReq.Header.Set("Content-Type", "application/json")
+	refreshW := httptest.NewRecorder()
+	mux.ServeHTTP(refreshW, refreshReq)
+
+	if refreshW.Code != http.StatusOK {
+		t.Fatalf("first refresh failed: %d", refreshW.Code)
+	}
+
+	// Reuse old token — should fail (session revoked)
+	reuseReq := httptest.NewRequest("POST", "/v1/auth/refresh", bytes.NewBufferString(refreshBody))
+	reuseReq.Header.Set("Content-Type", "application/json")
+	reuseW := httptest.NewRecorder()
+	mux.ServeHTTP(reuseW, reuseReq)
+
+	if reuseW.Code != http.StatusUnauthorized {
+		t.Fatalf("reuse status = %d, want %d (revoked token should fail)", reuseW.Code, http.StatusUnauthorized)
+	}
+}
+
+// --- Edge case tests ---
+
+func TestUserAuth_Register_MalformedJSON(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	req := httptest.NewRequest("POST", "/v1/auth/register", bytes.NewBufferString("{invalid json"))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestUserAuth_Register_EmptyBody(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	req := httptest.NewRequest("POST", "/v1/auth/register", bytes.NewBufferString(""))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestUserAuth_Register_MissingEmail(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"password":"Str0ng!Pass#99","display_name":"No Email"}`
+	req := httptest.NewRequest("POST", "/v1/auth/register", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestUserAuth_Register_EmailNormalization(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"email":" USER@EXAMPLE.COM ","password":"Str0ng!Pass#99","display_name":"Upper"}`
+	req := httptest.NewRequest("POST", "/v1/auth/register", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusCreated {
+		t.Fatalf("status = %d, want %d; body = %s", w.Code, http.StatusCreated, w.Body.String())
+	}
+
+	// Verify email was normalized to lowercase
+	if _, ok := us.users["user@example.com"]; !ok {
+		t.Error("email was not normalized to lowercase")
+	}
+}
+
+func TestUserAuth_Login_MalformedJSON(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	req := httptest.NewRequest("POST", "/v1/auth/login", bytes.NewBufferString("not json"))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestUserAuth_Refresh_MalformedJSON(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	req := httptest.NewRequest("POST", "/v1/auth/refresh", bytes.NewBufferString("broken{"))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestUserAuth_Logout_MalformedJSON(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	req := httptest.NewRequest("POST", "/v1/auth/logout", bytes.NewBufferString("{{"))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusBadRequest)
 	}
 }
 

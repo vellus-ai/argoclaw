@@ -1,8 +1,9 @@
 package auth_test
 
 import (
-	"os"
 	"testing"
+
+	"pgregory.net/rapid"
 
 	"github.com/vellus-ai/argoclaw/internal/auth"
 	"github.com/vellus-ai/argoclaw/internal/config"
@@ -25,7 +26,7 @@ func TestJWTSecretLoadedFromEnv(t *testing.T) {
 
 // TestJWTSecretEmptyByDefault verifies that JWTSecret is empty when env var is not set.
 func TestJWTSecretEmptyByDefault(t *testing.T) {
-	os.Unsetenv("ARGOCLAW_JWT_SECRET")
+	t.Setenv("ARGOCLAW_JWT_SECRET", "")
 
 	cfg, err := config.Load("")
 	if err != nil {
@@ -39,6 +40,7 @@ func TestJWTSecretEmptyByDefault(t *testing.T) {
 
 // TestGenerateAccessTokenRoundtrip verifies JWT generation and validation (1.A).
 func TestGenerateAccessTokenRoundtrip(t *testing.T) {
+	t.Parallel()
 	secret := "test-secret-key-for-jwt-signing-hmac256"
 	claims := auth.TokenClaims{
 		UserID:   "user-123",
@@ -74,6 +76,7 @@ func TestGenerateAccessTokenRoundtrip(t *testing.T) {
 // TestValidateAccessToken_WrongSecret verifies that a JWT signed with a different
 // secret is rejected (1.D).
 func TestValidateAccessToken_WrongSecret(t *testing.T) {
+	t.Parallel()
 	claims := auth.TokenClaims{UserID: "user-1", Email: "a@b.com", TenantID: "t-1", Role: "member"}
 
 	token, err := auth.GenerateAccessToken(claims, "correct-secret-key-for-signing")
@@ -89,6 +92,7 @@ func TestValidateAccessToken_WrongSecret(t *testing.T) {
 
 // TestPasswordValidation verifies PCI DSS password rules (1.E).
 func TestPasswordValidation(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		password string
@@ -114,6 +118,7 @@ func TestPasswordValidation(t *testing.T) {
 
 // TestPasswordHashAndVerify verifies Argon2id hashing (1.E).
 func TestPasswordHashAndVerify(t *testing.T) {
+	t.Parallel()
 	password := "Str0ng!Pass#99"
 
 	hash, err := auth.HashPassword(password)
@@ -132,6 +137,7 @@ func TestPasswordHashAndVerify(t *testing.T) {
 
 // TestHashRefreshToken verifies SHA-256 hashing of refresh tokens.
 func TestHashRefreshToken(t *testing.T) {
+	t.Parallel()
 	raw := "abc123"
 	hash := auth.HashRefreshToken(raw)
 
@@ -153,6 +159,7 @@ func TestHashRefreshToken(t *testing.T) {
 
 // TestGenerateRefreshToken verifies that generated tokens are unique.
 func TestGenerateRefreshToken(t *testing.T) {
+	t.Parallel()
 	raw1, hash1, err := auth.GenerateRefreshToken()
 	if err != nil {
 		t.Fatalf("GenerateRefreshToken: %v", err)
@@ -175,6 +182,7 @@ func TestGenerateRefreshToken(t *testing.T) {
 
 // TestVerifyPassword_MalformedHash verifies that a malformed hash returns false.
 func TestVerifyPassword_MalformedHash(t *testing.T) {
+	t.Parallel()
 	if auth.VerifyPassword("anything", "not-a-valid-argon2-hash") {
 		t.Error("VerifyPassword should return false for malformed hash")
 	}
@@ -183,8 +191,105 @@ func TestVerifyPassword_MalformedHash(t *testing.T) {
 	}
 }
 
+// --- PBT (Property-Based Tests) ---
+
+// TestPBT_ValidatePassword_AcceptedPasswordsHaveRequiredProperties ensures that any
+// password accepted by ValidatePassword satisfies all PCI DSS rules.
+func TestPBT_ValidatePassword_AcceptedPasswordsHaveRequiredProperties(t *testing.T) {
+	t.Parallel()
+	rapid.Check(t, func(t *rapid.T) {
+		pw := rapid.StringMatching(`[A-Za-z0-9!@#$%^&*]{12,64}`).Draw(t, "password")
+		email := "test@example.com"
+
+		err := auth.ValidatePassword(pw, email)
+		if err != nil {
+			return // rejected passwords are fine — we're testing accepted ones
+		}
+
+		// If accepted, must satisfy all rules:
+		if len(pw) < auth.MinPasswordLength {
+			t.Fatalf("accepted password %q has len %d < %d", pw, len(pw), auth.MinPasswordLength)
+		}
+		hasUpper, hasDigit, hasSpecial := false, false, false
+		for _, c := range pw {
+			if c >= 'A' && c <= 'Z' {
+				hasUpper = true
+			}
+			if c >= '0' && c <= '9' {
+				hasDigit = true
+			}
+			if (c >= '!' && c <= '/') || (c >= ':' && c <= '@') || (c >= '[' && c <= '`') || (c >= '{' && c <= '~') {
+				hasSpecial = true
+			}
+		}
+		if !hasUpper {
+			t.Fatalf("accepted password %q has no uppercase", pw)
+		}
+		if !hasDigit {
+			t.Fatalf("accepted password %q has no digit", pw)
+		}
+		if !hasSpecial {
+			t.Fatalf("accepted password %q has no special char", pw)
+		}
+	})
+}
+
+// TestPBT_JWTRoundtrip ensures Generate → Validate returns the original claims.
+func TestPBT_JWTRoundtrip(t *testing.T) {
+	t.Parallel()
+	secret := "test-pbt-secret-key-for-jwt-signing-hmac256"
+	rapid.Check(t, func(t *rapid.T) {
+		claims := auth.TokenClaims{
+			UserID:   rapid.StringMatching(`[a-f0-9-]{36}`).Draw(t, "userID"),
+			Email:    rapid.StringMatching(`[a-z]{3,10}@[a-z]{3,8}\.com`).Draw(t, "email"),
+			TenantID: rapid.StringMatching(`[a-f0-9-]{36}`).Draw(t, "tenantID"),
+			Role:     rapid.SampledFrom([]string{"admin", "member", "operator"}).Draw(t, "role"),
+		}
+
+		token, err := auth.GenerateAccessToken(claims, secret)
+		if err != nil {
+			t.Fatalf("GenerateAccessToken: %v", err)
+		}
+
+		got, err := auth.ValidateAccessToken(token, secret)
+		if err != nil {
+			t.Fatalf("ValidateAccessToken: %v", err)
+		}
+
+		if got.UserID != claims.UserID {
+			t.Fatalf("UserID: got %q, want %q", got.UserID, claims.UserID)
+		}
+		if got.Email != claims.Email {
+			t.Fatalf("Email: got %q, want %q", got.Email, claims.Email)
+		}
+		if got.TenantID != claims.TenantID {
+			t.Fatalf("TenantID: got %q, want %q", got.TenantID, claims.TenantID)
+		}
+		if got.Role != claims.Role {
+			t.Fatalf("Role: got %q, want %q", got.Role, claims.Role)
+		}
+	})
+}
+
+// TestPBT_HashRefreshToken_Deterministic ensures Hash(x) == Hash(x) for any input.
+func TestPBT_HashRefreshToken_Deterministic(t *testing.T) {
+	t.Parallel()
+	rapid.Check(t, func(t *rapid.T) {
+		raw := rapid.String().Draw(t, "raw")
+		h1 := auth.HashRefreshToken(raw)
+		h2 := auth.HashRefreshToken(raw)
+		if h1 != h2 {
+			t.Fatalf("HashRefreshToken not deterministic for %q: %q != %q", raw, h1, h2)
+		}
+		if h1 == raw && len(raw) > 0 {
+			t.Fatalf("HashRefreshToken returned raw input for %q", raw)
+		}
+	})
+}
+
 // TestCheckPasswordHistory verifies that recent passwords are rejected (1.E, G2).
 func TestCheckPasswordHistory(t *testing.T) {
+	t.Parallel()
 	// Generate hashes for 4 previous passwords
 	var hashes []string
 	passwords := []string{"Old!Pass#001X", "Old!Pass#002X", "Old!Pass#003X", "Old!Pass#004X"}
