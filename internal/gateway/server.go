@@ -67,6 +67,7 @@ type Server struct {
 	apiKeysHandler     *httpapi.APIKeysHandler      // API key management
 	apiKeyStore        store.APIKeyStore            // for API key auth lookup
 	docsHandler        *httpapi.DocsHandler         // OpenAPI spec + Swagger UI
+	userAuthHandler    *httpapi.UserAuthHandler      // email/password auth endpoints
 	agentStore         store.AgentStore             // for context injection in tools_invoke
 	msgBus             *bus.MessageBus              // for MCP bridge media delivery
 
@@ -309,6 +310,11 @@ func (s *Server) BuildMux() *http.ServeMux {
 	// API documentation (OpenAPI spec + Swagger UI)
 	if s.docsHandler != nil {
 		s.docsHandler.RegisterRoutes(mux)
+	}
+
+	// User auth endpoints (email/password login — public, no token required)
+	if s.userAuthHandler != nil {
+		s.userAuthHandler.RegisterRoutes(mux)
 	}
 
 	// OAuth endpoints (available in all modes)
@@ -554,6 +560,9 @@ func (s *Server) SetOAuthHandler(h *httpapi.OAuthHandler) { s.oauthHandler = h }
 func (s *Server) SetAnthropicAuthHandler(h *httpapi.AnthropicAuthHandler) {
 	s.anthropicAuthHandler = h
 }
+
+// SetUserAuthHandler sets the email/password auth handler.
+func (s *Server) SetUserAuthHandler(h *httpapi.UserAuthHandler) { s.userAuthHandler = h }
 
 // SetAPIKeysHandler sets the API key management handler.
 func (s *Server) SetAPIKeysHandler(h *httpapi.APIKeysHandler) { s.apiKeysHandler = h }

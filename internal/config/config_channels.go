@@ -342,6 +342,7 @@ type GatewayConfig struct {
 	BlockReply              *bool        `json:"block_reply,omitempty"`                // deliver intermediate text during tool iterations (default false)
 	ToolStatus              *bool        `json:"tool_status,omitempty"`                // show tool name in streaming preview during tool execution (default true)
 	TaskRecoveryIntervalSec int          `json:"task_recovery_interval_sec,omitempty"` // team task recovery ticker interval in seconds (default 300 = 5min)
+	JWTSecret               string       `json:"-"`                                    // from env ARGOCLAW_JWT_SECRET only (never persisted)
 }
 
 // ToolsConfig controls tool availability, policy, and web search.
