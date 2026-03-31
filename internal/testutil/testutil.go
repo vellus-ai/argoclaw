@@ -91,6 +91,25 @@ func CleanupTenantData(t *testing.T, db *sql.DB, tenantID uuid.UUID) {
 	}
 }
 
+// CleanupPluginData deletes all plugin host data for the given tenant.
+// Called in test cleanup to keep plugin tables clean between tests.
+func CleanupPluginData(t *testing.T, db *sql.DB, tenantID uuid.UUID) {
+	t.Helper()
+	ctx := context.Background()
+	for _, table := range []string{
+		"plugin_audit_log",
+		"plugin_data",
+		"agent_plugins",
+		"tenant_plugins",
+	} {
+		if _, err := db.ExecContext(ctx,
+			fmt.Sprintf("DELETE FROM %s WHERE tenant_id = $1", table), tenantID,
+		); err != nil {
+			t.Logf("cleanup %s for tenant %s: %v", table, tenantID, err)
+		}
+	}
+}
+
 // CreateTestTenant inserts a minimal tenant row and returns its UUID.
 func CreateTestTenant(t *testing.T, db *sql.DB, slug, name string) uuid.UUID {
 	t.Helper()

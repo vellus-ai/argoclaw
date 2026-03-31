@@ -396,6 +396,14 @@ func runGateway() {
 		server.SetSecureCLIHandler(secureCLIH)
 	}
 
+	// Plugin host: management API + data proxy
+	if pgStores != nil && pgStores.Plugins != nil {
+		pluginH := httpapi.NewPluginHandler(pgStores.Plugins, cfg.Gateway.Token, msgBus)
+		server.SetPluginHandler(pluginH)
+		pluginDataH := httpapi.NewPluginDataHandler(pgStores.Plugins, cfg.Gateway.Token)
+		server.SetPluginDataHandler(pluginDataH)
+	}
+
 	// Activity audit log API
 	if pgStores.Activity != nil {
 		server.SetActivityHandler(httpapi.NewActivityHandler(pgStores.Activity, cfg.Gateway.Token))

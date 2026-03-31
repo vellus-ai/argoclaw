@@ -31,4 +31,5 @@ type Stores struct {
 	Heartbeats        HeartbeatStore
 	ConfigPermissions ConfigPermissionStore
 	Users             UserStore
+	Plugins           PluginStore
 }

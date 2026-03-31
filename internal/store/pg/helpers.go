@@ -178,6 +178,9 @@ var allowedTables = map[string]bool{
 	"team_tasks_comments": true, "team_task_events": true, "team_task_attachments": true,
 	"tenants": true, "tenant_users": true, "tenant_branding": true,
 	"users": true, "user_sessions": true, "password_history": true, "login_audit": true,
+	// Plugin host tables (migration 000030)
+	"plugin_catalog": true, "tenant_plugins": true, "agent_plugins": true,
+	"plugin_data": true, "plugin_audit_log": true,
 }
 
 // validTableName returns true only if the table is in the strict whitelist.
@@ -233,6 +236,8 @@ var tablesWithUpdatedAt = map[string]bool{
 	"memory_documents": true, "memory_chunks": true, "embedding_cache": true,
 	"secure_cli_binaries": true,
 	"tenants": true, "tenant_branding": true, "users": true,
+	// Plugin host tables
+	"plugin_catalog": true, "tenant_plugins": true, "agent_plugins": true, "plugin_data": true,
 }
 
 func tableHasUpdatedAt(table string) bool {

@@ -68,6 +68,8 @@ type Server struct {
 	apiKeyStore        store.APIKeyStore            // for API key auth lookup
 	docsHandler        *httpapi.DocsHandler         // OpenAPI spec + Swagger UI
 	userAuthHandler    *httpapi.UserAuthHandler      // email/password auth endpoints
+	pluginHandler      *httpapi.PluginHandler      // plugin management API
+	pluginDataHandler  *httpapi.PluginDataHandler  // plugin KV data proxy API
 	agentStore         store.AgentStore             // for context injection in tools_invoke
 	msgBus             *bus.MessageBus              // for MCP bridge media delivery
 
@@ -323,6 +325,14 @@ func (s *Server) BuildMux() *http.ServeMux {
 	}
 	if s.anthropicAuthHandler != nil {
 		s.anthropicAuthHandler.RegisterRoutes(mux)
+	}
+
+	// Plugin management + data proxy API
+	if s.pluginHandler != nil {
+		s.pluginHandler.RegisterRoutes(mux)
+	}
+	if s.pluginDataHandler != nil {
+		s.pluginDataHandler.RegisterRoutes(mux)
 	}
 
 	// MCP bridge: expose ArgoClaw tools to Claude CLI via streamable-http.
@@ -624,6 +634,12 @@ func (s *Server) SetDocsHandler(h *httpapi.DocsHandler) { s.docsHandler = h }
 
 // SetAgentStore sets the agent store for context injection in tools_invoke.
 func (s *Server) SetAgentStore(as store.AgentStore) { s.agentStore = as }
+
+// SetPluginHandler sets the plugin management API handler.
+func (s *Server) SetPluginHandler(h *httpapi.PluginHandler) { s.pluginHandler = h }
+
+// SetPluginDataHandler sets the plugin KV data proxy API handler.
+func (s *Server) SetPluginDataHandler(h *httpapi.PluginDataHandler) { s.pluginDataHandler = h }
 
 // SetMessageBus sets the message bus for MCP bridge media delivery.
 func (s *Server) SetMessageBus(mb *bus.MessageBus) { s.msgBus = mb }
