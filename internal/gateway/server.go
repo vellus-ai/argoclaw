@@ -356,6 +356,19 @@ func (s *Server) BuildMux() *http.ServeMux {
 	return mux
 }
 
+// securityHeadersMiddleware adds OWASP baseline security headers to all responses.
+// Addresses Gap G4 (RNF-16): HSTS, X-Content-Type-Options, X-Frame-Options.
+func securityHeadersMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+		w.Header().Set("X-XSS-Protection", "0") // disabled per OWASP (CSP preferred)
+		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		next.ServeHTTP(w, r)
+	})
+}
+
 // bridgeContextMiddleware extracts X-Agent-ID and X-User-ID headers from the
 // MCP bridge request and injects them into the context so bridge tools can
 // access agent/user scope. When a gateway token is configured, the context
@@ -429,10 +442,21 @@ func tokenAuthMiddleware(token string, next http.Handler) http.Handler {
 func (s *Server) Start(ctx context.Context) error {
 	mux := s.BuildMux()
 
+	// Security headers middleware (OWASP baseline — Gap G4).
+	var handler http.Handler = securityHeadersMiddleware(mux)
+
+	// Wrap with JWT middleware when JWT secret is configured.
+	// Falls through to gateway token auth when no JWT is present (backward compat).
+	if s.cfg.Gateway.JWTSecret != "" {
+		jwtMw := httpapi.NewJWTMiddleware(s.cfg.Gateway.JWTSecret)
+		handler = jwtMw.Wrap(handler)
+		slog.Info("jwt_middleware: enabled globally")
+	}
+
 	addr := fmt.Sprintf("%s:%d", s.cfg.Gateway.Host, s.cfg.Gateway.Port)
 	s.httpServer = &http.Server{
 		Addr:    addr,
-		Handler: mux,
+		Handler: handler,
 	}
 
 	slog.Info("gateway starting", "addr", addr)
