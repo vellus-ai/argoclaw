@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/vellus-ai/argoclaw/internal/store"
 )
@@ -117,7 +119,7 @@ func (s *PGPluginStore) scanCatalogEntry(row *sql.Row) (*store.PluginCatalogEntr
 		&e.Description, &e.Author, &manifest, &e.Source, &e.MinPlan,
 		&checksum, &tagsRaw, &e.CreatedAt, &e.UpdatedAt,
 	)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, store.ErrPluginNotFound
 	}
 	if err != nil {
@@ -410,7 +412,7 @@ func (s *PGPluginStore) scanTenantPlugin(row scanner) (*store.TenantPlugin, erro
 		&config, &perms, &errMsg, &installedBy, &enabledAt,
 		&tp.CreatedAt, &tp.UpdatedAt,
 	)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, store.ErrPluginNotFound
 	}
 	if err != nil {
@@ -444,7 +446,7 @@ func (s *PGPluginStore) SetAgentPlugin(ctx context.Context, ap *store.AgentPlugi
 		INSERT INTO agent_plugins
 			(id, tenant_id, agent_id, plugin_name, enabled, config_override, created_at, updated_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-		ON CONFLICT (agent_id, plugin_name) DO UPDATE SET
+		ON CONFLICT (tenant_id, agent_id, plugin_name) DO UPDATE SET
 			enabled         = EXCLUDED.enabled,
 			config_override = EXCLUDED.config_override,
 			updated_at      = EXCLUDED.updated_at`,
@@ -499,7 +501,7 @@ func (s *PGPluginStore) IsPluginEnabledForAgent(ctx context.Context, agentID uui
 		WHERE tenant_id = $1 AND plugin_name = $2`,
 		tid, pluginName,
 	).Scan(&tenantState)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return false, nil
 	}
 	if err != nil {
@@ -516,7 +518,7 @@ func (s *PGPluginStore) IsPluginEnabledForAgent(ctx context.Context, agentID uui
 		WHERE tenant_id = $1 AND agent_id = $2 AND plugin_name = $3`,
 		tid, agentID, pluginName,
 	).Scan(&agentEnabled)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		// No override → inherit tenant-level (enabled).
 		return true, nil
 	}
@@ -533,7 +535,7 @@ func (s *PGPluginStore) scanAgentPlugin(row scanner) (*store.AgentPlugin, error)
 		&ap.ID, &ap.TenantID, &ap.AgentID, &ap.PluginName,
 		&ap.Enabled, &override, &ap.CreatedAt, &ap.UpdatedAt,
 	)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, store.ErrPluginNotFound
 	}
 	if err != nil {
@@ -585,7 +587,7 @@ func (s *PGPluginStore) GetData(ctx context.Context, pluginName, collection, key
 		&e.ID, &e.TenantID, &e.PluginName, &e.Collection, &e.Key,
 		&value, &expiresAt, &e.CreatedAt, &e.UpdatedAt,
 	)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, store.ErrPluginNotFound
 	}
 	if err != nil {
@@ -609,8 +611,9 @@ func (s *PGPluginStore) ListDataKeys(ctx context.Context, pluginName, collection
 	args = append(args, tid, pluginName, collection)
 
 	if prefix != "" {
-		args = append(args, prefix+"%")
-		q += fmt.Sprintf(" AND key LIKE $%d", len(args))
+		escaped := strings.NewReplacer("%", `\%`, "_", `\_`).Replace(prefix)
+		args = append(args, escaped+"%")
+		q += fmt.Sprintf(` AND key LIKE $%d ESCAPE '\'`, len(args))
 	}
 	q += fmt.Sprintf(" ORDER BY key LIMIT $%d OFFSET $%d", len(args)+1, len(args)+2)
 	args = append(args, limit, offset)
@@ -731,12 +734,13 @@ func (s *PGPluginStore) writeAuditTx(ctx context.Context, tx *sql.Tx, tenantID u
 	return err
 }
 
-// isUniqueViolation returns true if err represents a PostgreSQL unique constraint violation.
+// isUniqueViolation returns true if err represents a PostgreSQL unique constraint violation (SQLSTATE 23505).
 func isUniqueViolation(err error) bool {
-	if err == nil {
-		return false
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "23505"
 	}
-	return strings.Contains(err.Error(), "unique") || strings.Contains(err.Error(), "23505")
+	return false
 }
 
 // scanner is a common interface for *sql.Row and *sql.Rows to allow shared scan helpers.

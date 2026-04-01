@@ -113,8 +113,8 @@ CREATE TABLE IF NOT EXISTS agent_plugins (
     updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
 
     CONSTRAINT agent_plugins_pkey PRIMARY KEY (id),
-    -- One override row per (agent, plugin) pair
-    CONSTRAINT uq_agent_plugins_agent_name UNIQUE (agent_id, plugin_name)
+    -- One override row per (tenant, agent, plugin) triple for multi-tenant isolation
+    CONSTRAINT uq_agent_plugins_tenant_agent_name UNIQUE (tenant_id, agent_id, plugin_name)
 );
 
 CREATE INDEX IF NOT EXISTS idx_agent_plugins_tenant

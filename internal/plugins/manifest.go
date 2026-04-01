@@ -12,6 +12,11 @@ import (
 // must start and end with alphanumeric, minimum 3 chars.
 var validPluginName = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{1,}[a-z0-9]$`)
 
+// IsValidPluginName reports whether name is a valid kebab-case plugin name.
+func IsValidPluginName(name string) bool {
+	return validPluginName.MatchString(name)
+}
+
 // validSemver matches a simple semver pattern MAJOR.MINOR.PATCH with optional pre-release.
 var validSemver = regexp.MustCompile(`^\d+\.\d+\.\d+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$`)
 

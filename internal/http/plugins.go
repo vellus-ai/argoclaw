@@ -122,7 +122,7 @@ func (h *PluginHandler) handleCreateCatalogEntry(w http.ResponseWriter, r *http.
 
 	if err := h.store.UpsertCatalogEntry(r.Context(), entry); err != nil {
 		slog.Error("plugins.create_catalog_entry", "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 		return
 	}
 
@@ -195,11 +195,11 @@ func (h *PluginHandler) handleInstallPlugin(w http.ResponseWriter, r *http.Reque
 
 	if err := h.store.InstallPlugin(r.Context(), tp); err != nil {
 		if errors.Is(err, store.ErrPluginAlreadyInstalled) {
-			writeJSON(w, http.StatusConflict, map[string]string{"error": err.Error()})
+			writeJSON(w, http.StatusConflict, map[string]string{"error": "plugin already installed"})
 			return
 		}
 		slog.Error("plugins.install", "plugin", req.PluginName, "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 		return
 	}
 
@@ -208,9 +208,13 @@ func (h *PluginHandler) handleInstallPlugin(w http.ResponseWriter, r *http.Reque
 
 func (h *PluginHandler) handleUninstallPlugin(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
+	if !plugins.IsValidPluginName(name) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
+		return
+	}
 	if err := h.store.UninstallPlugin(r.Context(), name, nil); err != nil {
 		if errors.Is(err, store.ErrPluginNotFound) {
-			writeJSON(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+			writeJSON(w, http.StatusNotFound, map[string]string{"error": "plugin not found"})
 			return
 		}
 		slog.Error("plugins.uninstall", "plugin", name, "error", err)
@@ -229,6 +233,10 @@ type updateConfigRequest struct {
 func (h *PluginHandler) handleUpdatePluginConfig(w http.ResponseWriter, r *http.Request) {
 	locale := h.locale(r)
 	name := r.PathValue("name")
+	if !plugins.IsValidPluginName(name) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
+		return
+	}
 	var req updateConfigRequest
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": i18n.T(locale, i18n.MsgInvalidJSON)})
@@ -241,11 +249,11 @@ func (h *PluginHandler) handleUpdatePluginConfig(w http.ResponseWriter, r *http.
 
 	if err := h.store.UpdatePluginConfig(r.Context(), name, req.Config, nil); err != nil {
 		if errors.Is(err, store.ErrPluginNotFound) {
-			writeJSON(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+			writeJSON(w, http.StatusNotFound, map[string]string{"error": "plugin not found"})
 			return
 		}
 		slog.Error("plugins.update_config", "plugin", name, "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 		return
 	}
 
@@ -254,13 +262,17 @@ func (h *PluginHandler) handleUpdatePluginConfig(w http.ResponseWriter, r *http.
 
 func (h *PluginHandler) handleEnablePlugin(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
+	if !plugins.IsValidPluginName(name) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
+		return
+	}
 	if err := h.store.EnablePlugin(r.Context(), name, nil); err != nil {
 		if errors.Is(err, store.ErrPluginNotFound) {
-			writeJSON(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+			writeJSON(w, http.StatusNotFound, map[string]string{"error": "plugin not found"})
 			return
 		}
 		slog.Error("plugins.enable", "plugin", name, "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "enabled"})
@@ -268,13 +280,17 @@ func (h *PluginHandler) handleEnablePlugin(w http.ResponseWriter, r *http.Reques
 
 func (h *PluginHandler) handleDisablePlugin(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
+	if !plugins.IsValidPluginName(name) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
+		return
+	}
 	if err := h.store.DisablePlugin(r.Context(), name, nil); err != nil {
 		if errors.Is(err, store.ErrPluginNotFound) {
-			writeJSON(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+			writeJSON(w, http.StatusNotFound, map[string]string{"error": "plugin not found"})
 			return
 		}
 		slog.Error("plugins.disable", "plugin", name, "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "disabled"})
@@ -282,6 +298,10 @@ func (h *PluginHandler) handleDisablePlugin(w http.ResponseWriter, r *http.Reque
 
 func (h *PluginHandler) handleAuditLog(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
+	if !plugins.IsValidPluginName(name) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
+		return
+	}
 	entries, err := h.store.ListAuditLog(r.Context(), name, 50)
 	if err != nil {
 		slog.Error("plugins.audit_log", "plugin", name, "error", err)
@@ -336,7 +356,7 @@ func (h *PluginHandler) handleGrantAgent(w http.ResponseWriter, r *http.Request)
 
 	if err := h.store.SetAgentPlugin(r.Context(), ap); err != nil {
 		slog.Error("plugins.grant_agent", "agent", agentID, "plugin", req.PluginName, "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 		return
 	}
 
@@ -351,6 +371,10 @@ func (h *PluginHandler) handleRevokeAgent(w http.ResponseWriter, r *http.Request
 		return
 	}
 	pluginName := r.PathValue("pluginName")
+	if !plugins.IsValidPluginName(pluginName) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
+		return
+	}
 
 	ap := &store.AgentPlugin{
 		AgentID:        agentID,
@@ -361,7 +385,7 @@ func (h *PluginHandler) handleRevokeAgent(w http.ResponseWriter, r *http.Request
 
 	if err := h.store.SetAgentPlugin(r.Context(), ap); err != nil {
 		slog.Error("plugins.revoke_agent", "agent", agentID, "plugin", pluginName, "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 		return
 	}
 

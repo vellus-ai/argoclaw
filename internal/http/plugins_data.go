@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/vellus-ai/argoclaw/internal/i18n"
+	"github.com/vellus-ai/argoclaw/internal/plugins"
 	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
@@ -43,6 +44,10 @@ func (h *PluginDataHandler) locale(r *http.Request) string {
 // GET /v1/plugins/{name}/data/{collection}?prefix=&limit=50&offset=0
 func (h *PluginDataHandler) handleListKeys(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
+	if !plugins.IsValidPluginName(name) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
+		return
+	}
 	collection := r.PathValue("collection")
 	prefix := r.URL.Query().Get("prefix")
 
@@ -80,6 +85,10 @@ func (h *PluginDataHandler) handleListKeys(w http.ResponseWriter, r *http.Reques
 // GET /v1/plugins/{name}/data/{collection}/{key}
 func (h *PluginDataHandler) handleGetValue(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
+	if !plugins.IsValidPluginName(name) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
+		return
+	}
 	collection := r.PathValue("collection")
 	key := r.PathValue("key")
 
@@ -91,7 +100,7 @@ func (h *PluginDataHandler) handleGetValue(w http.ResponseWriter, r *http.Reques
 			return
 		}
 		slog.Error("plugins.data.get", "plugin", name, "collection", collection, "key", key, "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 		return
 	}
 
@@ -108,6 +117,10 @@ type putValueRequest struct {
 func (h *PluginDataHandler) handlePutValue(w http.ResponseWriter, r *http.Request) {
 	locale := h.locale(r)
 	name := r.PathValue("name")
+	if !plugins.IsValidPluginName(name) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
+		return
+	}
 	collection := r.PathValue("collection")
 	key := r.PathValue("key")
 
@@ -124,7 +137,7 @@ func (h *PluginDataHandler) handlePutValue(w http.ResponseWriter, r *http.Reques
 
 	if err := h.store.PutData(r.Context(), name, collection, key, value, nil); err != nil {
 		slog.Error("plugins.data.put", "plugin", name, "collection", collection, "key", key, "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 		return
 	}
 
@@ -135,12 +148,16 @@ func (h *PluginDataHandler) handlePutValue(w http.ResponseWriter, r *http.Reques
 // DELETE /v1/plugins/{name}/data/{collection}/{key}
 func (h *PluginDataHandler) handleDeleteValue(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
+	if !plugins.IsValidPluginName(name) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
+		return
+	}
 	collection := r.PathValue("collection")
 	key := r.PathValue("key")
 
 	if err := h.store.DeleteData(r.Context(), name, collection, key); err != nil {
 		slog.Error("plugins.data.delete", "plugin", name, "collection", collection, "key", key, "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 		return
 	}
 
