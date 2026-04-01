@@ -4,6 +4,8 @@ import (
 	"testing"
 	"testing/quick"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func TestGenerateAndValidateAccessToken(t *testing.T) {
@@ -61,6 +63,73 @@ func TestValidateAccessToken_WrongSecret(t *testing.T) {
 	_, err := ValidateAccessToken(token, secret2)
 	if err == nil {
 		t.Error("expected error for wrong secret")
+	}
+}
+
+func TestGenerateAccessToken_HasAudienceClaim(t *testing.T) {
+	secret := "test-secret-key-min-32-chars!!!!!"
+	claims := TokenClaims{UserID: "user-123", Email: "t@t.com", TenantID: "t", Role: "member"}
+
+	tokenStr, err := GenerateAccessToken(claims, secret)
+	if err != nil {
+		t.Fatalf("GenerateAccessToken: %v", err)
+	}
+
+	// Parse without audience validation to inspect claims
+	token, _ := jwt.ParseWithClaims(tokenStr, &argoClaims{}, func(token *jwt.Token) (any, error) {
+		return []byte(secret), nil
+	})
+	parsed := token.Claims.(*argoClaims)
+
+	if len(parsed.Audience) != 1 || parsed.Audience[0] != "argoclaw" {
+		t.Errorf("Audience = %v, want [argoclaw]", parsed.Audience)
+	}
+}
+
+func TestValidateAccessToken_RejectsWrongAudience(t *testing.T) {
+	secret := "test-secret-key-min-32-chars!!!!!"
+
+	// Forge a token with wrong audience
+	now := time.Now()
+	c := argoClaims{
+		TokenClaims: TokenClaims{UserID: "user-123", Email: "t@t.com", TenantID: "t", Role: "member"},
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    "argoclaw",
+			Subject:   "user-123",
+			Audience:  jwt.ClaimStrings{"other-service"},
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(15 * time.Minute)),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
+	tokenStr, _ := token.SignedString([]byte(secret))
+
+	_, err := ValidateAccessToken(tokenStr, secret)
+	if err == nil {
+		t.Error("expected error for token with wrong audience")
+	}
+}
+
+func TestValidateAccessToken_RejectsNoAudience(t *testing.T) {
+	secret := "test-secret-key-min-32-chars!!!!!"
+
+	// Forge a token without audience
+	now := time.Now()
+	c := argoClaims{
+		TokenClaims: TokenClaims{UserID: "user-123", Email: "t@t.com", TenantID: "t", Role: "member"},
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    "argoclaw",
+			Subject:   "user-123",
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(15 * time.Minute)),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
+	tokenStr, _ := token.SignedString([]byte(secret))
+
+	_, err := ValidateAccessToken(tokenStr, secret)
+	if err == nil {
+		t.Error("expected error for token without audience claim")
 	}
 }
 
