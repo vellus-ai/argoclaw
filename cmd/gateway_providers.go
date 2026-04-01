@@ -136,6 +136,20 @@ func registerProviders(registry *providers.Registry, cfg *config.Config) {
 		slog.Info("registered provider", "name", "ollama-cloud")
 	}
 
+	// Vertex AI provider (OAuth2 via ADC/Workload Identity, no API key needed)
+	if cfg.Providers.VertexAI.ProjectID != "" {
+		region := cfg.Providers.VertexAI.Region
+		if region == "" {
+			region = "us-central1"
+		}
+		var opts []providers.VertexAIOption
+		if cfg.Providers.VertexAI.DefaultModel != "" {
+			opts = append(opts, providers.WithVertexAIDefaultModel(cfg.Providers.VertexAI.DefaultModel))
+		}
+		registry.Register(providers.NewVertexAIProvider(cfg.Providers.VertexAI.ProjectID, region, opts...))
+		slog.Info("registered provider", "name", "vertex-ai", "project", cfg.Providers.VertexAI.ProjectID, "region", region)
+	}
+
 	// Claude CLI provider (subscription-based, no API key needed)
 	if cfg.Providers.ClaudeCLI.CLIPath != "" {
 		cliPath := cfg.Providers.ClaudeCLI.CLIPath
@@ -272,6 +286,36 @@ func registerProvidersFromDB(registry *providers.Registry, provStore store.Provi
 		// ACP provider — no API key needed (agents manage their own auth).
 		if p.ProviderType == store.ProviderACP {
 			registerACPFromDB(registry, p)
+			continue
+		}
+		// Vertex AI uses OAuth2 (ADC), not API keys — handle before the key guard.
+		if p.ProviderType == store.ProviderVertexAI {
+			var settings struct {
+				ProjectID    string `json:"project_id"`
+				Region       string `json:"region"`
+				DefaultModel string `json:"default_model"`
+			}
+			if p.Settings != nil {
+				if err := json.Unmarshal(p.Settings, &settings); err != nil {
+					slog.Warn("vertex-ai: invalid settings JSON", "name", p.Name, "error", err)
+					continue
+				}
+			}
+			if settings.ProjectID == "" {
+				slog.Warn("vertex-ai: project_id required in settings", "name", p.Name)
+				continue
+			}
+			region := settings.Region
+			if region == "" {
+				region = "us-central1"
+			}
+			var opts []providers.VertexAIOption
+			opts = append(opts, providers.WithVertexAIName(p.Name))
+			if settings.DefaultModel != "" {
+				opts = append(opts, providers.WithVertexAIDefaultModel(settings.DefaultModel))
+			}
+			registry.Register(providers.NewVertexAIProvider(settings.ProjectID, region, opts...))
+			slog.Info("registered provider from DB", "name", p.Name, "type", "vertex_ai")
 			continue
 		}
 		// Local Ollama requires no API key — handle before the key guard (same pattern as ClaudeCLI).

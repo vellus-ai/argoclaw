@@ -32,6 +32,7 @@ const (
 	ProviderOllamaCloud     = "ollama_cloud"    // Ollama Cloud (Bearer token required)
 	ProviderACP             = "acp"             // ACP (Agent Client Protocol) agent subprocess
 	ProviderAnthropicOAuth  = "anthropic_oauth" // Anthropic OAuth setup token (sk-ant-oat01-)
+	ProviderVertexAI        = "vertex_ai"       // Google Vertex AI (OAuth2 via ADC/Workload Identity)
 )
 
 // ValidProviderTypes lists all accepted provider_type values.
@@ -59,6 +60,7 @@ var ValidProviderTypes = map[string]bool{
 	ProviderOllamaCloud:     true,
 	ProviderACP:             true,
 	ProviderAnthropicOAuth:  true,
+	ProviderVertexAI:        true,
 }
 
 // LLMProviderData represents an LLM provider configuration.
