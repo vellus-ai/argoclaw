@@ -13,20 +13,46 @@ import (
 
 // UserAuthHandler manages user registration, login, and token refresh.
 type UserAuthHandler struct {
-	users     store.UserStore
-	jwtSecret string
+	users       store.UserStore
+	jwtSecret   string
+	rateLimiter *AuthRateLimiter
 }
 
 // NewUserAuthHandler creates a new auth handler.
-func NewUserAuthHandler(users store.UserStore, jwtSecret string) *UserAuthHandler {
-	return &UserAuthHandler{users: users, jwtSecret: jwtSecret}
+// rateLimiter is optional — pass nil to disable rate limiting.
+func NewUserAuthHandler(users store.UserStore, jwtSecret string, opts ...UserAuthOption) *UserAuthHandler {
+	h := &UserAuthHandler{users: users, jwtSecret: jwtSecret}
+	for _, opt := range opts {
+		opt(h)
+	}
+	return h
+}
+
+// UserAuthOption configures optional settings for UserAuthHandler.
+type UserAuthOption func(*UserAuthHandler)
+
+// WithRateLimiter sets the rate limiter for auth endpoints.
+func WithRateLimiter(rl *AuthRateLimiter) UserAuthOption {
+	return func(h *UserAuthHandler) {
+		h.rateLimiter = rl
+	}
 }
 
 // RegisterRoutes adds auth endpoints to the mux.
 func (h *UserAuthHandler) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("POST /v1/auth/register", h.handleRegister)
-	mux.HandleFunc("POST /v1/auth/login", h.handleLogin)
-	mux.HandleFunc("POST /v1/auth/refresh", h.handleRefresh)
+	register := h.handleRegister
+	login := h.handleLogin
+	refresh := h.handleRefresh
+
+	if h.rateLimiter != nil {
+		register = h.rateLimiter.WrapRegister(register)
+		login = h.rateLimiter.WrapLogin(login)
+		refresh = h.rateLimiter.WrapRefresh(refresh)
+	}
+
+	mux.HandleFunc("POST /v1/auth/register", register)
+	mux.HandleFunc("POST /v1/auth/login", login)
+	mux.HandleFunc("POST /v1/auth/refresh", refresh)
 	mux.HandleFunc("POST /v1/auth/logout", h.handleLogout)
 }
 
@@ -184,6 +210,17 @@ func (h *UserAuthHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check account status before granting access
+	if user.Status != "active" {
+		_ = h.users.LogAudit(r.Context(), &store.LoginAuditEntry{
+			UserID: &user.ID, Email: req.Email, Action: "login_inactive",
+			IPAddress: clientIP(r), UserAgent: r.UserAgent(),
+		})
+		slog.Warn("security.login_inactive_account", "email", req.Email, "status", user.Status)
+		writeJSONError(w, http.StatusForbidden, "account is not active")
+		return
+	}
+
 	// Success — reset failed attempts
 	_ = h.users.ResetFailedAttempts(r.Context(), user.ID)
 	_ = h.users.UpdateLastLogin(r.Context(), user.ID)
@@ -230,6 +267,12 @@ func (h *UserAuthHandler) handleRefresh(w http.ResponseWriter, r *http.Request) 
 	user, err := h.users.GetByID(r.Context(), session.UserID)
 	if err != nil || user == nil {
 		writeJSONError(w, http.StatusUnauthorized, "user not found")
+		return
+	}
+
+	// Reject refresh for inactive accounts
+	if user.Status != "active" {
+		writeJSONError(w, http.StatusForbidden, "account is not active")
 		return
 	}
 

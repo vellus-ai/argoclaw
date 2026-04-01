@@ -367,6 +367,93 @@ func TestUserAuth_Login_Lockout(t *testing.T) {
 	}
 }
 
+func TestUserAuth_Login_DisabledAccount(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	password := "Str0ng!Pass#99"
+	hash, _ := auth.HashPassword(password)
+	us.users["disabled@example.com"] = &store.User{
+		ID: uuid.New(), Email: "disabled@example.com", PasswordHash: hash,
+		Role: "member", Status: "disabled",
+	}
+
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"email":"disabled@example.com","password":"Str0ng!Pass#99"}`
+	req := httptest.NewRequest("POST", "/v1/auth/login", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, want %d; body = %s", w.Code, http.StatusForbidden, w.Body.String())
+	}
+
+	// Verify audit log
+	found := false
+	for _, a := range us.audit {
+		if a.Action == "login_inactive" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("expected login_inactive audit entry")
+	}
+}
+
+func TestUserAuth_Login_SuspendedAccount(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	password := "Str0ng!Pass#99"
+	hash, _ := auth.HashPassword(password)
+	us.users["suspended@example.com"] = &store.User{
+		ID: uuid.New(), Email: "suspended@example.com", PasswordHash: hash,
+		Role: "member", Status: "suspended",
+	}
+
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"email":"suspended@example.com","password":"Str0ng!Pass#99"}`
+	req := httptest.NewRequest("POST", "/v1/auth/login", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusForbidden)
+	}
+}
+
+func TestUserAuth_Login_PendingAccount(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	password := "Str0ng!Pass#99"
+	hash, _ := auth.HashPassword(password)
+	us.users["pending@example.com"] = &store.User{
+		ID: uuid.New(), Email: "pending@example.com", PasswordHash: hash,
+		Role: "member", Status: "pending",
+	}
+
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"email":"pending@example.com","password":"Str0ng!Pass#99"}`
+	req := httptest.NewRequest("POST", "/v1/auth/login", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusForbidden)
+	}
+}
+
 func TestUserAuth_Logout_Revokes(t *testing.T) {
 	t.Parallel()
 	us := newStubUserStore()
@@ -655,6 +742,84 @@ func TestUserAuth_Logout_MalformedJSON(t *testing.T) {
 
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+// --- Rate limiting tests ---
+
+func TestUserAuth_Login_RateLimited(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	password := "Str0ng!Pass#99"
+	hash, _ := auth.HashPassword(password)
+	us.users["user@example.com"] = &store.User{
+		ID: uuid.New(), Email: "user@example.com", PasswordHash: hash,
+		Role: "member", Status: "active",
+	}
+
+	// 2 RPM, burst 1 — very restrictive for testing
+	rl := httpapi.NewAuthRateLimiter(2, 2, 20)
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret, httpapi.WithRateLimiter(rl))
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := `{"email":"user@example.com","password":"Str0ng!Pass#99"}`
+
+	// First request: should succeed
+	req := httptest.NewRequest("POST", "/v1/auth/login", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("first request: status = %d, want %d; body = %s", w.Code, http.StatusOK, w.Body.String())
+	}
+
+	// Rapid subsequent requests should eventually be rate limited
+	rateLimited := false
+	for i := 0; i < 10; i++ {
+		req = httptest.NewRequest("POST", "/v1/auth/login", bytes.NewBufferString(body))
+		req.Header.Set("Content-Type", "application/json")
+		w = httptest.NewRecorder()
+		mux.ServeHTTP(w, req)
+		if w.Code == http.StatusTooManyRequests {
+			rateLimited = true
+			// Check Retry-After header
+			if w.Header().Get("Retry-After") == "" {
+				t.Error("429 response missing Retry-After header")
+			}
+			break
+		}
+	}
+	if !rateLimited {
+		t.Error("expected 429 after rapid login requests")
+	}
+}
+
+func TestUserAuth_Register_RateLimited(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+
+	// 1 RPM, burst 1 — very restrictive
+	rl := httpapi.NewAuthRateLimiter(2, 1, 20)
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret, httpapi.WithRateLimiter(rl))
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	rateLimited := false
+	for i := 0; i < 10; i++ {
+		email := "user" + string(rune('a'+i)) + "@example.com"
+		body := `{"email":"` + email + `","password":"Str0ng!Pass#99","display_name":"User"}`
+		req := httptest.NewRequest("POST", "/v1/auth/register", bytes.NewBufferString(body))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		mux.ServeHTTP(w, req)
+		if w.Code == http.StatusTooManyRequests {
+			rateLimited = true
+			break
+		}
+	}
+	if !rateLimited {
+		t.Error("expected 429 after rapid register requests")
 	}
 }
 

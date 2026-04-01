@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/google/uuid"
+
 	"github.com/vellus-ai/argoclaw/internal/auth"
 	"github.com/vellus-ai/argoclaw/internal/store"
 )
@@ -95,5 +97,13 @@ func TenantIDFromContext(ctx context.Context) string {
 
 // WithTenantID adds tenant isolation to store context.
 func WithTenantID(ctx context.Context, tenantID string) context.Context {
-	return store.WithUserID(ctx, tenantID)
+	if tenantID == "" {
+		return ctx
+	}
+	id, err := uuid.Parse(tenantID)
+	if err != nil {
+		slog.Warn("security.invalid_tenant_id", "tenant_id", tenantID, "error", err)
+		return ctx
+	}
+	return store.WithTenantID(ctx, id)
 }
