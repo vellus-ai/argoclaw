@@ -136,6 +136,28 @@ func registerProviders(registry *providers.Registry, cfg *config.Config) {
 		slog.Info("registered provider", "name", "ollama-cloud")
 	}
 
+	// Vertex AI provider (OAuth2 via ADC/Workload Identity, no API key needed).
+	// SECURITY: Vertex AI uses the HOST's service account for auth. Only the host
+	// operator can configure it via config.json — tenant DB registration is blocked
+	// to prevent billing abuse and cross-tenant access.
+	if cfg.Providers.VertexAI.ProjectID != "" {
+		region := cfg.Providers.VertexAI.Region
+		if region == "" {
+			region = providers.VertexAIDefaultRegion
+		}
+		var opts []providers.VertexAIOption
+		if cfg.Providers.VertexAI.DefaultModel != "" {
+			opts = append(opts, providers.WithVertexAIDefaultModel(cfg.Providers.VertexAI.DefaultModel))
+		}
+		p, err := providers.NewVertexAIProvider(cfg.Providers.VertexAI.ProjectID, region, opts...)
+		if err != nil {
+			slog.Error("vertex-ai: invalid config, skipping", "error", err)
+		} else {
+			registry.Register(p)
+			slog.Info("registered provider", "name", "vertex-ai", "project", cfg.Providers.VertexAI.ProjectID, "region", region)
+		}
+	}
+
 	// Claude CLI provider (subscription-based, no API key needed)
 	if cfg.Providers.ClaudeCLI.CLIPath != "" {
 		cliPath := cfg.Providers.ClaudeCLI.CLIPath
@@ -272,6 +294,14 @@ func registerProvidersFromDB(registry *providers.Registry, provStore store.Provi
 		// ACP provider — no API key needed (agents manage their own auth).
 		if p.ProviderType == store.ProviderACP {
 			registerACPFromDB(registry, p)
+			continue
+		}
+		// SECURITY: Vertex AI DB registration is blocked. Vertex AI uses the HOST's
+		// service account (Workload Identity) for auth — allowing tenants to configure
+		// arbitrary project_ids via DB would enable billing abuse and cross-tenant access.
+		// Vertex AI must be configured via config.json by the host operator only.
+		if p.ProviderType == store.ProviderVertexAI {
+			slog.Warn("security.vertex_ai: DB registration blocked — use config.json instead", "name", p.Name)
 			continue
 		}
 		// Local Ollama requires no API key — handle before the key guard (same pattern as ClaudeCLI).

@@ -210,6 +210,7 @@ type ProvidersConfig struct {
 	OllamaCloud ProviderConfig  `json:"ollama_cloud"` // Ollama Cloud (API key required)
 	ClaudeCLI   ClaudeCLIConfig `json:"claude_cli"`
 	ACP         ACPConfig       `json:"acp"`
+	VertexAI    VertexAIConfig  `json:"vertex_ai"` // Google Vertex AI (OAuth2 via ADC/Workload Identity)
 }
 
 // OllamaConfig configures a local (or self-hosted) Ollama instance.
@@ -235,6 +236,17 @@ type ACPConfig struct {
 	WorkDir  string   `json:"work_dir"`  // base workspace dir
 	IdleTTL  string   `json:"idle_ttl"`  // process idle TTL (e.g. "5m")
 	PermMode string   `json:"perm_mode"` // "approve-all" (default), "approve-reads", "deny-all"
+}
+
+// VertexAIConfig configures the Google Vertex AI provider.
+// Authentication uses Application Default Credentials (ADC):
+//   - GKE: automatic via Workload Identity (no config needed)
+//   - VM: via attached service account metadata
+//   - Local: via `gcloud auth application-default login`
+type VertexAIConfig struct {
+	ProjectID    string `json:"project_id"`              // GCP project ID (e.g. "vellus-ai-agent-platform")
+	Region       string `json:"region"`                  // GCP region (e.g. "us-central1")
+	DefaultModel string `json:"default_model,omitempty"` // default model (default: "gemini-2.5-flash")
 }
 
 type ProviderConfig struct {
@@ -278,6 +290,9 @@ func (p *ProvidersConfig) APIBaseForType(providerType string) string {
 		return p.ZaiCoding.APIBase
 	case "ollama_cloud":
 		return p.OllamaCloud.APIBase
+	case "vertex_ai":
+		// Vertex AI builds its base URL from project_id + region; no static api_base.
+		return ""
 	default:
 		return ""
 	}

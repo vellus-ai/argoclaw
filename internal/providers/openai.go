@@ -17,7 +17,7 @@ import (
 )
 
 // OpenAIProvider implements Provider for OpenAI-compatible APIs
-// (OpenAI, Groq, OpenRouter, DeepSeek, VLLM, etc.)
+// (OpenAI, Groq, OpenRouter, DeepSeek, Vertex AI, VLLM, etc.)
 type OpenAIProvider struct {
 	name         string
 	apiKey       string
@@ -25,6 +25,7 @@ type OpenAIProvider struct {
 	chatPath     string // defaults to "/chat/completions"
 	defaultModel string
 	providerType string // DB provider_type (e.g. "gemini_native", "openai", "minimax_native")
+	tokenSource  TokenSource
 	client       *http.Client
 	retryConfig  RetryConfig
 }
@@ -62,6 +63,14 @@ func (p *OpenAIProvider) ProviderType() string   { return p.providerType }
 // WithProviderType sets the DB provider_type for correct API endpoint routing in media tools.
 func (p *OpenAIProvider) WithProviderType(pt string) *OpenAIProvider {
 	p.providerType = pt
+	return p
+}
+
+// WithTokenSource sets a dynamic token source for OAuth2-based authentication
+// (e.g. GCP Workload Identity for Vertex AI). When set, the provider calls
+// tokenSource.Token() on each request instead of using the static apiKey.
+func (p *OpenAIProvider) WithTokenSource(ts TokenSource) *OpenAIProvider {
+	p.tokenSource = ts
 	return p
 }
 
@@ -269,8 +278,11 @@ func (p *OpenAIProvider) buildRequestBody(model string, req ChatRequest, stream 
 	// Compute provider capability once: does this endpoint support Google's thought_signature?
 	// We check providerType, name, apiBase, and the model string (robust detection for proxies/OpenRouter).
 	supportsThoughtSignature := strings.Contains(strings.ToLower(p.providerType), "gemini") ||
+		strings.Contains(strings.ToLower(p.providerType), "vertex") ||
 		strings.Contains(strings.ToLower(p.name), "gemini") ||
+		strings.Contains(strings.ToLower(p.name), "vertex") ||
 		strings.Contains(strings.ToLower(p.apiBase), "generativelanguage") ||
+		strings.Contains(strings.ToLower(p.apiBase), "aiplatform.googleapis.com") ||
 		strings.Contains(strings.ToLower(model), "gemini")
 
 	if supportsThoughtSignature {
@@ -420,11 +432,23 @@ func (p *OpenAIProvider) doRequest(ctx context.Context, body any) (io.ReadCloser
 	}
 
 	httpReq.Header.Set("Content-Type", "application/json")
+
+	// Resolve bearer token: prefer dynamic TokenSource (OAuth2/Workload Identity)
+	// over static API key. TokenSource is used by Vertex AI, ChatGPT OAuth, etc.
+	bearerToken := p.apiKey
+	if p.tokenSource != nil {
+		tok, tokErr := p.tokenSource.Token()
+		if tokErr != nil {
+			return nil, fmt.Errorf("%s: token source: %w", p.name, tokErr)
+		}
+		bearerToken = tok
+	}
+
 	// Azure OpenAI/Foundry support for now atleast
 	if strings.Contains(strings.ToLower(p.apiBase), "azure.com") {
-		httpReq.Header.Set("api-key", p.apiKey)
+		httpReq.Header.Set("api-key", bearerToken)
 	} else {
-		httpReq.Header.Set("Authorization", "Bearer "+p.apiKey)
+		httpReq.Header.Set("Authorization", "Bearer "+bearerToken)
 	}
 
 	resp, err := p.client.Do(httpReq)
