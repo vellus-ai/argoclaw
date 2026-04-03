@@ -354,8 +354,12 @@ func TestVertexAIOptions(t *testing.T) {
 func TestGCPTokenSource_LazyInit(t *testing.T) {
 	t.Parallel()
 	ts := newGCPTokenSource()
+	// Before any Token() call, src should be nil (sync.Once not yet fired)
 	if ts.src != nil {
 		t.Error("underlying source should be nil before first Token() call")
+	}
+	if ts.err != nil {
+		t.Error("err should be nil before first Token() call")
 	}
 }
 

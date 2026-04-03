@@ -16,6 +16,13 @@ import (
 // Using aiplatform scope instead of cloud-platform to follow least-privilege.
 const vertexAIScope = "https://www.googleapis.com/auth/aiplatform"
 
+// VertexAIDefaultRegion is the fallback GCP region when none is configured.
+const VertexAIDefaultRegion = "us-central1"
+
+// VertexAIProviderType is the provider_type value for Vertex AI.
+// Must match store.ProviderVertexAI.
+const VertexAIProviderType = "vertex_ai"
+
 // vertexAIProjectIDRe validates GCP project IDs (6-30 chars, lowercase+digits+hyphens).
 var vertexAIProjectIDRe = regexp.MustCompile(`^[a-z][a-z0-9-]{4,28}[a-z0-9]$`)
 
@@ -83,16 +90,17 @@ func NewVertexAIProvider(projectID, region string, opts ...VertexAIOption) (*Ope
 	}
 
 	p := NewOpenAIProvider(cfg.name, "", base, cfg.defaultModel)
-	p.WithProviderType("vertex_ai")
+	p.WithProviderType(VertexAIProviderType)
 	p.WithTokenSource(ts)
 	return p, nil
 }
 
 // gcpTokenSource wraps an oauth2.TokenSource to implement our TokenSource interface.
-// It caches the underlying token and handles auto-refresh.
+// Uses sync.Once for one-time lazy init of ADC credentials.
 type gcpTokenSource struct {
-	mu  sync.Mutex
-	src oauth2.TokenSource // lazy-initialized
+	once sync.Once
+	src  oauth2.TokenSource
+	err  error
 }
 
 // newGCPTokenSource creates a TokenSource that obtains OAuth2 access tokens
@@ -104,9 +112,8 @@ func newGCPTokenSource() *gcpTokenSource {
 // Token returns a valid OAuth2 access token, refreshing if expired.
 // SECURITY: Never log the returned token value.
 func (g *gcpTokenSource) Token() (string, error) {
-	g.mu.Lock()
-	if g.src == nil {
-		// Initialize on first call. Uses ADC which auto-detects:
+	g.once.Do(func() {
+		// Uses ADC which auto-detects:
 		// 1. GOOGLE_APPLICATION_CREDENTIALS env var (service account key file)
 		// 2. gcloud CLI credentials (gcloud auth application-default login)
 		// 3. GCE/GKE metadata server (Workload Identity, attached SA)
@@ -115,18 +122,18 @@ func (g *gcpTokenSource) Token() (string, error) {
 
 		ts, err := google.DefaultTokenSource(ctx, vertexAIScope)
 		if err != nil {
-			g.mu.Unlock()
-			return "", fmt.Errorf("vertex-ai: ADC not available: %w", err)
+			g.err = fmt.Errorf("vertex-ai: ADC not available: %w", err)
+			return
 		}
 		// oauth2.ReuseTokenSource handles caching and auto-refresh (thread-safe)
 		g.src = oauth2.ReuseTokenSource(nil, ts)
 		slog.Info("vertex-ai: initialized GCP token source via ADC")
+	})
+	if g.err != nil {
+		return "", g.err
 	}
-	src := g.src
-	g.mu.Unlock()
 
-	// Call Token() outside the lock — oauth2.ReuseTokenSource is thread-safe.
-	tok, err := src.Token()
+	tok, err := g.src.Token()
 	if err != nil {
 		return "", fmt.Errorf("vertex-ai: token refresh failed: %w", err)
 	}
