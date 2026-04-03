@@ -70,8 +70,14 @@ func (p *DataProxy) validateCollection(collection string) error {
 }
 
 func (p *DataProxy) checkPluginInstalled(ctx context.Context, pluginName string) error {
-	_, err := p.store.GetTenantPlugin(ctx, pluginName)
+	tp, err := p.store.GetTenantPlugin(ctx, pluginName)
+	if errors.Is(err, store.ErrPluginNotFound) {
+		return ErrPluginNotInstalled
+	}
 	if err != nil {
+		return err // propagate transient DB errors
+	}
+	if tp.State != store.PluginStateEnabled {
 		return ErrPluginNotInstalled
 	}
 	return nil

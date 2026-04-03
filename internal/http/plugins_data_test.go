@@ -10,8 +10,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/vellus-ai/argoclaw/internal/plugins"
 	"github.com/vellus-ai/argoclaw/internal/store"
 )
+
+// testTenantID is a fixed tenant UUID injected into data proxy test requests.
+var testTenantID = uuid.MustParse("00000000-0000-0000-0000-000000000001")
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Setup helpers for data proxy HTTP tests
@@ -20,7 +25,8 @@ import (
 
 func newPluginDataMux(s store.PluginStore) *http.ServeMux {
 	mux := http.NewServeMux()
-	h := NewPluginDataHandler(s, testToken)
+	proxy := plugins.NewDataProxy(s)
+	h := NewPluginDataHandler(proxy, testToken, nil)
 	h.RegisterRoutes(mux)
 	return mux
 }
@@ -33,9 +39,21 @@ func doDataRequest(mux *http.ServeMux, method, path string, body any) *httptest.
 	r := httptest.NewRequest(method, path, &buf)
 	r.Header.Set("Authorization", "Bearer "+testToken)
 	r.Header.Set("Content-Type", "application/json")
+	// Inject tenant_id into context for DataProxy validation.
+	ctx := store.WithTenantID(r.Context(), testTenantID)
+	r = r.WithContext(ctx)
 	w := httptest.NewRecorder()
 	mux.ServeHTTP(w, r)
 	return w
+}
+
+// dataStubWithEnabledPlugin returns a stub where GetTenantPlugin succeeds with "enabled" state.
+func dataStubWithEnabledPlugin() *stubPluginStoreHTTP {
+	return &stubPluginStoreHTTP{
+		getTenantPlugin: func(_ context.Context, name string) (*store.TenantPlugin, error) {
+			return &store.TenantPlugin{PluginName: name, State: store.PluginStateEnabled}, nil
+		},
+	}
 }
 
 func doDataRequestNoAuth(mux *http.ServeMux, method, path string) *httptest.ResponseRecorder {
@@ -58,7 +76,7 @@ func TestPluginDataHandler_ListKeys_RequiresAuth(t *testing.T) {
 }
 
 func TestPluginDataHandler_ListKeys_EmptyResultIsNotNull(t *testing.T) {
-	mux := newPluginDataMux(&stubPluginStoreHTTP{})
+	mux := newPluginDataMux(dataStubWithEnabledPlugin())
 	w := doDataRequest(mux, "GET", "/v1/plugins/vault/data/prompts", nil)
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
@@ -75,10 +93,9 @@ func TestPluginDataHandler_ListKeys_EmptyResultIsNotNull(t *testing.T) {
 }
 
 func TestPluginDataHandler_ListKeys_ReturnsKeys(t *testing.T) {
-	stub := &stubPluginStoreHTTP{
-		listDataKeys: func(_ context.Context, _, _, _ string, _, _ int) ([]string, error) {
-			return []string{"key1", "key2"}, nil
-		},
+	stub := dataStubWithEnabledPlugin()
+	stub.listDataKeys = func(_ context.Context, _, _, _ string, _, _ int) ([]string, error) {
+		return []string{"key1", "key2"}, nil
 	}
 	mux := newPluginDataMux(stub)
 	w := doDataRequest(mux, "GET", "/v1/plugins/vault/data/prompts", nil)
@@ -106,8 +123,12 @@ func TestPluginDataHandler_GetValue_RequiresAuth(t *testing.T) {
 }
 
 func TestPluginDataHandler_GetValue_NotFound(t *testing.T) {
-	// Default stub returns ErrPluginNotFound for GetData.
-	mux := newPluginDataMux(&stubPluginStoreHTTP{})
+	// Stub returns enabled plugin but GetData returns ErrPluginNotFound.
+	stub := dataStubWithEnabledPlugin()
+	stub.getData = func(_ context.Context, _, _, _ string) (*store.PluginDataEntry, error) {
+		return nil, store.ErrPluginNotFound
+	}
+	mux := newPluginDataMux(stub)
 	w := doDataRequest(mux, "GET", "/v1/plugins/vault/data/prompts/missing-key", nil)
 	if w.Code != http.StatusNotFound {
 		t.Errorf("expected 404, got %d: %s", w.Code, w.Body.String())
@@ -115,10 +136,9 @@ func TestPluginDataHandler_GetValue_NotFound(t *testing.T) {
 }
 
 func TestPluginDataHandler_GetValue_Found(t *testing.T) {
-	stub := &stubPluginStoreHTTP{
-		getData: func(_ context.Context, _, _, key string) (*store.PluginDataEntry, error) {
-			return &store.PluginDataEntry{Key: key, Value: json.RawMessage(`"hello"`)}, nil
-		},
+	stub := dataStubWithEnabledPlugin()
+	stub.getData = func(_ context.Context, _, _, key string) (*store.PluginDataEntry, error) {
+		return &store.PluginDataEntry{Key: key, Value: json.RawMessage(`"hello"`)}, nil
 	}
 	mux := newPluginDataMux(stub)
 	w := doDataRequest(mux, "GET", "/v1/plugins/vault/data/prompts/my-key", nil)
@@ -145,10 +165,12 @@ func TestPluginDataHandler_PutValue_RequiresAuth(t *testing.T) {
 }
 
 func TestPluginDataHandler_PutValue_InvalidJSON(t *testing.T) {
-	mux := newPluginDataMux(&stubPluginStoreHTTP{})
+	mux := newPluginDataMux(dataStubWithEnabledPlugin())
 	r := httptest.NewRequest("PUT", "/v1/plugins/vault/data/prompts/my-key", bytes.NewBufferString("not-json-at-all!!!"))
 	r.Header.Set("Authorization", "Bearer "+testToken)
 	r.Header.Set("Content-Type", "application/json")
+	ctx := store.WithTenantID(r.Context(), testTenantID)
+	r = r.WithContext(ctx)
 	w := httptest.NewRecorder()
 	mux.ServeHTTP(w, r)
 	if w.Code != http.StatusBadRequest {
@@ -158,11 +180,10 @@ func TestPluginDataHandler_PutValue_InvalidJSON(t *testing.T) {
 
 func TestPluginDataHandler_PutValue_Success(t *testing.T) {
 	called := false
-	stub := &stubPluginStoreHTTP{
-		putData: func(_ context.Context, plugin, col, key string, val json.RawMessage, _ *time.Time) error {
-			called = true
-			return nil
-		},
+	stub := dataStubWithEnabledPlugin()
+	stub.putData = func(_ context.Context, plugin, col, key string, val json.RawMessage, _ *time.Time) error {
+		called = true
+		return nil
 	}
 	mux := newPluginDataMux(stub)
 	body := map[string]any{"value": "hello world"}
@@ -177,7 +198,7 @@ func TestPluginDataHandler_PutValue_Success(t *testing.T) {
 
 func TestPluginDataHandler_PutValue_EmptyBodyAllowed(t *testing.T) {
 	// An empty JSON object {} should be a valid value.
-	mux := newPluginDataMux(&stubPluginStoreHTTP{})
+	mux := newPluginDataMux(dataStubWithEnabledPlugin())
 	w := doDataRequest(mux, "PUT", "/v1/plugins/vault/data/prompts/my-key", map[string]any{})
 	if w.Code != http.StatusOK && w.Code != http.StatusNoContent {
 		t.Errorf("expected success for empty JSON body, got %d: %s", w.Code, w.Body.String())
@@ -197,7 +218,7 @@ func TestPluginDataHandler_DeleteValue_RequiresAuth(t *testing.T) {
 }
 
 func TestPluginDataHandler_DeleteValue_Success(t *testing.T) {
-	mux := newPluginDataMux(&stubPluginStoreHTTP{})
+	mux := newPluginDataMux(dataStubWithEnabledPlugin())
 	w := doDataRequest(mux, "DELETE", "/v1/plugins/vault/data/prompts/my-key", nil)
 	if w.Code != http.StatusNoContent {
 		t.Errorf("expected 204, got %d: %s", w.Code, w.Body.String())
@@ -205,22 +226,11 @@ func TestPluginDataHandler_DeleteValue_Success(t *testing.T) {
 }
 
 func TestPluginDataHandler_DeleteValue_StoreError(t *testing.T) {
-	stub := &stubPluginStoreHTTP{
-		deleteData: func(_ context.Context, _, _, _ string) error {
-			return errors.New("db connection failed")
-		},
+	stub := dataStubWithEnabledPlugin()
+	stub.deleteData = func(_ context.Context, _, _, _ string) error {
+		return errors.New("db connection failed")
 	}
-	// Override DeleteData for the stub
-	_ = stub
-	// This test verifies that a store error maps to 500.
-	// Since the stub above doesn't wire deleteData into the stub struct (the struct
-	// uses a function field "deleteData"), it's already covered by the field defined
-	// in plugins_test.go. The default no-op returns nil, so let's verify the error path.
-	mux := newPluginDataMux(&stubPluginStoreHTTP{
-		deleteData: func(_ context.Context, _, _, _ string) error {
-			return errors.New("db connection failed")
-		},
-	})
+	mux := newPluginDataMux(stub)
 	w := doDataRequest(mux, "DELETE", "/v1/plugins/vault/data/prompts/my-key", nil)
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("expected 500 for store error, got %d", w.Code)

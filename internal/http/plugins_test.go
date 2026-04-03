@@ -168,7 +168,7 @@ const testToken = "test-gateway-token"
 
 func newPluginMux(s store.PluginStore) *http.ServeMux {
 	mux := http.NewServeMux()
-	h := NewPluginHandler(s, testToken, nil)
+	h := NewPluginHandler(s, testToken, nil, nil)
 	h.RegisterRoutes(mux)
 	return mux
 }

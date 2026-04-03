@@ -611,7 +611,7 @@ func (s *PGPluginStore) ListDataKeys(ctx context.Context, pluginName, collection
 	args = append(args, tid, pluginName, collection)
 
 	if prefix != "" {
-		escaped := strings.NewReplacer("%", `\%`, "_", `\_`).Replace(prefix)
+		escaped := strings.NewReplacer(`\`, `\\`, "%", `\%`, "_", `\_`).Replace(prefix)
 		args = append(args, escaped+"%")
 		q += fmt.Sprintf(` AND key LIKE $%d ESCAPE '\'`, len(args))
 	}

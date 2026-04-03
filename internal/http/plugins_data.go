@@ -14,22 +14,25 @@ import (
 
 // PluginDataHandler handles plugin KV data store HTTP endpoints.
 // Endpoints are scoped per plugin: /v1/plugins/{name}/data/{collection}[/{key}]
+// All data access goes through DataProxy which enforces tenant context, length limits,
+// and plugin installation checks.
 type PluginDataHandler struct {
-	store store.PluginStore
-	token string
+	proxy    *plugins.DataProxy
+	token    string
+	tenantMw *TenantMiddleware
 }
 
 // NewPluginDataHandler creates a handler for plugin data proxy endpoints.
-func NewPluginDataHandler(s store.PluginStore, token string) *PluginDataHandler {
-	return &PluginDataHandler{store: s, token: token}
+func NewPluginDataHandler(proxy *plugins.DataProxy, token string, tenantMw *TenantMiddleware) *PluginDataHandler {
+	return &PluginDataHandler{proxy: proxy, token: token, tenantMw: tenantMw}
 }
 
 // RegisterRoutes registers plugin data proxy routes on the given mux.
 func (h *PluginDataHandler) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /v1/plugins/{name}/data/{collection}", h.auth(h.handleListKeys))
-	mux.HandleFunc("GET /v1/plugins/{name}/data/{collection}/{key}", h.auth(h.handleGetValue))
-	mux.HandleFunc("PUT /v1/plugins/{name}/data/{collection}/{key}", h.auth(h.handlePutValue))
-	mux.HandleFunc("DELETE /v1/plugins/{name}/data/{collection}/{key}", h.auth(h.handleDeleteValue))
+	mux.HandleFunc("GET /v1/plugins/{name}/data/{collection}", h.withTenant(h.auth(h.handleListKeys)))
+	mux.HandleFunc("GET /v1/plugins/{name}/data/{collection}/{key}", h.withTenant(h.auth(h.handleGetValue)))
+	mux.HandleFunc("PUT /v1/plugins/{name}/data/{collection}/{key}", h.withTenant(h.auth(h.handlePutValue)))
+	mux.HandleFunc("DELETE /v1/plugins/{name}/data/{collection}/{key}", h.withTenant(h.auth(h.handleDeleteValue)))
 }
 
 func (h *PluginDataHandler) auth(next http.HandlerFunc) http.HandlerFunc {
@@ -40,15 +43,38 @@ func (h *PluginDataHandler) locale(r *http.Request) string {
 	return store.LocaleFromContext(r.Context())
 }
 
+// withTenant wraps a handler with TenantMiddleware to inject tenant_id from JWT into context.
+func (h *PluginDataHandler) withTenant(next http.HandlerFunc) http.HandlerFunc {
+	if h.tenantMw == nil {
+		return next
+	}
+	wrapped := h.tenantMw.Wrap(next)
+	return wrapped.ServeHTTP
+}
+
+// validatePathParams validates plugin name, collection, and optional key from path params.
+func validatePathParams(name, collection, key string) string {
+	if !plugins.IsValidPluginName(name) {
+		return "invalid plugin name"
+	}
+	if len(collection) == 0 || len(collection) > 100 {
+		return "collection must be 1-100 characters"
+	}
+	if key != "" && len(key) > 500 {
+		return "key must be at most 500 characters"
+	}
+	return ""
+}
+
 // handleListKeys lists all keys in a collection.
 // GET /v1/plugins/{name}/data/{collection}?prefix=&limit=50&offset=0
 func (h *PluginDataHandler) handleListKeys(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
-	if !plugins.IsValidPluginName(name) {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
+	collection := r.PathValue("collection")
+	if msg := validatePathParams(name, collection, ""); msg != "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": msg})
 		return
 	}
-	collection := r.PathValue("collection")
 	prefix := r.URL.Query().Get("prefix")
 
 	limit := 50
@@ -64,11 +90,9 @@ func (h *PluginDataHandler) handleListKeys(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
-	keys, err := h.store.ListDataKeys(r.Context(), name, collection, prefix, limit, offset)
+	keys, err := h.proxy.ListKeys(r.Context(), name, collection, prefix, limit, offset)
 	if err != nil {
-		slog.Error("plugins.data.list_keys", "plugin", name, "collection", collection, "error", err)
-		locale := h.locale(r)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": i18n.T(locale, i18n.MsgFailedToList, "keys")})
+		h.handleProxyError(w, r, "plugins.data.list_keys", name, collection, "", err)
 		return
 	}
 	if keys == nil {
@@ -85,22 +109,16 @@ func (h *PluginDataHandler) handleListKeys(w http.ResponseWriter, r *http.Reques
 // GET /v1/plugins/{name}/data/{collection}/{key}
 func (h *PluginDataHandler) handleGetValue(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
-	if !plugins.IsValidPluginName(name) {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
-		return
-	}
 	collection := r.PathValue("collection")
 	key := r.PathValue("key")
+	if msg := validatePathParams(name, collection, key); msg != "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": msg})
+		return
+	}
 
-	entry, err := h.store.GetData(r.Context(), name, collection, key)
+	entry, err := h.proxy.Get(r.Context(), name, collection, key)
 	if err != nil {
-		if errors.Is(err, store.ErrPluginNotFound) {
-			locale := h.locale(r)
-			writeJSON(w, http.StatusNotFound, map[string]string{"error": i18n.T(locale, i18n.MsgNotFound, "key", key)})
-			return
-		}
-		slog.Error("plugins.data.get", "plugin", name, "collection", collection, "key", key, "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
+		h.handleProxyError(w, r, "plugins.data.get", name, collection, key, err)
 		return
 	}
 
@@ -117,12 +135,12 @@ type putValueRequest struct {
 func (h *PluginDataHandler) handlePutValue(w http.ResponseWriter, r *http.Request) {
 	locale := h.locale(r)
 	name := r.PathValue("name")
-	if !plugins.IsValidPluginName(name) {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
-		return
-	}
 	collection := r.PathValue("collection")
 	key := r.PathValue("key")
+	if msg := validatePathParams(name, collection, key); msg != "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": msg})
+		return
+	}
 
 	var req putValueRequest
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
@@ -135,9 +153,8 @@ func (h *PluginDataHandler) handlePutValue(w http.ResponseWriter, r *http.Reques
 		value = json.RawMessage(`null`)
 	}
 
-	if err := h.store.PutData(r.Context(), name, collection, key, value, nil); err != nil {
-		slog.Error("plugins.data.put", "plugin", name, "collection", collection, "key", key, "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
+	if err := h.proxy.Put(r.Context(), name, collection, key, value, nil); err != nil {
+		h.handleProxyError(w, r, "plugins.data.put", name, collection, key, err)
 		return
 	}
 
@@ -148,18 +165,38 @@ func (h *PluginDataHandler) handlePutValue(w http.ResponseWriter, r *http.Reques
 // DELETE /v1/plugins/{name}/data/{collection}/{key}
 func (h *PluginDataHandler) handleDeleteValue(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
-	if !plugins.IsValidPluginName(name) {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
-		return
-	}
 	collection := r.PathValue("collection")
 	key := r.PathValue("key")
+	if msg := validatePathParams(name, collection, key); msg != "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": msg})
+		return
+	}
 
-	if err := h.store.DeleteData(r.Context(), name, collection, key); err != nil {
-		slog.Error("plugins.data.delete", "plugin", name, "collection", collection, "key", key, "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
+	if err := h.proxy.Delete(r.Context(), name, collection, key); err != nil {
+		h.handleProxyError(w, r, "plugins.data.delete", name, collection, key, err)
 		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// handleProxyError maps DataProxy errors to HTTP responses.
+func (h *PluginDataHandler) handleProxyError(w http.ResponseWriter, r *http.Request, op, name, collection, key string, err error) {
+	switch {
+	case errors.Is(err, plugins.ErrPluginNotInstalled):
+		locale := h.locale(r)
+		writeJSON(w, http.StatusNotFound, map[string]string{"error": i18n.T(locale, i18n.MsgNotFound, "plugin", name)})
+	case errors.Is(err, plugins.ErrMissingTenantContext):
+		writeJSON(w, http.StatusForbidden, map[string]string{"error": "tenant context required"})
+	case errors.Is(err, plugins.ErrKeyTooLong):
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "key exceeds maximum length"})
+	case errors.Is(err, plugins.ErrCollectionTooLong):
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "collection exceeds maximum length"})
+	case errors.Is(err, store.ErrPluginNotFound):
+		locale := h.locale(r)
+		writeJSON(w, http.StatusNotFound, map[string]string{"error": i18n.T(locale, i18n.MsgNotFound, "key", key)})
+	default:
+		slog.Error(op, "plugin", name, "collection", collection, "key", key, "error", err)
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
+	}
 }

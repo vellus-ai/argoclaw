@@ -10,45 +10,61 @@ import (
 
 	"github.com/vellus-ai/argoclaw/internal/bus"
 	"github.com/vellus-ai/argoclaw/internal/i18n"
+	"github.com/vellus-ai/argoclaw/internal/permissions"
 	"github.com/vellus-ai/argoclaw/internal/plugins"
 	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // PluginHandler handles plugin management HTTP endpoints.
 type PluginHandler struct {
-	store  store.PluginStore
-	token  string
-	msgBus *bus.MessageBus // optional
+	store    store.PluginStore
+	token    string
+	msgBus   *bus.MessageBus    // optional
+	tenantMw *TenantMiddleware  // injects tenant_id from JWT into context
 }
 
 // NewPluginHandler creates a handler for plugin management endpoints.
-func NewPluginHandler(s store.PluginStore, token string, msgBus *bus.MessageBus) *PluginHandler {
-	return &PluginHandler{store: s, token: token, msgBus: msgBus}
+func NewPluginHandler(s store.PluginStore, token string, msgBus *bus.MessageBus, tenantMw *TenantMiddleware) *PluginHandler {
+	return &PluginHandler{store: s, token: token, msgBus: msgBus, tenantMw: tenantMw}
 }
 
 // RegisterRoutes registers all plugin management routes on the given mux.
+// All routes are wrapped with TenantMiddleware to ensure tenant_id is injected for JWT users.
 func (h *PluginHandler) RegisterRoutes(mux *http.ServeMux) {
-	// Catalog
-	mux.HandleFunc("GET /v1/plugins/catalog", h.auth(h.handleListCatalog))
-	mux.HandleFunc("POST /v1/plugins/catalog", h.auth(h.handleCreateCatalogEntry))
-	mux.HandleFunc("GET /v1/plugins/catalog/{id}", h.auth(h.handleGetCatalogEntry))
+	// Catalog — POST requires admin role
+	mux.HandleFunc("GET /v1/plugins/catalog", h.withTenant(h.auth(h.handleListCatalog)))
+	mux.HandleFunc("POST /v1/plugins/catalog", h.withTenant(h.authAdmin(h.handleCreateCatalogEntry)))
+	mux.HandleFunc("GET /v1/plugins/catalog/{id}", h.withTenant(h.auth(h.handleGetCatalogEntry)))
 
 	// Installed plugins (tenant-scoped)
-	mux.HandleFunc("GET /v1/plugins/installed", h.auth(h.handleListInstalled))
-	mux.HandleFunc("POST /v1/plugins/install", h.auth(h.handleInstallPlugin))
-	mux.HandleFunc("DELETE /v1/plugins/installed/{name}", h.auth(h.handleUninstallPlugin))
-	mux.HandleFunc("PUT /v1/plugins/installed/{name}", h.auth(h.handleUpdatePluginConfig))
-	mux.HandleFunc("POST /v1/plugins/installed/{name}/enable", h.auth(h.handleEnablePlugin))
-	mux.HandleFunc("POST /v1/plugins/installed/{name}/disable", h.auth(h.handleDisablePlugin))
-	mux.HandleFunc("GET /v1/plugins/installed/{name}/audit", h.auth(h.handleAuditLog))
+	mux.HandleFunc("GET /v1/plugins/installed", h.withTenant(h.auth(h.handleListInstalled)))
+	mux.HandleFunc("POST /v1/plugins/install", h.withTenant(h.auth(h.handleInstallPlugin)))
+	mux.HandleFunc("DELETE /v1/plugins/installed/{name}", h.withTenant(h.auth(h.handleUninstallPlugin)))
+	mux.HandleFunc("PUT /v1/plugins/installed/{name}", h.withTenant(h.auth(h.handleUpdatePluginConfig)))
+	mux.HandleFunc("POST /v1/plugins/installed/{name}/enable", h.withTenant(h.auth(h.handleEnablePlugin)))
+	mux.HandleFunc("POST /v1/plugins/installed/{name}/disable", h.withTenant(h.auth(h.handleDisablePlugin)))
+	mux.HandleFunc("GET /v1/plugins/installed/{name}/audit", h.withTenant(h.auth(h.handleAuditLog)))
 
 	// Agent plugin grants
-	mux.HandleFunc("POST /v1/plugins/agents/{agentID}/grant", h.auth(h.handleGrantAgent))
-	mux.HandleFunc("DELETE /v1/plugins/agents/{agentID}/{pluginName}", h.auth(h.handleRevokeAgent))
+	mux.HandleFunc("POST /v1/plugins/agents/{agentID}/grant", h.withTenant(h.auth(h.handleGrantAgent)))
+	mux.HandleFunc("DELETE /v1/plugins/agents/{agentID}/{pluginName}", h.withTenant(h.auth(h.handleRevokeAgent)))
 }
 
 func (h *PluginHandler) auth(next http.HandlerFunc) http.HandlerFunc {
 	return requireAuth(h.token, "", next)
+}
+
+func (h *PluginHandler) authAdmin(next http.HandlerFunc) http.HandlerFunc {
+	return requireAuth(h.token, permissions.RoleAdmin, next)
+}
+
+// withTenant wraps a handler with TenantMiddleware to inject tenant_id from JWT into context.
+func (h *PluginHandler) withTenant(next http.HandlerFunc) http.HandlerFunc {
+	if h.tenantMw == nil {
+		return next
+	}
+	wrapped := h.tenantMw.Wrap(next)
+	return wrapped.ServeHTTP
 }
 
 func (h *PluginHandler) locale(r *http.Request) string {
@@ -177,6 +193,10 @@ func (h *PluginHandler) handleInstallPlugin(w http.ResponseWriter, r *http.Reque
 
 	if req.PluginName == "" {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": i18n.T(locale, i18n.MsgRequired, "plugin_name")})
+		return
+	}
+	if !plugins.IsValidPluginName(req.PluginName) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
 		return
 	}
 
@@ -339,6 +359,10 @@ func (h *PluginHandler) handleGrantAgent(w http.ResponseWriter, r *http.Request)
 	}
 	if req.PluginName == "" {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": i18n.T(locale, i18n.MsgRequired, "plugin_name")})
+		return
+	}
+	if !plugins.IsValidPluginName(req.PluginName) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid plugin name"})
 		return
 	}
 
