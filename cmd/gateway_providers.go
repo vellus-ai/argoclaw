@@ -143,7 +143,7 @@ func registerProviders(registry *providers.Registry, cfg *config.Config) {
 	if cfg.Providers.VertexAI.ProjectID != "" {
 		region := cfg.Providers.VertexAI.Region
 		if region == "" {
-			region = "us-central1"
+			region = providers.VertexAIDefaultRegion
 		}
 		var opts []providers.VertexAIOption
 		if cfg.Providers.VertexAI.DefaultModel != "" {
@@ -302,7 +302,6 @@ func registerProvidersFromDB(registry *providers.Registry, provStore store.Provi
 		// Vertex AI must be configured via config.json by the host operator only.
 		if p.ProviderType == store.ProviderVertexAI {
 			slog.Warn("security.vertex_ai: DB registration blocked — use config.json instead", "name", p.Name)
-			slog.Info("registered provider from DB", "name", p.Name, "type", "vertex_ai")
 			continue
 		}
 		// Local Ollama requires no API key — handle before the key guard (same pattern as ClaudeCLI).
