@@ -30,6 +30,7 @@ import (
 	httpapi "github.com/vellus-ai/argoclaw/internal/http"
 	mcpbridge "github.com/vellus-ai/argoclaw/internal/mcp"
 	"github.com/vellus-ai/argoclaw/internal/media"
+	"github.com/vellus-ai/argoclaw/internal/plugins"
 	"github.com/vellus-ai/argoclaw/internal/providers"
 	"github.com/vellus-ai/argoclaw/internal/scheduler"
 	"github.com/vellus-ai/argoclaw/internal/skills"
@@ -394,6 +395,17 @@ func runGateway() {
 
 	if secureCLIH != nil {
 		server.SetSecureCLIHandler(secureCLIH)
+	}
+
+	// Plugin host: management API + data proxy
+	// TenantMiddleware injects tenant_id from JWT into context for multi-tenant isolation.
+	if pgStores != nil && pgStores.Plugins != nil {
+		tenantMw := httpapi.NewTenantMiddleware(nil)
+		pluginH := httpapi.NewPluginHandler(pgStores.Plugins, cfg.Gateway.Token, msgBus, tenantMw)
+		server.SetPluginHandler(pluginH)
+		dataProxy := plugins.NewDataProxy(pgStores.Plugins)
+		pluginDataH := httpapi.NewPluginDataHandler(dataProxy, cfg.Gateway.Token, tenantMw)
+		server.SetPluginDataHandler(pluginDataH)
 	}
 
 	// Activity audit log API
