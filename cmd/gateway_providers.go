@@ -136,7 +136,10 @@ func registerProviders(registry *providers.Registry, cfg *config.Config) {
 		slog.Info("registered provider", "name", "ollama-cloud")
 	}
 
-	// Vertex AI provider (OAuth2 via ADC/Workload Identity, no API key needed)
+	// Vertex AI provider (OAuth2 via ADC/Workload Identity, no API key needed).
+	// SECURITY: Vertex AI uses the HOST's service account for auth. Only the host
+	// operator can configure it via config.json — tenant DB registration is blocked
+	// to prevent billing abuse and cross-tenant access.
 	if cfg.Providers.VertexAI.ProjectID != "" {
 		region := cfg.Providers.VertexAI.Region
 		if region == "" {
@@ -146,8 +149,13 @@ func registerProviders(registry *providers.Registry, cfg *config.Config) {
 		if cfg.Providers.VertexAI.DefaultModel != "" {
 			opts = append(opts, providers.WithVertexAIDefaultModel(cfg.Providers.VertexAI.DefaultModel))
 		}
-		registry.Register(providers.NewVertexAIProvider(cfg.Providers.VertexAI.ProjectID, region, opts...))
-		slog.Info("registered provider", "name", "vertex-ai", "project", cfg.Providers.VertexAI.ProjectID, "region", region)
+		p, err := providers.NewVertexAIProvider(cfg.Providers.VertexAI.ProjectID, region, opts...)
+		if err != nil {
+			slog.Error("vertex-ai: invalid config, skipping", "error", err)
+		} else {
+			registry.Register(p)
+			slog.Info("registered provider", "name", "vertex-ai", "project", cfg.Providers.VertexAI.ProjectID, "region", region)
+		}
 	}
 
 	// Claude CLI provider (subscription-based, no API key needed)
@@ -288,33 +296,12 @@ func registerProvidersFromDB(registry *providers.Registry, provStore store.Provi
 			registerACPFromDB(registry, p)
 			continue
 		}
-		// Vertex AI uses OAuth2 (ADC), not API keys — handle before the key guard.
+		// SECURITY: Vertex AI DB registration is blocked. Vertex AI uses the HOST's
+		// service account (Workload Identity) for auth — allowing tenants to configure
+		// arbitrary project_ids via DB would enable billing abuse and cross-tenant access.
+		// Vertex AI must be configured via config.json by the host operator only.
 		if p.ProviderType == store.ProviderVertexAI {
-			var settings struct {
-				ProjectID    string `json:"project_id"`
-				Region       string `json:"region"`
-				DefaultModel string `json:"default_model"`
-			}
-			if p.Settings != nil {
-				if err := json.Unmarshal(p.Settings, &settings); err != nil {
-					slog.Warn("vertex-ai: invalid settings JSON", "name", p.Name, "error", err)
-					continue
-				}
-			}
-			if settings.ProjectID == "" {
-				slog.Warn("vertex-ai: project_id required in settings", "name", p.Name)
-				continue
-			}
-			region := settings.Region
-			if region == "" {
-				region = "us-central1"
-			}
-			var opts []providers.VertexAIOption
-			opts = append(opts, providers.WithVertexAIName(p.Name))
-			if settings.DefaultModel != "" {
-				opts = append(opts, providers.WithVertexAIDefaultModel(settings.DefaultModel))
-			}
-			registry.Register(providers.NewVertexAIProvider(settings.ProjectID, region, opts...))
+			slog.Warn("security.vertex_ai: DB registration blocked — use config.json instead", "name", p.Name)
 			slog.Info("registered provider from DB", "name", p.Name, "type", "vertex_ai")
 			continue
 		}
