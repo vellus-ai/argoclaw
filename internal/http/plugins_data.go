@@ -13,7 +13,7 @@ import (
 )
 
 // PluginDataHandler handles plugin KV data store HTTP endpoints.
-// Endpoints are scoped per plugin: /v1/plugins/{name}/data/{collection}[/{key}]
+// Endpoints are scoped per plugin: /v1/plugin-data/{name}/{collection}[/{key}]
 // All data access goes through DataProxy which enforces tenant context, length limits,
 // and plugin installation checks.
 type PluginDataHandler struct {
@@ -68,7 +68,7 @@ func validatePathParams(name, collection, key string) string {
 }
 
 // handleListKeys lists all keys in a collection.
-// GET /v1/plugins/{name}/data/{collection}?prefix=&limit=50&offset=0
+// GET /v1/plugin-data/{name}/{collection}?prefix=&limit=50&offset=0
 func (h *PluginDataHandler) handleListKeys(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	collection := r.PathValue("collection")
@@ -107,7 +107,7 @@ func (h *PluginDataHandler) handleListKeys(w http.ResponseWriter, r *http.Reques
 }
 
 // handleGetValue retrieves a single KV value.
-// GET /v1/plugins/{name}/data/{collection}/{key}
+// GET /v1/plugin-data/{name}/{collection}/{key}
 func (h *PluginDataHandler) handleGetValue(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	collection := r.PathValue("collection")
@@ -132,7 +132,7 @@ type putValueRequest struct {
 }
 
 // handlePutValue upserts a KV value.
-// PUT /v1/plugins/{name}/data/{collection}/{key}
+// PUT /v1/plugin-data/{name}/{collection}/{key}
 func (h *PluginDataHandler) handlePutValue(w http.ResponseWriter, r *http.Request) {
 	locale := h.locale(r)
 	name := r.PathValue("name")
@@ -163,7 +163,7 @@ func (h *PluginDataHandler) handlePutValue(w http.ResponseWriter, r *http.Reques
 }
 
 // handleDeleteValue deletes a KV entry.
-// DELETE /v1/plugins/{name}/data/{collection}/{key}
+// DELETE /v1/plugin-data/{name}/{collection}/{key}
 func (h *PluginDataHandler) handleDeleteValue(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	collection := r.PathValue("collection")

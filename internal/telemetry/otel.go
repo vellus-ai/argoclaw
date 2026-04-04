@@ -45,6 +45,10 @@ func Setup(ctx context.Context, cfg Config) (shutdown func(context.Context) erro
 		return func(context.Context) error { return nil }, nil
 	}
 
+	// gRPC expects host:port without schema. Strip http:// or https:// if present
+	// to prevent "too many colons in address" errors from grpc.NewClient.
+	endpoint = stripEndpointSchema(endpoint)
+
 	serviceName := cfg.ServiceName
 	if v := os.Getenv("OTEL_SERVICE_NAME"); serviceName == "" && v != "" {
 		serviceName = v
@@ -139,4 +143,15 @@ func Setup(ctx context.Context, cfg Config) (shutdown func(context.Context) erro
 		}
 		return nil
 	}, nil
+}
+
+// stripEndpointSchema removes http:// or https:// from a gRPC endpoint.
+// gRPC expects "host:port" format; a URL schema causes "too many colons" errors.
+func stripEndpointSchema(endpoint string) string {
+	for _, prefix := range []string{"https://", "http://"} {
+		if len(endpoint) > len(prefix) && endpoint[:len(prefix)] == prefix {
+			return endpoint[len(prefix):]
+		}
+	}
+	return endpoint
 }
