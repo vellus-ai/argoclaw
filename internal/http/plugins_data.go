@@ -28,11 +28,12 @@ func NewPluginDataHandler(proxy *plugins.DataProxy, token string, tenantMw *Tena
 }
 
 // RegisterRoutes registers plugin data proxy routes on the given mux.
+// Routes use /v1/plugin-data/ prefix to avoid conflicts with /v1/plugins/installed/{name}/...
 func (h *PluginDataHandler) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /v1/plugins/{name}/data/{collection}", h.withTenant(h.auth(h.handleListKeys)))
-	mux.HandleFunc("GET /v1/plugins/{name}/data/{collection}/{key}", h.withTenant(h.auth(h.handleGetValue)))
-	mux.HandleFunc("PUT /v1/plugins/{name}/data/{collection}/{key}", h.withTenant(h.auth(h.handlePutValue)))
-	mux.HandleFunc("DELETE /v1/plugins/{name}/data/{collection}/{key}", h.withTenant(h.auth(h.handleDeleteValue)))
+	mux.HandleFunc("GET /v1/plugin-data/{name}/{collection}", h.withTenant(h.auth(h.handleListKeys)))
+	mux.HandleFunc("GET /v1/plugin-data/{name}/{collection}/{key}", h.withTenant(h.auth(h.handleGetValue)))
+	mux.HandleFunc("PUT /v1/plugin-data/{name}/{collection}/{key}", h.withTenant(h.auth(h.handlePutValue)))
+	mux.HandleFunc("DELETE /v1/plugin-data/{name}/{collection}/{key}", h.withTenant(h.auth(h.handleDeleteValue)))
 }
 
 func (h *PluginDataHandler) auth(next http.HandlerFunc) http.HandlerFunc {
