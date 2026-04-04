@@ -69,7 +69,7 @@ func doDataRequestNoAuth(mux *http.ServeMux, method, path string) *httptest.Resp
 
 func TestPluginDataHandler_ListKeys_RequiresAuth(t *testing.T) {
 	mux := newPluginDataMux(&stubPluginStoreHTTP{})
-	w := doDataRequestNoAuth(mux, "GET", "/v1/plugins/vault/data/prompts")
+	w := doDataRequestNoAuth(mux, "GET", "/v1/plugin-data/vault/prompts")
 	if w.Code != http.StatusUnauthorized {
 		t.Errorf("expected 401, got %d", w.Code)
 	}
@@ -77,7 +77,7 @@ func TestPluginDataHandler_ListKeys_RequiresAuth(t *testing.T) {
 
 func TestPluginDataHandler_ListKeys_EmptyResultIsNotNull(t *testing.T) {
 	mux := newPluginDataMux(dataStubWithEnabledPlugin())
-	w := doDataRequest(mux, "GET", "/v1/plugins/vault/data/prompts", nil)
+	w := doDataRequest(mux, "GET", "/v1/plugin-data/vault/prompts", nil)
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
 	}
@@ -98,7 +98,7 @@ func TestPluginDataHandler_ListKeys_ReturnsKeys(t *testing.T) {
 		return []string{"key1", "key2"}, nil
 	}
 	mux := newPluginDataMux(stub)
-	w := doDataRequest(mux, "GET", "/v1/plugins/vault/data/prompts", nil)
+	w := doDataRequest(mux, "GET", "/v1/plugin-data/vault/prompts", nil)
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
 	}
@@ -116,7 +116,7 @@ func TestPluginDataHandler_ListKeys_ReturnsKeys(t *testing.T) {
 
 func TestPluginDataHandler_GetValue_RequiresAuth(t *testing.T) {
 	mux := newPluginDataMux(&stubPluginStoreHTTP{})
-	w := doDataRequestNoAuth(mux, "GET", "/v1/plugins/vault/data/prompts/my-key")
+	w := doDataRequestNoAuth(mux, "GET", "/v1/plugin-data/vault/prompts/my-key")
 	if w.Code != http.StatusUnauthorized {
 		t.Errorf("expected 401, got %d", w.Code)
 	}
@@ -129,7 +129,7 @@ func TestPluginDataHandler_GetValue_NotFound(t *testing.T) {
 		return nil, store.ErrPluginNotFound
 	}
 	mux := newPluginDataMux(stub)
-	w := doDataRequest(mux, "GET", "/v1/plugins/vault/data/prompts/missing-key", nil)
+	w := doDataRequest(mux, "GET", "/v1/plugin-data/vault/prompts/missing-key", nil)
 	if w.Code != http.StatusNotFound {
 		t.Errorf("expected 404, got %d: %s", w.Code, w.Body.String())
 	}
@@ -141,7 +141,7 @@ func TestPluginDataHandler_GetValue_Found(t *testing.T) {
 		return &store.PluginDataEntry{Key: key, Value: json.RawMessage(`"hello"`)}, nil
 	}
 	mux := newPluginDataMux(stub)
-	w := doDataRequest(mux, "GET", "/v1/plugins/vault/data/prompts/my-key", nil)
+	w := doDataRequest(mux, "GET", "/v1/plugin-data/vault/prompts/my-key", nil)
 	if w.Code != http.StatusOK {
 		t.Errorf("expected 200, got %d: %s", w.Code, w.Body.String())
 	}
@@ -158,7 +158,7 @@ func TestPluginDataHandler_GetValue_Found(t *testing.T) {
 
 func TestPluginDataHandler_PutValue_RequiresAuth(t *testing.T) {
 	mux := newPluginDataMux(&stubPluginStoreHTTP{})
-	w := doDataRequestNoAuth(mux, "PUT", "/v1/plugins/vault/data/prompts/my-key")
+	w := doDataRequestNoAuth(mux, "PUT", "/v1/plugin-data/vault/prompts/my-key")
 	if w.Code != http.StatusUnauthorized {
 		t.Errorf("expected 401, got %d", w.Code)
 	}
@@ -166,7 +166,7 @@ func TestPluginDataHandler_PutValue_RequiresAuth(t *testing.T) {
 
 func TestPluginDataHandler_PutValue_InvalidJSON(t *testing.T) {
 	mux := newPluginDataMux(dataStubWithEnabledPlugin())
-	r := httptest.NewRequest("PUT", "/v1/plugins/vault/data/prompts/my-key", bytes.NewBufferString("not-json-at-all!!!"))
+	r := httptest.NewRequest("PUT", "/v1/plugin-data/vault/prompts/my-key", bytes.NewBufferString("not-json-at-all!!!"))
 	r.Header.Set("Authorization", "Bearer "+testToken)
 	r.Header.Set("Content-Type", "application/json")
 	ctx := store.WithTenantID(r.Context(), testTenantID)
@@ -187,7 +187,7 @@ func TestPluginDataHandler_PutValue_Success(t *testing.T) {
 	}
 	mux := newPluginDataMux(stub)
 	body := map[string]any{"value": "hello world"}
-	w := doDataRequest(mux, "PUT", "/v1/plugins/vault/data/prompts/my-key", body)
+	w := doDataRequest(mux, "PUT", "/v1/plugin-data/vault/prompts/my-key", body)
 	if w.Code != http.StatusOK && w.Code != http.StatusNoContent {
 		t.Errorf("expected 200 or 204, got %d: %s", w.Code, w.Body.String())
 	}
@@ -199,7 +199,7 @@ func TestPluginDataHandler_PutValue_Success(t *testing.T) {
 func TestPluginDataHandler_PutValue_EmptyBodyAllowed(t *testing.T) {
 	// An empty JSON object {} should be a valid value.
 	mux := newPluginDataMux(dataStubWithEnabledPlugin())
-	w := doDataRequest(mux, "PUT", "/v1/plugins/vault/data/prompts/my-key", map[string]any{})
+	w := doDataRequest(mux, "PUT", "/v1/plugin-data/vault/prompts/my-key", map[string]any{})
 	if w.Code != http.StatusOK && w.Code != http.StatusNoContent {
 		t.Errorf("expected success for empty JSON body, got %d: %s", w.Code, w.Body.String())
 	}
@@ -211,7 +211,7 @@ func TestPluginDataHandler_PutValue_EmptyBodyAllowed(t *testing.T) {
 
 func TestPluginDataHandler_DeleteValue_RequiresAuth(t *testing.T) {
 	mux := newPluginDataMux(&stubPluginStoreHTTP{})
-	w := doDataRequestNoAuth(mux, "DELETE", "/v1/plugins/vault/data/prompts/my-key")
+	w := doDataRequestNoAuth(mux, "DELETE", "/v1/plugin-data/vault/prompts/my-key")
 	if w.Code != http.StatusUnauthorized {
 		t.Errorf("expected 401, got %d", w.Code)
 	}
@@ -219,7 +219,7 @@ func TestPluginDataHandler_DeleteValue_RequiresAuth(t *testing.T) {
 
 func TestPluginDataHandler_DeleteValue_Success(t *testing.T) {
 	mux := newPluginDataMux(dataStubWithEnabledPlugin())
-	w := doDataRequest(mux, "DELETE", "/v1/plugins/vault/data/prompts/my-key", nil)
+	w := doDataRequest(mux, "DELETE", "/v1/plugin-data/vault/prompts/my-key", nil)
 	if w.Code != http.StatusNoContent {
 		t.Errorf("expected 204, got %d: %s", w.Code, w.Body.String())
 	}
@@ -231,7 +231,7 @@ func TestPluginDataHandler_DeleteValue_StoreError(t *testing.T) {
 		return errors.New("db connection failed")
 	}
 	mux := newPluginDataMux(stub)
-	w := doDataRequest(mux, "DELETE", "/v1/plugins/vault/data/prompts/my-key", nil)
+	w := doDataRequest(mux, "DELETE", "/v1/plugin-data/vault/prompts/my-key", nil)
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("expected 500 for store error, got %d", w.Code)
 	}
