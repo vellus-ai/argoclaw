@@ -1,7 +1,13 @@
 import { ApiError } from "./errors";
 
+type RefreshFn = () => Promise<{ accessToken: string; refreshToken: string } | null>;
+
 export class HttpClient {
   onAuthFailure: (() => void) | null = null;
+  onTokenRefreshed: ((accessToken: string, refreshToken: string) => void) | null = null;
+
+  private _refreshFn: RefreshFn | null = null;
+  private _refreshPromise: Promise<boolean> | null = null;
 
   constructor(
     private baseUrl: string,
@@ -9,6 +15,11 @@ export class HttpClient {
     private getUserId: () => string,
     private getSenderID: () => string = () => "",
   ) {}
+
+  /** Set the function used to refresh JWT tokens on 401. */
+  setRefreshFn(fn: RefreshFn) {
+    this._refreshFn = fn;
+  }
 
   async get<T>(path: string, params?: Record<string, string>): Promise<T> {
     const url = this.buildUrl(path, params);
@@ -118,7 +129,32 @@ export class HttpClient {
     return { "Content-Type": "application/json", ...this.authHeaders() };
   }
 
-  private async request<T>(url: string, init: RequestInit): Promise<T> {
+  /** Try to refresh the JWT token. Returns true if refresh succeeded. */
+  private async tryRefresh(): Promise<boolean> {
+    if (!this._refreshFn) return false;
+
+    // Deduplicate concurrent refresh attempts
+    if (this._refreshPromise) return this._refreshPromise;
+
+    this._refreshPromise = (async () => {
+      try {
+        const result = await this._refreshFn!();
+        if (result) {
+          this.onTokenRefreshed?.(result.accessToken, result.refreshToken);
+          return true;
+        }
+        return false;
+      } catch {
+        return false;
+      } finally {
+        this._refreshPromise = null;
+      }
+    })();
+
+    return this._refreshPromise;
+  }
+
+  private async request<T>(url: string, init: RequestInit, isRetry = false): Promise<T> {
     let res: Response;
     try {
       res = await fetch(url, {
@@ -130,7 +166,11 @@ export class HttpClient {
     }
 
     if (!res.ok) {
-      if (res.status === 401) {
+      if (res.status === 401 && !isRetry) {
+        const refreshed = await this.tryRefresh();
+        if (refreshed) {
+          return this.request<T>(url, init, true);
+        }
         this.onAuthFailure?.();
       }
       const err = await res.json().catch(() => ({ error: res.statusText }));

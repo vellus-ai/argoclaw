@@ -453,6 +453,11 @@ func (s *Server) Start(ctx context.Context) error {
 
 	var handler http.Handler = securityHeadersMiddleware(mux)
 
+	// General rate limiting: 60 rpm per IP across all HTTP endpoints.
+	// Auth endpoints have their own stricter limits; this is a baseline defense.
+	generalRL := httpapi.NewGeneralRateLimiter(60, 10)
+	handler = generalRL.Wrap(handler)
+
 	// Wrap with JWT middleware when JWT secret is configured.
 	// Falls through to gateway token auth when no JWT is present (backward compat).
 	if s.cfg.Gateway.JWTSecret != "" {
@@ -501,11 +506,13 @@ func (s *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	client.Run(r.Context())
 }
 
-// handleHealth returns a simple health check response.
+// handleHealth returns a minimal health check response for GKE liveness probes.
+// Intentionally unauthenticated and tenant-agnostic (liveness probe requirement).
+// Does NOT expose protocol version or internal details to prevent service fingerprinting.
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, `{"status":"ok","protocol":%d}`, protocol.ProtocolVersion)
+	fmt.Fprint(w, `{"status":"ok"}`)
 }
 
 // clientIP extracts the real client IP from the request, checking proxy headers first.

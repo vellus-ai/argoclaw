@@ -44,7 +44,10 @@ func generateTokenWithExpiry(claims TokenClaims, secret string, expiry time.Dura
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "argoclaw",
 			Subject:   claims.UserID,
-			Audience:  jwt.ClaimStrings{"argoclaw"},
+			// Audience hardcoded to "argoclaw" — binds tokens to this service.
+			// Provisioning API shares the same JWT secret and validates the
+			// same audience, preventing cross-service token misuse.
+			Audience: jwt.ClaimStrings{"argoclaw"},
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(expiry)),
 		},

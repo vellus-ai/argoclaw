@@ -7,12 +7,14 @@ import { LoginLayout } from "./login-layout";
 import { LoginTabs, type LoginMode } from "./login-tabs";
 import { TokenForm } from "./token-form";
 import { PairingForm } from "./pairing-form";
+import { EmailForm } from "./email-form";
 
 export function LoginPage() {
   const { t } = useTranslation("login");
-  const [mode, setMode] = useState<LoginMode>("token");
+  const [mode, setMode] = useState<LoginMode>("email");
 
   const setCredentials = useAuthStore((s) => s.setCredentials);
+  const setJwtAuth = useAuthStore((s) => s.setJwtAuth);
   const setPairing = useAuthStore((s) => s.setPairing);
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,6 +28,11 @@ export function LoginPage() {
     navigate(from, { replace: true });
   }
 
+  function handleEmailLogin(accessToken: string, refreshToken: string, userId: string) {
+    setJwtAuth(accessToken, refreshToken, userId);
+    navigate(from, { replace: true });
+  }
+
   function handlePairingApproved(senderID: string, userId: string) {
     setPairing(senderID, userId);
     setTimeout(() => navigate(from, { replace: true }), 500);
@@ -34,7 +41,9 @@ export function LoginPage() {
   return (
     <LoginLayout subtitle={t("subtitle")}>
       <LoginTabs mode={mode} onModeChange={setMode} />
-      {mode === "token" ? (
+      {mode === "email" ? (
+        <EmailForm onSuccess={handleEmailLogin} />
+      ) : mode === "token" ? (
         <TokenForm onSubmit={handleTokenLogin} />
       ) : (
         <PairingForm onApproved={handlePairingApproved} />

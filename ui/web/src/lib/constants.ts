@@ -43,6 +43,7 @@ export const ROUTES = {
 
 export const LOCAL_STORAGE_KEYS = {
   TOKEN: "argo:token",
+  REFRESH_TOKEN: "argo:refreshToken",
   USER_ID: "argo:userId",
   SENDER_ID: "argo:senderID",
   THEME: "argo:theme",

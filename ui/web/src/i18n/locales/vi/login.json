@@ -1,32 +1,61 @@
 {
-  "pairing": {
-    "approved": "Truy cập đã được phê duyệt! Đang chuyển hướng...",
-    "askAdmin": "Yêu cầu quản trị viên phê duyệt mã này:",
-    "cancel": "Hủy",
-    "connecting": "Đang kết nối...",
-    "errorCannotConnect": "Không thể kết nối đến gateway.",
-    "errorConnectionLost": "Mất kết nối. Vui lòng thử lại.",
-    "noTokenNeeded": "Không cần token. Mã ghép nối sẽ được tạo để quản trị viên phê duyệt.",
-    "orRun": "Hoặc chạy:",
-    "requestAccess": "Yêu cầu truy cập",
-    "userId": "User ID",
-    "userIdPlaceholder": "your-user-id",
-    "waitingForApproval": "Đang chờ phê duyệt..."
-  },
   "subtitle": "Đăng nhập vào bảng điều khiển gateway",
   "tabs": {
-    "pairing": "Ghép nối",
-    "token": "Token"
+    "email": "Email",
+    "token": "Token",
+    "pairing": "Ghép nối"
+  },
+  "email": {
+    "signIn": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "submitting": "Đang đăng nhập...",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Mật khẩu",
+    "passwordPlaceholder": "Nhập mật khẩu",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "confirmPasswordPlaceholder": "Nhập lại mật khẩu",
+    "displayName": "Tên hiển thị",
+    "displayNamePlaceholder": "Tên của bạn (tùy chọn)",
+    "req12Chars": "Ít nhất 12 ký tự",
+    "reqUppercase": "Ít nhất một chữ hoa",
+    "reqLowercase": "Ít nhất một chữ thường",
+    "reqDigit": "Ít nhất một chữ số",
+    "reqSpecial": "Ít nhất một ký tự đặc biệt",
+    "errorPasswordMismatch": "Mật khẩu không khớp.",
+    "errorInvalidCredentials": "Email hoặc mật khẩu không hợp lệ.",
+    "errorEmailTaken": "Email này đã được đăng ký.",
+    "errorAccountLocked": "Quá nhiều lần thử. Vui lòng thử lại sau.",
+    "errorServer": "Lỗi máy chủ. Vui lòng thử lại.",
+    "errorNetwork": "Không thể kết nối đến máy chủ. Kiểm tra gateway đã chạy chưa.",
+    "noAccount": "Chưa có tài khoản?",
+    "hasAccount": "Đã có tài khoản?",
+    "signInLink": "Đăng nhập",
+    "signUpLink": "Đăng ký"
   },
   "token": {
-    "connect": "Kết nối",
-    "connecting": "Đang kết nối...",
-    "errorCannotConnect": "Không thể kết nối đến gateway. Kiểm tra server đã chạy chưa.",
-    "errorInvalidCredentials": "Thông tin xác thực không hợp lệ. Kiểm tra token và user ID.",
-    "errorServer": "Server trả về {{status}}. Vui lòng thử lại.",
+    "userId": "User ID",
+    "userIdPlaceholder": "your-user-id",
     "gatewayToken": "Gateway Token",
     "tokenPlaceholder": "Bearer token",
+    "connect": "Kết nối",
+    "connecting": "Đang kết nối...",
+    "errorInvalidCredentials": "Thông tin xác thực không hợp lệ. Kiểm tra token và user ID.",
+    "errorServer": "Server trả về {{status}}. Vui lòng thử lại.",
+    "errorCannotConnect": "Không thể kết nối đến gateway. Kiểm tra server đã chạy chưa."
+  },
+  "pairing": {
     "userId": "User ID",
-    "userIdPlaceholder": "your-user-id"
+    "userIdPlaceholder": "your-user-id",
+    "noTokenNeeded": "Không cần token. Mã ghép nối sẽ được tạo để quản trị viên phê duyệt.",
+    "requestAccess": "Yêu cầu truy cập",
+    "connecting": "Đang kết nối...",
+    "errorConnectionLost": "Mất kết nối. Vui lòng thử lại.",
+    "errorCannotConnect": "Không thể kết nối đến gateway.",
+    "askAdmin": "Yêu cầu quản trị viên phê duyệt mã này:",
+    "orRun": "Hoặc chạy:",
+    "waitingForApproval": "Đang chờ phê duyệt...",
+    "cancel": "Hủy",
+    "approved": "Truy cập đã được phê duyệt! Đang chuyển hướng..."
   }
 }
