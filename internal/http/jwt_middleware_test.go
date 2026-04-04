@@ -1,11 +1,15 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/google/uuid"
+
 	"github.com/vellus-ai/argoclaw/internal/auth"
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 const testSecret = "test-jwt-secret-key-min-32-chars!!!"
@@ -100,5 +104,44 @@ func TestJWTMiddleware_GatewayToken_PassThrough(t *testing.T) {
 
 	if !called {
 		t.Error("handler should be called (pass-through for gateway token)")
+	}
+}
+
+// --- WithTenantID tests (Fix: was incorrectly calling store.WithUserID) ---
+
+func TestWithTenantID_SetsTenantContext(t *testing.T) {
+	t.Parallel()
+	tenantUUID := uuid.New()
+	ctx := WithTenantID(context.Background(), tenantUUID.String())
+
+	got := store.TenantIDFromContext(ctx)
+	if got != tenantUUID {
+		t.Errorf("TenantIDFromContext = %v, want %v", got, tenantUUID)
+	}
+
+	// Must NOT be set as UserID
+	userID := store.UserIDFromContext(ctx)
+	if userID != "" {
+		t.Errorf("UserIDFromContext = %q, want empty (tenant ID must not leak into user context)", userID)
+	}
+}
+
+func TestWithTenantID_EmptyString_NoOp(t *testing.T) {
+	t.Parallel()
+	ctx := WithTenantID(context.Background(), "")
+
+	got := store.TenantIDFromContext(ctx)
+	if got != uuid.Nil {
+		t.Errorf("TenantIDFromContext = %v, want uuid.Nil for empty tenant", got)
+	}
+}
+
+func TestWithTenantID_InvalidUUID_NoOp(t *testing.T) {
+	t.Parallel()
+	ctx := WithTenantID(context.Background(), "not-a-uuid")
+
+	got := store.TenantIDFromContext(ctx)
+	if got != uuid.Nil {
+		t.Errorf("TenantIDFromContext = %v, want uuid.Nil for invalid tenant", got)
 	}
 }

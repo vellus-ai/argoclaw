@@ -303,7 +303,8 @@ func runGateway() {
 
 	// User auth (email/password) — only wired when JWT secret is configured.
 	if cfg.Gateway.JWTSecret != "" {
-		server.SetUserAuthHandler(httpapi.NewUserAuthHandler(pgStores.Users, cfg.Gateway.JWTSecret))
+		authRL := httpapi.NewAuthRateLimiter(10, 5, 20) // login: 10/min, register: 5/min, refresh: 20/min
+		server.SetUserAuthHandler(httpapi.NewUserAuthHandler(pgStores.Users, cfg.Gateway.JWTSecret, httpapi.WithRateLimiter(authRL)))
 		slog.Info("user_auth: email/password endpoints enabled at /v1/auth/*")
 	}
 

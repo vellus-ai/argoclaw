@@ -44,6 +44,7 @@ func generateTokenWithExpiry(claims TokenClaims, secret string, expiry time.Dura
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "argoclaw",
 			Subject:   claims.UserID,
+			Audience:  jwt.ClaimStrings{"argoclaw"},
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(expiry)),
 		},
@@ -60,7 +61,7 @@ func ValidateAccessToken(tokenString, secret string) (*TokenClaims, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(secret), nil
-	})
+	}, jwt.WithAudience("argoclaw"))
 	if err != nil {
 		return nil, fmt.Errorf("invalid token: %w", err)
 	}
