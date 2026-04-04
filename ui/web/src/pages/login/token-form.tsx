@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertCircle } from "lucide-react";
+import { INPUT_CLASS, BUTTON_CLASS } from "./form-styles";
 
 interface TokenFormProps {
   onSubmit: (userId: string, token: string) => void;
@@ -59,7 +60,7 @@ export function TokenForm({ onSubmit }: TokenFormProps) {
           value={userId}
           onChange={(e) => { setUserId(e.target.value); setError(null); }}
           placeholder={t("token.userIdPlaceholder")}
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base md:text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className={INPUT_CLASS}
           autoFocus
           disabled={connecting}
         />
@@ -75,7 +76,7 @@ export function TokenForm({ onSubmit }: TokenFormProps) {
           value={token}
           onChange={(e) => { setToken(e.target.value); setError(null); }}
           placeholder={t("token.tokenPlaceholder")}
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base md:text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className={INPUT_CLASS}
           disabled={connecting}
         />
       </div>
@@ -90,7 +91,7 @@ export function TokenForm({ onSubmit }: TokenFormProps) {
       <button
         type="submit"
         disabled={!token.trim() || !userId.trim() || connecting}
-        className="inline-flex h-9 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
+        className={BUTTON_CLASS}
       >
         {connecting ? t("token.connecting") : t("token.connect")}
       </button>
