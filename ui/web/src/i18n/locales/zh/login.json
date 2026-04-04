@@ -22,6 +22,7 @@
     "reqLowercase": "至少一个小写字母",
     "reqDigit": "至少一个数字",
     "reqSpecial": "至少一个特殊字符",
+    "reqNoEmail": "不能包含邮箱用户名",
     "errorPasswordMismatch": "两次输入的密码不一致。",
     "errorInvalidCredentials": "邮箱或密码错误。",
     "errorEmailTaken": "该邮箱已被注册。",

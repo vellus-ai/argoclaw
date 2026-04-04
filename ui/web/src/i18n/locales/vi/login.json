@@ -22,6 +22,7 @@
     "reqLowercase": "Ít nhất một chữ thường",
     "reqDigit": "Ít nhất một chữ số",
     "reqSpecial": "Ít nhất một ký tự đặc biệt",
+    "reqNoEmail": "Không được chứa tên người dùng email",
     "errorPasswordMismatch": "Mật khẩu không khớp.",
     "errorInvalidCredentials": "Email hoặc mật khẩu không hợp lệ.",
     "errorEmailTaken": "Email này đã được đăng ký.",

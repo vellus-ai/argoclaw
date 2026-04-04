@@ -22,6 +22,7 @@
     "reqLowercase": "At least one lowercase letter",
     "reqDigit": "At least one digit",
     "reqSpecial": "At least one special character",
+    "reqNoEmail": "Must not contain your email username",
     "errorPasswordMismatch": "Passwords do not match.",
     "errorInvalidCredentials": "Invalid email or password.",
     "errorEmailTaken": "This email is already registered.",

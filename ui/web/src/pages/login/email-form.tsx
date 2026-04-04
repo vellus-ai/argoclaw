@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { AlertCircle, Check, X } from "lucide-react";
 import { login, register, AuthApiError } from "@/api/auth-client";
 import type { AuthResponse } from "@/api/auth-client";
+import { INPUT_CLASS, BUTTON_CLASS } from "./form-styles";
 
 interface EmailFormProps {
   onSuccess: (accessToken: string, refreshToken: string, userId: string) => void;
@@ -10,15 +11,9 @@ interface EmailFormProps {
 
 type Mode = "signIn" | "signUp";
 
-const INPUT_CLASS =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base md:text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
-
-const BUTTON_CLASS =
-  "inline-flex h-9 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50";
-
 interface PasswordRequirement {
   key: string;
-  test: (pw: string) => boolean;
+  test: (pw: string, email: string) => boolean;
 }
 
 const PASSWORD_REQUIREMENTS: PasswordRequirement[] = [
@@ -27,6 +22,11 @@ const PASSWORD_REQUIREMENTS: PasswordRequirement[] = [
   { key: "reqLowercase", test: (pw) => /[a-z]/.test(pw) },
   { key: "reqDigit", test: (pw) => /\d/.test(pw) },
   { key: "reqSpecial", test: (pw) => /[^A-Za-z0-9]/.test(pw) },
+  { key: "reqNoEmail", test: (pw, email) => {
+    if (!email) return true;
+    const local = email.split("@")[0]?.toLowerCase() ?? "";
+    return local.length < 3 || !pw.toLowerCase().includes(local);
+  }},
 ];
 
 export function EmailForm({ onSuccess }: EmailFormProps) {
@@ -40,7 +40,7 @@ export function EmailForm({ onSuccess }: EmailFormProps) {
   const [error, setError] = useState<string | null>(null);
 
   const isSignUp = mode === "signUp";
-  const passwordValid = PASSWORD_REQUIREMENTS.every((r) => r.test(password));
+  const passwordValid = PASSWORD_REQUIREMENTS.every((r) => r.test(password, email));
   const canSubmit = isSignUp
     ? email.trim() && password && confirmPassword && passwordValid && password === confirmPassword
     : email.trim() && password;
@@ -165,7 +165,7 @@ export function EmailForm({ onSuccess }: EmailFormProps) {
           {password.length > 0 && (
             <ul className="space-y-1 text-xs">
               {PASSWORD_REQUIREMENTS.map((req) => {
-                const pass = req.test(password);
+                const pass = req.test(password, email);
                 return (
                   <li key={req.key} className={`flex items-center gap-1.5 ${pass ? "text-green-600" : "text-muted-foreground"}`}>
                     {pass ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
