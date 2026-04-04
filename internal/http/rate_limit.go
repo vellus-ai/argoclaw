@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"golang.org/x/time/rate"
@@ -18,7 +19,7 @@ type ipLimiter struct {
 
 type ipEntry struct {
 	limiter  *rate.Limiter
-	lastSeen time.Time
+	lastSeen atomic.Int64 // unix nano — atomic for concurrent access from allow() and cleanupLoop()
 }
 
 func newIPLimiter(rpm, burst int) *ipLimiter {
@@ -38,12 +39,12 @@ func (il *ipLimiter) allow(key string) bool {
 	if il.r == 0 {
 		return true
 	}
-	v, _ := il.limiters.LoadOrStore(key, &ipEntry{
-		limiter:  rate.NewLimiter(il.r, il.burst),
-		lastSeen: time.Now(),
-	})
+	newEntry := &ipEntry{limiter: rate.NewLimiter(il.r, il.burst)}
+	newEntry.lastSeen.Store(time.Now().UnixNano())
+
+	v, _ := il.limiters.LoadOrStore(key, newEntry)
 	entry := v.(*ipEntry)
-	entry.lastSeen = time.Now()
+	entry.lastSeen.Store(time.Now().UnixNano())
 	if !entry.limiter.Allow() {
 		slog.Warn("security.auth_rate_limited", "ip", key)
 		return false
@@ -57,7 +58,7 @@ func (il *ipLimiter) cleanupLoop() {
 	for range ticker.C {
 		cutoff := time.Now().Add(-10 * time.Minute)
 		il.limiters.Range(func(key, value any) bool {
-			if value.(*ipEntry).lastSeen.Before(cutoff) {
+			if value.(*ipEntry).lastSeen.Load() < cutoff.UnixNano() {
 				il.limiters.Delete(key)
 			}
 			return true
