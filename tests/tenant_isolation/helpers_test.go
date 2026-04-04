@@ -107,10 +107,10 @@ func (e *testEnv) setupTenants(ctx context.Context) error {
 	// Ensure test users exist in the users table.
 	for _, uid := range []uuid.UUID{e.userA, e.userB} {
 		_, err := e.db.ExecContext(ctx,
-			`INSERT INTO users (id, external_id, display_name, created_at, updated_at)
-			 VALUES ($1, $2, $3, NOW(), NOW())
+			`INSERT INTO users (id, email, password_hash, display_name, role, status, created_at, updated_at)
+			 VALUES ($1, $2, $3, $4, 'member', 'active', NOW(), NOW())
 			 ON CONFLICT (id) DO NOTHING`,
-			uid, uid.String(), "test-user-"+uid.String()[:8])
+			uid, uid.String()[:8]+"@test.local", "not-a-real-hash", "test-user-"+uid.String()[:8])
 		if err != nil {
 			return fmt.Errorf("insert user %s: %w", uid, err)
 		}
