@@ -40,6 +40,16 @@ func New(ctx context.Context, cfg Config) (*Exporter, error) {
 		return nil, fmt.Errorf("OTLP endpoint is required")
 	}
 
+	// gRPC expects host:port without schema. Strip http:// or https:// if present.
+	endpoint := cfg.Endpoint
+	for _, prefix := range []string{"https://", "http://"} {
+		if len(endpoint) > len(prefix) && endpoint[:len(prefix)] == prefix {
+			endpoint = endpoint[len(prefix):]
+			break
+		}
+	}
+	cfg.Endpoint = endpoint
+
 	serviceName := cfg.ServiceName
 	if serviceName == "" {
 		serviceName = "argoclaw-gateway"
