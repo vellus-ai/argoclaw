@@ -1,7 +1,7 @@
 import { useEffect, useRef, useMemo, useCallback } from "react";
 import { WsClient, type ConnectionState } from "@/api/ws-client";
 import { HttpClient } from "@/api/http-client";
-import { refresh as refreshToken } from "@/api/auth-client";
+import { refreshTokenSingleton } from "@/api/token-refresh";
 import { WsContext } from "@/hooks/use-ws";
 import { useAuthStore } from "@/stores/use-auth-store";
 import { useJwtRefresh } from "@/hooks/use-jwt-refresh";
@@ -55,22 +55,14 @@ export function WsProvider({ children }: { children: React.ReactNode }) {
       state.logout();
     };
 
-    // Wire JWT refresh: on 401 → try refresh token → retry request
-    client.setRefreshFn(async () => {
-      const { refreshToken: rt } = useAuthStore.getState();
-      if (!rt) return null;
-      try {
-        const res = await refreshToken(rt);
-        return { accessToken: res.access_token, refreshToken: res.refresh_token };
-      } catch {
-        return null;
-      }
-    });
+    // Wire JWT refresh: on 401 → use centralized singleton (shared with useJwtRefresh)
+    client.setRefreshFn(refreshTokenSingleton);
 
-    // When refresh succeeds, persist new tokens to store
+    // When refresh succeeds via HttpClient, store is already updated by the singleton
+    // but HttpClient also calls onTokenRefreshed — keep in sync
     client.onTokenRefreshed = (accessToken, rt) => {
-      const { userId: uid } = useAuthStore.getState();
-      useAuthStore.getState().setJwtAuth(accessToken, rt, uid);
+      const { userId: uid, setJwtAuth } = useAuthStore.getState();
+      setJwtAuth(accessToken, rt, uid);
     };
 
     return client;
