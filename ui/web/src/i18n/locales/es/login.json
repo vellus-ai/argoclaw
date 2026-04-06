@@ -45,6 +45,24 @@
     "errorServer": "El servidor respondió {{status}}. Inténtalo de nuevo.",
     "errorCannotConnect": "No se puede conectar al gateway. Verifica si el servidor está activo."
   },
+  "changePassword": {
+    "title": "Cambiar tu contrasena",
+    "description": "Debes cambiar tu contrasena temporal antes de continuar.",
+    "currentPassword": "Contrasena actual",
+    "currentPasswordPlaceholder": "Ingresa tu contrasena temporal",
+    "newPassword": "Nueva contrasena",
+    "newPasswordPlaceholder": "Elige una contrasena segura",
+    "confirmPassword": "Confirmar nueva contrasena",
+    "confirmPasswordPlaceholder": "Vuelve a ingresar tu nueva contrasena",
+    "reqMatch": "Las contrasenas coinciden",
+    "submit": "Cambiar contrasena",
+    "submitting": "Cambiando contrasena...",
+    "errorMismatch": "Las contrasenas no coinciden.",
+    "errorWrongCurrent": "La contrasena actual es incorrecta.",
+    "errorWeakPassword": "La contrasena no cumple los requisitos.",
+    "errorServer": "Error del servidor. Intentalo de nuevo.",
+    "errorNetwork": "No se puede conectar al servidor."
+  },
   "pairing": {
     "userId": "ID de Usuario",
     "userIdPlaceholder": "tu-id-de-usuario",

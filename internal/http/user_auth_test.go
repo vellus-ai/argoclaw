@@ -26,10 +26,11 @@ type testAuthResp struct {
 // --- in-memory stub of store.UserStore ---
 
 type stubUserStore struct {
-	users    map[string]*store.User // keyed by email
-	sessions map[string]*store.UserSession
-	audit    []store.LoginAuditEntry
-	history  map[uuid.UUID][]string // password history per user
+	users              map[string]*store.User // keyed by email
+	sessions           map[string]*store.UserSession
+	audit              []store.LoginAuditEntry
+	history            map[uuid.UUID][]string // password history per user
+	mustChangeCleared  bool                   // tracks whether ClearMustChangePassword was called
 }
 
 func newStubUserStore() *stubUserStore {
@@ -146,6 +147,10 @@ func (s *stubUserStore) RevokeSession(_ context.Context, id uuid.UUID) error {
 
 func (s *stubUserStore) RevokeAllSessions(_ context.Context, _ uuid.UUID) error { return nil }
 func (s *stubUserStore) CleanExpiredSessions(_ context.Context) error             { return nil }
+func (s *stubUserStore) ClearMustChangePassword(_ context.Context, _ uuid.UUID) error {
+	s.mustChangeCleared = true
+	return nil
+}
 
 func (s *stubUserStore) LogAudit(_ context.Context, entry *store.LoginAuditEntry) error {
 	s.audit = append(s.audit, *entry)
@@ -820,6 +825,249 @@ func TestUserAuth_Register_RateLimited(t *testing.T) {
 	}
 	if !rateLimited {
 		t.Error("expected 429 after rapid register requests")
+	}
+}
+
+// --- Change Password tests ---
+
+// generateTestJWT creates a JWT for testing without going through login.
+// This avoids the issueTokens side effect that clears user.PasswordHash
+// on the shared pointer (which would corrupt the in-memory stub).
+func generateTestJWT(t *testing.T, user *store.User) string {
+	t.Helper()
+	tenantID := ""
+	if user.TenantID != nil {
+		tenantID = user.TenantID.String()
+	}
+	token, err := auth.GenerateAccessToken(auth.TokenClaims{
+		UserID:             user.ID.String(),
+		Email:              user.Email,
+		TenantID:           tenantID,
+		Role:               user.Role,
+		MustChangePassword: user.MustChangePassword,
+	}, testJWTSecret)
+	if err != nil {
+		t.Fatalf("GenerateAccessToken: %v", err)
+	}
+	return token
+}
+
+func TestChangePassword_Success(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	currentPassword := "Str0ng!Pass#99"
+	hash, _ := auth.HashPassword(currentPassword)
+	tenantID := uuid.New()
+	user := &store.User{
+		ID: uuid.New(), Email: "cp@example.com", PasswordHash: hash,
+		Role: "admin", Status: "active", TenantID: ptrUUID(tenantID),
+	}
+	us.users[user.Email] = user
+
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	accessToken := generateTestJWT(t, user)
+
+	// Change password
+	cpBody := `{"current_password":"Str0ng!Pass#99","new_password":"N3w!Secure#Pass1"}`
+	cpReq := httptest.NewRequest("POST", "/v1/auth/change-password", bytes.NewBufferString(cpBody))
+	cpReq.Header.Set("Content-Type", "application/json")
+	cpReq.Header.Set("Authorization", "Bearer "+accessToken)
+	cpW := httptest.NewRecorder()
+	mux.ServeHTTP(cpW, cpReq)
+
+	if cpW.Code != http.StatusOK {
+		t.Fatalf("change-password status = %d, want %d; body = %s", cpW.Code, http.StatusOK, cpW.Body.String())
+	}
+
+	// Verify new tokens are returned
+	var cpResp testAuthResp
+	if err := json.Unmarshal(cpW.Body.Bytes(), &cpResp); err != nil {
+		t.Fatalf("unmarshal change-password response: %v", err)
+	}
+	if cpResp.AccessToken == "" {
+		t.Error("access_token is empty after change-password")
+	}
+	if cpResp.RefreshToken == "" {
+		t.Error("refresh_token is empty after change-password")
+	}
+
+	// Verify audit log has password_change entry
+	found := false
+	for _, a := range us.audit {
+		if a.Action == "password_change" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("expected password_change audit entry")
+	}
+}
+
+func TestChangePassword_WrongCurrentPassword(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	hash, _ := auth.HashPassword("Str0ng!Pass#99")
+	tenantID := uuid.New()
+	user := &store.User{
+		ID: uuid.New(), Email: "cpwrong@example.com", PasswordHash: hash,
+		Role: "member", Status: "active", TenantID: ptrUUID(tenantID),
+	}
+	us.users[user.Email] = user
+
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	accessToken := generateTestJWT(t, user)
+
+	// Change password with wrong current password
+	cpBody := `{"current_password":"Wrong!Pass#999","new_password":"N3w!Secure#Pass1"}`
+	cpReq := httptest.NewRequest("POST", "/v1/auth/change-password", bytes.NewBufferString(cpBody))
+	cpReq.Header.Set("Content-Type", "application/json")
+	cpReq.Header.Set("Authorization", "Bearer "+accessToken)
+	cpW := httptest.NewRecorder()
+	mux.ServeHTTP(cpW, cpReq)
+
+	if cpW.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d; body = %s", cpW.Code, http.StatusUnauthorized, cpW.Body.String())
+	}
+}
+
+func TestChangePassword_InvalidNewPassword(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	hash, _ := auth.HashPassword("Str0ng!Pass#99")
+	tenantID := uuid.New()
+	user := &store.User{
+		ID: uuid.New(), Email: "cpweak@example.com", PasswordHash: hash,
+		Role: "member", Status: "active", TenantID: ptrUUID(tenantID),
+	}
+	us.users[user.Email] = user
+
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	accessToken := generateTestJWT(t, user)
+
+	// Change password with weak new password
+	cpBody := `{"current_password":"Str0ng!Pass#99","new_password":"short"}`
+	cpReq := httptest.NewRequest("POST", "/v1/auth/change-password", bytes.NewBufferString(cpBody))
+	cpReq.Header.Set("Content-Type", "application/json")
+	cpReq.Header.Set("Authorization", "Bearer "+accessToken)
+	cpW := httptest.NewRecorder()
+	mux.ServeHTTP(cpW, cpReq)
+
+	if cpW.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d; body = %s", cpW.Code, http.StatusBadRequest, cpW.Body.String())
+	}
+}
+
+func TestChangePassword_NoAuth(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	cpBody := `{"current_password":"Str0ng!Pass#99","new_password":"N3w!Secure#Pass1"}`
+	cpReq := httptest.NewRequest("POST", "/v1/auth/change-password", bytes.NewBufferString(cpBody))
+	cpReq.Header.Set("Content-Type", "application/json")
+	// No Authorization header
+	cpW := httptest.NewRecorder()
+	mux.ServeHTTP(cpW, cpReq)
+
+	if cpW.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d; body = %s", cpW.Code, http.StatusUnauthorized, cpW.Body.String())
+	}
+}
+
+func TestChangePassword_PasswordReuse(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	currentPassword := "Str0ng!Pass#99"
+	hash, _ := auth.HashPassword(currentPassword)
+	userID := uuid.New()
+	tenantID := uuid.New()
+	user := &store.User{
+		ID: userID, Email: "cpreuse@example.com", PasswordHash: hash,
+		Role: "member", Status: "active", TenantID: ptrUUID(tenantID),
+	}
+	us.users[user.Email] = user
+
+	// Add current password hash to history so reuse is detected
+	us.history[userID] = []string{hash}
+
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	accessToken := generateTestJWT(t, user)
+
+	// Try to change password to the same current password (reuse)
+	cpBody := `{"current_password":"Str0ng!Pass#99","new_password":"Str0ng!Pass#99"}`
+	cpReq := httptest.NewRequest("POST", "/v1/auth/change-password", bytes.NewBufferString(cpBody))
+	cpReq.Header.Set("Content-Type", "application/json")
+	cpReq.Header.Set("Authorization", "Bearer "+accessToken)
+	cpW := httptest.NewRecorder()
+	mux.ServeHTTP(cpW, cpReq)
+
+	if cpW.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d; body = %s", cpW.Code, http.StatusBadRequest, cpW.Body.String())
+	}
+}
+
+func TestChangePassword_ClearsMustChangeFlag(t *testing.T) {
+	t.Parallel()
+	us := newStubUserStore()
+	currentPassword := "Str0ng!Pass#99"
+	hash, _ := auth.HashPassword(currentPassword)
+	tenantID := uuid.New()
+	user := &store.User{
+		ID: uuid.New(), Email: "cpmust@example.com", PasswordHash: hash,
+		Role: "member", Status: "active", TenantID: ptrUUID(tenantID),
+		MustChangePassword: true,
+	}
+	us.users[user.Email] = user
+
+	h := httpapi.NewUserAuthHandler(us, testJWTSecret)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	accessToken := generateTestJWT(t, user)
+
+	// Change password
+	cpBody := `{"current_password":"Str0ng!Pass#99","new_password":"N3w!Secure#Pass1"}`
+	cpReq := httptest.NewRequest("POST", "/v1/auth/change-password", bytes.NewBufferString(cpBody))
+	cpReq.Header.Set("Content-Type", "application/json")
+	cpReq.Header.Set("Authorization", "Bearer "+accessToken)
+	cpW := httptest.NewRecorder()
+	mux.ServeHTTP(cpW, cpReq)
+
+	if cpW.Code != http.StatusOK {
+		t.Fatalf("change-password status = %d, want %d; body = %s", cpW.Code, http.StatusOK, cpW.Body.String())
+	}
+
+	// Verify ClearMustChangePassword was called
+	if !us.mustChangeCleared {
+		t.Error("ClearMustChangePassword was not called")
+	}
+
+	// Verify the new token does NOT have MustChangePassword flag
+	var cpResp testAuthResp
+	if err := json.Unmarshal(cpW.Body.Bytes(), &cpResp); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	claims, err := auth.ValidateAccessToken(cpResp.AccessToken, testJWTSecret)
+	if err != nil {
+		t.Fatalf("ValidateAccessToken: %v", err)
+	}
+	if claims.MustChangePassword {
+		t.Error("MustChangePassword should be false in new token after password change")
 	}
 }
 

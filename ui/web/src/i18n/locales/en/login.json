@@ -45,6 +45,24 @@
     "errorServer": "Server returned {{status}}. Please try again.",
     "errorCannotConnect": "Cannot connect to gateway. Check if the server is running."
   },
+  "changePassword": {
+    "title": "Change Your Password",
+    "description": "Your temporary password must be changed before you can continue.",
+    "currentPassword": "Current Password",
+    "currentPasswordPlaceholder": "Enter your temporary password",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Choose a strong password",
+    "confirmPassword": "Confirm New Password",
+    "confirmPasswordPlaceholder": "Re-enter your new password",
+    "reqMatch": "Passwords match",
+    "submit": "Change Password",
+    "submitting": "Changing password...",
+    "errorMismatch": "Passwords do not match.",
+    "errorWrongCurrent": "Current password is incorrect.",
+    "errorWeakPassword": "Password does not meet the requirements.",
+    "errorServer": "Server error. Please try again.",
+    "errorNetwork": "Cannot connect to server."
+  },
   "pairing": {
     "userId": "User ID",
     "userIdPlaceholder": "your-user-id",

@@ -45,6 +45,24 @@
     "errorServer": "Le serveur a renvoyé {{status}}. Veuillez réessayer.",
     "errorCannotConnect": "Impossible de se connecter au gateway. Vérifiez que le serveur est actif."
   },
+  "changePassword": {
+    "title": "Changer votre mot de passe",
+    "description": "Votre mot de passe temporaire doit etre change avant de continuer.",
+    "currentPassword": "Mot de passe actuel",
+    "currentPasswordPlaceholder": "Entrez votre mot de passe temporaire",
+    "newPassword": "Nouveau mot de passe",
+    "newPasswordPlaceholder": "Choisissez un mot de passe fort",
+    "confirmPassword": "Confirmer le nouveau mot de passe",
+    "confirmPasswordPlaceholder": "Ressaisissez votre nouveau mot de passe",
+    "reqMatch": "Les mots de passe correspondent",
+    "submit": "Changer le mot de passe",
+    "submitting": "Changement en cours...",
+    "errorMismatch": "Les mots de passe ne correspondent pas.",
+    "errorWrongCurrent": "Le mot de passe actuel est incorrect.",
+    "errorWeakPassword": "Le mot de passe ne repond pas aux exigences.",
+    "errorServer": "Erreur serveur. Veuillez reessayer.",
+    "errorNetwork": "Impossible de se connecter au serveur."
+  },
   "pairing": {
     "userId": "ID Utilisateur",
     "userIdPlaceholder": "votre-id-utilisateur",

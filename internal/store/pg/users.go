@@ -24,9 +24,9 @@ func (s *PGUserStore) CreateUser(ctx context.Context, user *store.User) error {
 		user.ID = uuid.New()
 	}
 	_, err := s.db.ExecContext(ctx, `
-		INSERT INTO users (id, tenant_id, email, password_hash, display_name, role, status, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`,
-		user.ID, user.TenantID, user.Email, user.PasswordHash, user.DisplayName, user.Role, user.Status)
+		INSERT INTO users (id, tenant_id, email, password_hash, display_name, role, status, must_change_password, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())`,
+		user.ID, user.TenantID, user.Email, user.PasswordHash, user.DisplayName, user.Role, user.Status, user.MustChangePassword)
 	if err != nil {
 		return fmt.Errorf("create user: %w", err)
 	}
@@ -38,11 +38,11 @@ func (s *PGUserStore) GetByEmail(ctx context.Context, email string) (*store.User
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, tenant_id, email, password_hash, display_name, role, status,
 		       failed_attempts, locked_until, last_login_at, email_verified, mfa_enabled,
-		       created_at, updated_at
+		       must_change_password, created_at, updated_at
 		FROM users WHERE email = $1`, email).Scan(
 		&u.ID, &u.TenantID, &u.Email, &u.PasswordHash, &u.DisplayName, &u.Role, &u.Status,
 		&u.FailedAttempts, &u.LockedUntil, &u.LastLoginAt, &u.EmailVerified, &u.MFAEnabled,
-		&u.CreatedAt, &u.UpdatedAt)
+		&u.MustChangePassword, &u.CreatedAt, &u.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -57,11 +57,11 @@ func (s *PGUserStore) GetByID(ctx context.Context, id uuid.UUID) (*store.User, e
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, tenant_id, email, password_hash, display_name, role, status,
 		       failed_attempts, locked_until, last_login_at, email_verified, mfa_enabled,
-		       created_at, updated_at
+		       must_change_password, created_at, updated_at
 		FROM users WHERE id = $1`, id).Scan(
 		&u.ID, &u.TenantID, &u.Email, &u.PasswordHash, &u.DisplayName, &u.Role, &u.Status,
 		&u.FailedAttempts, &u.LockedUntil, &u.LastLoginAt, &u.EmailVerified, &u.MFAEnabled,
-		&u.CreatedAt, &u.UpdatedAt)
+		&u.MustChangePassword, &u.CreatedAt, &u.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -174,6 +174,15 @@ func (s *PGUserStore) RevokeAllSessions(ctx context.Context, userID uuid.UUID) e
 
 func (s *PGUserStore) CleanExpiredSessions(ctx context.Context) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM user_sessions WHERE revoked = true OR expires_at < NOW()`)
+	return err
+}
+
+// --- Password Change ---
+
+func (s *PGUserStore) ClearMustChangePassword(ctx context.Context, userID uuid.UUID) error {
+	_, err := s.db.ExecContext(ctx, `
+		UPDATE users SET must_change_password = false, updated_at = NOW()
+		WHERE id = $1`, userID)
 	return err
 }
 

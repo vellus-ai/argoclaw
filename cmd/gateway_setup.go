@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log/slog"
 	"os"
@@ -238,6 +239,32 @@ func setupToolRegistry(
 	}
 
 	return
+}
+
+// wireOnboardingTools creates the onboarding store and registers the 8 onboarding tools.
+// Called after setupStoresAndTracing so that pgStores.DB is available.
+func wireOnboardingTools(reg *tools.Registry, db *sql.DB) {
+	onbStore := pg.NewPGOnboardingStore(db)
+	onbTools := []tools.Tool{
+		tools.NewConfigureWorkspaceTool(),
+		tools.NewSetBrandingTool(),
+		tools.NewConfigureLLMProviderTool(),
+		tools.NewTestLLMConnectionTool(),
+		tools.NewCreateAgentTool(),
+		tools.NewConfigureChannelTool(),
+		tools.NewCompleteOnboardingTool(),
+		tools.NewGetOnboardingStatusTool(),
+	}
+	names := make([]string, len(onbTools))
+	for i, t := range onbTools {
+		if aware, ok := t.(tools.OnboardingStoreAware); ok {
+			aware.SetOnboardingStore(onbStore)
+		}
+		reg.Register(t)
+		names[i] = t.Name()
+	}
+	tools.RegisterToolGroup("group:onboarding", names)
+	slog.Info("onboarding tools registered", "count", len(onbTools))
 }
 
 // setupStoresAndTracing creates PG stores, tracing collector, snapshot worker, and wires cron config.

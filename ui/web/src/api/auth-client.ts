@@ -66,6 +66,36 @@ export function refresh(refreshToken: string): Promise<AuthResponse> {
   return authFetch("/v1/auth/refresh", { refresh_token: refreshToken });
 }
 
+export function changePassword(
+  currentPassword: string,
+  newPassword: string,
+  accessToken: string,
+): Promise<AuthResponse> {
+  return authFetchWithAuth<AuthResponse>(
+    "/v1/auth/change-password",
+    { current_password: currentPassword, new_password: newPassword },
+    accessToken,
+  );
+}
+
+async function authFetchWithAuth<T>(path: string, body: unknown, accessToken: string): Promise<T> {
+  const res = await fetch(path, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const err: AuthError = await res.json().catch(() => ({ error: res.statusText }));
+    throw new AuthApiError(res.status, err.error, err.code);
+  }
+
+  return res.json() as Promise<T>;
+}
+
 export async function logout(refreshToken: string, accessToken: string): Promise<void> {
   await fetch("/v1/auth/logout", {
     method: "POST",
