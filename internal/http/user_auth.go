@@ -44,18 +44,20 @@ func (h *UserAuthHandler) RegisterRoutes(mux *http.ServeMux) {
 	register := h.handleRegister
 	login := h.handleLogin
 	refresh := h.handleRefresh
+	changePassword := h.handleChangePassword
 
 	if h.rateLimiter != nil {
 		register = h.rateLimiter.WrapRegister(register)
 		login = h.rateLimiter.WrapLogin(login)
 		refresh = h.rateLimiter.WrapRefresh(refresh)
+		changePassword = h.rateLimiter.WrapChangePassword(changePassword)
 	}
 
 	mux.HandleFunc("POST /v1/auth/register", register)
 	mux.HandleFunc("POST /v1/auth/login", login)
 	mux.HandleFunc("POST /v1/auth/refresh", refresh)
 	mux.HandleFunc("POST /v1/auth/logout", h.handleLogout)
-	mux.HandleFunc("POST /v1/auth/change-password", h.handleChangePassword)
+	mux.HandleFunc("POST /v1/auth/change-password", changePassword)
 }
 
 type registerRequest struct {
@@ -393,8 +395,12 @@ func (h *UserAuthHandler) handleChangePassword(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	// Store old password in history before updating
-	_ = h.users.AddPasswordHistory(r.Context(), user.ID, user.PasswordHash)
+	// Store old password in history before updating (PCI DSS: must persist before changing)
+	if err := h.users.AddPasswordHistory(r.Context(), user.ID, user.PasswordHash); err != nil {
+		slog.Error("change-password: add password history failed — aborting to preserve reuse prevention", "error", err, "user_id", user.ID)
+		writeJSONError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
 
 	// Update password
 	if err := h.users.UpdatePassword(r.Context(), user.ID, newHash); err != nil {
@@ -404,10 +410,14 @@ func (h *UserAuthHandler) handleChangePassword(w http.ResponseWriter, r *http.Re
 	}
 
 	// Clear forced password change flag
-	_ = h.users.ClearMustChangePassword(r.Context(), user.ID)
+	if err := h.users.ClearMustChangePassword(r.Context(), user.ID); err != nil {
+		slog.Warn("change-password: clear must_change_password flag failed", "error", err, "user_id", user.ID)
+	}
 
-	// Revoke all existing sessions
-	_ = h.users.RevokeAllSessions(r.Context(), user.ID)
+	// Revoke all existing sessions (best-effort — password already changed)
+	if err := h.users.RevokeAllSessions(r.Context(), user.ID); err != nil {
+		slog.Warn("change-password: revoke sessions failed", "error", err, "user_id", user.ID)
+	}
 
 	// Update user struct for token issuance (flag cleared)
 	user.MustChangePassword = false
@@ -426,7 +436,7 @@ func (h *UserAuthHandler) handleChangePassword(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	slog.Info("security.password_changed", "user_id", user.ID, "email", user.Email)
+	slog.Info("security.password_changed", "user_id", user.ID)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)

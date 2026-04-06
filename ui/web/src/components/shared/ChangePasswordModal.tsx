@@ -78,8 +78,8 @@ export function ChangePasswordModal() {
           case 401:
             setError(t("changePassword.errorWrongCurrent"));
             break;
-          case 422:
-            setError(t("changePassword.errorWeakPassword"));
+          case 400:
+            setError(err.message || t("changePassword.errorWeakPassword"));
             break;
           default:
             setError(t("changePassword.errorServer"));
