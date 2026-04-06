@@ -53,7 +53,7 @@ export function useJwtRefresh() {
     if (!token || !refreshTokenValue) return;
 
     const exp = getJwtExp(token);
-    if (!exp) return; // Not a JWT (gateway token) — skip
+    if (exp === null) return; // Not a JWT (gateway token) — skip
 
     const nowS = Math.floor(Date.now() / 1000);
     const delayS = exp - REFRESH_MARGIN_S - nowS;
