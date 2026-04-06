@@ -1,0 +1,62 @@
+{
+  "subtitle": "Anmeldung am Gateway-Dashboard",
+  "tabs": {
+    "email": "E-Mail",
+    "token": "Token",
+    "pairing": "Kopplung"
+  },
+  "email": {
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "submitting": "Anmeldung läuft...",
+    "email": "E-Mail",
+    "emailPlaceholder": "du@beispiel.com",
+    "password": "Passwort",
+    "passwordPlaceholder": "Gib dein Passwort ein",
+    "confirmPassword": "Passwort bestätigen",
+    "confirmPasswordPlaceholder": "Passwort erneut eingeben",
+    "displayName": "Anzeigename",
+    "displayNamePlaceholder": "Dein Name (optional)",
+    "req12Chars": "Mindestens 12 Zeichen",
+    "reqUppercase": "Mindestens ein Großbuchstabe",
+    "reqLowercase": "Mindestens ein Kleinbuchstabe",
+    "reqDigit": "Mindestens eine Ziffer",
+    "reqSpecial": "Mindestens ein Sonderzeichen",
+    "reqNoEmail": "Darf den E-Mail-Benutzernamen nicht enthalten",
+    "errorPasswordMismatch": "Die Passwörter stimmen nicht überein.",
+    "errorInvalidCredentials": "Ungültige E-Mail oder ungültiges Passwort.",
+    "errorEmailTaken": "Diese E-Mail ist bereits registriert.",
+    "errorAccountLocked": "Zu viele Versuche. Versuche es später erneut.",
+    "errorServer": "Serverfehler. Bitte versuche es erneut.",
+    "errorNetwork": "Verbindung zum Server nicht möglich. Prüfe, ob das Gateway aktiv ist.",
+    "noAccount": "Noch kein Konto?",
+    "hasAccount": "Bereits ein Konto?",
+    "signInLink": "Anmelden",
+    "signUpLink": "Registrieren"
+  },
+  "token": {
+    "userId": "Benutzer-ID",
+    "userIdPlaceholder": "deine-benutzer-id",
+    "gatewayToken": "Gateway-Token",
+    "tokenPlaceholder": "Bearer-Token",
+    "connect": "Verbinden",
+    "connecting": "Verbindung wird hergestellt...",
+    "errorInvalidCredentials": "Ungültige Anmeldedaten. Prüfe Token und Benutzer-ID.",
+    "errorServer": "Server antwortete mit {{status}}. Bitte versuche es erneut.",
+    "errorCannotConnect": "Verbindung zum Gateway nicht möglich. Prüfe, ob der Server läuft."
+  },
+  "pairing": {
+    "userId": "Benutzer-ID",
+    "userIdPlaceholder": "deine-benutzer-id",
+    "noTokenNeeded": "Kein Token erforderlich. Es wird ein Kopplungscode generiert, den ein Administrator genehmigen muss.",
+    "requestAccess": "Zugang anfordern",
+    "connecting": "Verbindung wird hergestellt...",
+    "errorConnectionLost": "Verbindung verloren. Bitte versuche es erneut.",
+    "errorCannotConnect": "Verbindung zum Gateway nicht möglich.",
+    "askAdmin": "Bitte einen Administrator, diesen Code zu genehmigen:",
+    "orRun": "Oder führe aus:",
+    "waitingForApproval": "Warte auf Genehmigung...",
+    "cancel": "Abbrechen",
+    "approved": "Zugang genehmigt! Weiterleitung..."
+  }
+}

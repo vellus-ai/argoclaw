@@ -1,0 +1,62 @@
+{
+  "subtitle": "Accedi al pannello del gateway",
+  "tabs": {
+    "email": "Email",
+    "token": "Token",
+    "pairing": "Associazione"
+  },
+  "email": {
+    "signIn": "Accedi",
+    "signUp": "Registrati",
+    "submitting": "Accesso in corso...",
+    "email": "Email",
+    "emailPlaceholder": "tu@esempio.com",
+    "password": "Password",
+    "passwordPlaceholder": "Inserisci la tua password",
+    "confirmPassword": "Conferma password",
+    "confirmPasswordPlaceholder": "Reinserisci la tua password",
+    "displayName": "Nome visualizzato",
+    "displayNamePlaceholder": "Il tuo nome (facoltativo)",
+    "req12Chars": "Almeno 12 caratteri",
+    "reqUppercase": "Almeno una lettera maiuscola",
+    "reqLowercase": "Almeno una lettera minuscola",
+    "reqDigit": "Almeno una cifra",
+    "reqSpecial": "Almeno un carattere speciale",
+    "reqNoEmail": "Non deve contenere il nome utente dell'email",
+    "errorPasswordMismatch": "Le password non corrispondono.",
+    "errorInvalidCredentials": "Email o password non validi.",
+    "errorEmailTaken": "Questa email è già registrata.",
+    "errorAccountLocked": "Troppi tentativi. Riprova più tardi.",
+    "errorServer": "Errore del server. Riprova.",
+    "errorNetwork": "Impossibile connettersi al server. Verifica che il gateway sia attivo.",
+    "noAccount": "Non hai un account?",
+    "hasAccount": "Hai già un account?",
+    "signInLink": "Accedi",
+    "signUpLink": "Registrati"
+  },
+  "token": {
+    "userId": "ID Utente",
+    "userIdPlaceholder": "il-tuo-id-utente",
+    "gatewayToken": "Token del Gateway",
+    "tokenPlaceholder": "Token Bearer",
+    "connect": "Connetti",
+    "connecting": "Connessione...",
+    "errorInvalidCredentials": "Credenziali non valide. Verifica il token e l'ID utente.",
+    "errorServer": "Il server ha risposto {{status}}. Riprova.",
+    "errorCannotConnect": "Impossibile connettersi al gateway. Verifica che il server sia attivo."
+  },
+  "pairing": {
+    "userId": "ID Utente",
+    "userIdPlaceholder": "il-tuo-id-utente",
+    "noTokenNeeded": "Nessun token necessario. Verrà generato un codice di associazione per l'approvazione di un amministratore.",
+    "requestAccess": "Richiedi Accesso",
+    "connecting": "Connessione...",
+    "errorConnectionLost": "Connessione persa. Riprova.",
+    "errorCannotConnect": "Impossibile connettersi al gateway.",
+    "askAdmin": "Chiedi a un amministratore di approvare questo codice:",
+    "orRun": "Oppure esegui:",
+    "waitingForApproval": "In attesa di approvazione...",
+    "cancel": "Annulla",
+    "approved": "Accesso approvato! Reindirizzamento..."
+  }
+}

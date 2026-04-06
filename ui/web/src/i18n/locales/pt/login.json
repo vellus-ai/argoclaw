@@ -1,0 +1,62 @@
+{
+  "subtitle": "Entrar no painel do gateway",
+  "tabs": {
+    "email": "Email",
+    "token": "Token",
+    "pairing": "Pareamento"
+  },
+  "email": {
+    "signIn": "Entrar",
+    "signUp": "Criar conta",
+    "submitting": "Entrando...",
+    "email": "Email",
+    "emailPlaceholder": "voce@exemplo.com",
+    "password": "Senha",
+    "passwordPlaceholder": "Digite sua senha",
+    "confirmPassword": "Confirmar senha",
+    "confirmPasswordPlaceholder": "Digite a senha novamente",
+    "displayName": "Nome de exibição",
+    "displayNamePlaceholder": "Seu nome (opcional)",
+    "req12Chars": "Pelo menos 12 caracteres",
+    "reqUppercase": "Pelo menos uma letra maiúscula",
+    "reqLowercase": "Pelo menos uma letra minúscula",
+    "reqDigit": "Pelo menos um dígito",
+    "reqSpecial": "Pelo menos um caractere especial",
+    "reqNoEmail": "Não pode conter o usuário do email",
+    "errorPasswordMismatch": "As senhas não coincidem.",
+    "errorInvalidCredentials": "Email ou senha inválidos.",
+    "errorEmailTaken": "Este email já está cadastrado.",
+    "errorAccountLocked": "Muitas tentativas. Tente novamente mais tarde.",
+    "errorServer": "Erro no servidor. Tente novamente.",
+    "errorNetwork": "Não foi possível conectar ao servidor. Verifique se o gateway está ativo.",
+    "noAccount": "Não tem uma conta?",
+    "hasAccount": "Já tem uma conta?",
+    "signInLink": "Entrar",
+    "signUpLink": "Criar conta"
+  },
+  "token": {
+    "userId": "ID do Usuário",
+    "userIdPlaceholder": "seu-id-de-usuario",
+    "gatewayToken": "Token do Gateway",
+    "tokenPlaceholder": "Token Bearer",
+    "connect": "Conectar",
+    "connecting": "Conectando...",
+    "errorInvalidCredentials": "Credenciais inválidas. Verifique o token e o ID do usuário.",
+    "errorServer": "Servidor retornou {{status}}. Tente novamente.",
+    "errorCannotConnect": "Não foi possível conectar ao gateway. Verifique se o servidor está ativo."
+  },
+  "pairing": {
+    "userId": "ID do Usuário",
+    "userIdPlaceholder": "seu-id-de-usuario",
+    "noTokenNeeded": "Nenhum token necessário. Um código de pareamento será gerado para aprovação de um administrador.",
+    "requestAccess": "Solicitar Acesso",
+    "connecting": "Conectando...",
+    "errorConnectionLost": "Conexão perdida. Tente novamente.",
+    "errorCannotConnect": "Não foi possível conectar ao gateway.",
+    "askAdmin": "Peça a um administrador para aprovar este código:",
+    "orRun": "Ou execute:",
+    "waitingForApproval": "Aguardando aprovação...",
+    "cancel": "Cancelar",
+    "approved": "Acesso aprovado! Redirecionando..."
+  }
+}

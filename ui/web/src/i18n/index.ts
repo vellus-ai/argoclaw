@@ -69,6 +69,21 @@ import viApiKeys from "./locales/vi/api-keys.json";
 import viCliCredentials from "./locales/vi/cli-credentials.json";
 import viPackages from "./locales/vi/packages.json";
 
+// --- PT namespaces (login only — fallback to EN for other namespaces) ---
+import ptLogin from "./locales/pt/login.json";
+
+// --- ES namespaces (login only — fallback to EN for other namespaces) ---
+import esLogin from "./locales/es/login.json";
+
+// --- FR namespaces (login only — fallback to EN for other namespaces) ---
+import frLogin from "./locales/fr/login.json";
+
+// --- IT namespaces (login only — fallback to EN for other namespaces) ---
+import itLogin from "./locales/it/login.json";
+
+// --- DE namespaces (login only — fallback to EN for other namespaces) ---
+import deLogin from "./locales/de/login.json";
+
 // --- ZH namespaces ---
 import zhCommon from "./locales/zh/common.json";
 import zhSidebar from "./locales/zh/sidebar.json";
@@ -105,12 +120,17 @@ import zhPackages from "./locales/zh/packages.json";
 
 const STORAGE_KEY = "argo:language";
 
-function getInitialLanguage(): string {
+const SUPPORTED_LANGS = ["en", "vi", "zh", "pt", "es", "fr", "it", "de"] as const;
+type SupportedLang = (typeof SUPPORTED_LANGS)[number];
+
+function getInitialLanguage(): SupportedLang {
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === "en" || stored === "vi" || stored === "zh") return stored;
+  if (stored && (SUPPORTED_LANGS as readonly string[]).includes(stored)) return stored as SupportedLang;
   const lang = navigator.language.toLowerCase();
-  if (lang.startsWith("vi")) return "vi";
-  if (lang.startsWith("zh")) return "zh";
+  // Match browser language prefix to supported languages
+  for (const supported of SUPPORTED_LANGS) {
+    if (lang.startsWith(supported)) return supported;
+  }
   return "en";
 }
 
@@ -164,6 +184,12 @@ i18n.use(initReactI18next).init({
       "cli-credentials": zhCliCredentials,
       packages: zhPackages,
     },
+    // ARGO product languages — login namespace only; other namespaces fall back to EN
+    pt: { login: ptLogin },
+    es: { login: esLogin },
+    fr: { login: frLogin },
+    it: { login: itLogin },
+    de: { login: deLogin },
   },
   ns: [...ns],
   defaultNS: "common",
