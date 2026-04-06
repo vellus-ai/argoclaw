@@ -4,7 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strings"
 
+	"github.com/google/uuid"
 	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
@@ -23,6 +26,12 @@ type OnboardingStore interface {
 type OnboardingStoreAware interface {
 	SetOnboardingStore(OnboardingStore)
 }
+
+// hexColorRe validates hex color format: #RGB or #RRGGBB
+var hexColorRe = regexp.MustCompile(`^#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?$`)
+
+// validAccountTypes are the allowed values for workspace type.
+var validAccountTypes = map[string]bool{"personal": true, "business": true}
 
 // --- 1. ConfigureWorkspaceTool ---
 
@@ -59,8 +68,15 @@ func (t *ConfigureWorkspaceTool) Execute(ctx context.Context, args map[string]an
 
 	accType, _ := args["type"].(string)
 	accName, _ := args["account_name"].(string)
+	accName = strings.TrimSpace(accName)
 	if accType == "" || accName == "" {
 		return ErrorResult("type and account_name are required")
+	}
+	if !validAccountTypes[accType] {
+		return ErrorResult("type must be 'personal' or 'business'")
+	}
+	if len(accName) > 255 {
+		return ErrorResult("account_name must be 255 characters or fewer")
 	}
 
 	tenantID := tenantIDFromCtx(ctx)
@@ -97,7 +113,7 @@ func (t *SetBrandingTool) SetOnboardingStore(s OnboardingStore) { t.store = s }
 func (t *SetBrandingTool) Name() string { return "set_branding" }
 
 func (t *SetBrandingTool) Description() string {
-	return `Set the workspace branding: primary color (hex) and product name. Parameters: primary_color (hex like "#3B82F6"), product_name (default "ARGO").`
+	return `Set the workspace branding: primary color (hex) and product name. Parameters: primary_color (hex like "#3B82F6"), product_name (default "ARGO"). Only provided fields are updated — omitted fields keep their current value.`
 }
 
 func (t *SetBrandingTool) Parameters() map[string]any {
@@ -126,38 +142,40 @@ func (t *SetBrandingTool) Execute(ctx context.Context, args map[string]any) *Res
 		return ErrorResult("at least primary_color or product_name is required")
 	}
 
+	// Validate hex color format
+	if color != "" && !hexColorRe.MatchString(color) {
+		return ErrorResult("primary_color must be a valid hex color (e.g. #3B82F6)")
+	}
+
 	if err := t.store.UpdateTenantBranding(ctx, tenantID, color, name); err != nil {
 		return ErrorResult(fmt.Sprintf("failed to update branding: %v", err))
 	}
 
-	parts := ""
+	var parts []string
 	if color != "" {
-		parts += fmt.Sprintf("color=%s", color)
+		parts = append(parts, fmt.Sprintf("color=%s", color))
 	}
 	if name != "" {
-		if parts != "" {
-			parts += ", "
-		}
-		parts += fmt.Sprintf("name=%s", name)
+		parts = append(parts, fmt.Sprintf("name=%s", name))
 	}
 
-	return NewResult(fmt.Sprintf("Branding updated: %s", parts))
+	return NewResult(fmt.Sprintf("Branding updated: %s", strings.Join(parts, ", ")))
 }
 
 // --- 3. ConfigureLLMProviderTool ---
+// NOTE: This tool is a STUB. It validates input but does NOT persist the provider.
+// The actual provider creation requires the HTTP API /v1/providers which handles
+// encryption and DB persistence. This tool exists so the Imediato can guide the
+// user through the setup flow and collect the information.
 
-type ConfigureLLMProviderTool struct {
-	agentStore store.AgentStore
-}
+type ConfigureLLMProviderTool struct{}
 
 func NewConfigureLLMProviderTool() *ConfigureLLMProviderTool { return &ConfigureLLMProviderTool{} }
-
-func (t *ConfigureLLMProviderTool) SetAgentStore(s store.AgentStore) { t.agentStore = s }
 
 func (t *ConfigureLLMProviderTool) Name() string { return "configure_llm_provider" }
 
 func (t *ConfigureLLMProviderTool) Description() string {
-	return `Configure an LLM provider with API key for the workspace. Supported providers: anthropic, openai, google. Parameters: provider (name), api_key (the key), model (preferred model). The key is encrypted at rest.`
+	return `Collect LLM provider configuration. This validates the input but does NOT persist yet — the user must complete setup via the dashboard settings. Supported providers: anthropic, openai, google. Parameters: provider (name), api_key (the key), model (preferred model).`
 }
 
 func (t *ConfigureLLMProviderTool) Parameters() map[string]any {
@@ -181,10 +199,14 @@ func (t *ConfigureLLMProviderTool) Execute(ctx context.Context, args map[string]
 		return ErrorResult("provider and api_key are required")
 	}
 
-	// For now, return success with the config details.
-	// The actual provider creation requires the HTTP API /v1/providers which
-	// handles encryption and DB persistence.
-	return NewResult(fmt.Sprintf("LLM provider configured: provider=%s, model=%s. Note: API key will be encrypted and stored securely. Use test_llm_connection to verify.", provider, model))
+	if len(apiKey) < 10 {
+		return ErrorResult("API key appears too short — please check and try again")
+	}
+
+	// Mask the key in response — never expose full key in LLM context
+	masked := apiKey[:4] + "***"
+
+	return NewResult(fmt.Sprintf("Provider info collected: provider=%s, model=%s, key=%s. NOTE: To activate this provider, go to Settings > Providers in your dashboard and complete the setup there. The API key will be encrypted at rest.", provider, model, masked))
 }
 
 // --- 4. TestLLMConnectionTool ---
@@ -196,7 +218,7 @@ func NewTestLLMConnectionTool() *TestLLMConnectionTool { return &TestLLMConnecti
 func (t *TestLLMConnectionTool) Name() string { return "test_llm_connection" }
 
 func (t *TestLLMConnectionTool) Description() string {
-	return `Test the LLM provider connection by sending a simple prompt. Returns success with latency or error details. Parameters: provider, api_key, model.`
+	return `Validate an LLM API key format. Does NOT make an actual API call — full connection testing happens when the provider is activated via the dashboard. Parameters: provider, api_key.`
 }
 
 func (t *TestLLMConnectionTool) Parameters() map[string]any {
@@ -204,8 +226,7 @@ func (t *TestLLMConnectionTool) Parameters() map[string]any {
 		"type": "object",
 		"properties": map[string]any{
 			"provider": map[string]any{"type": "string", "description": "LLM provider to test"},
-			"api_key":  map[string]any{"type": "string", "description": "API key to test"},
-			"model":    map[string]any{"type": "string", "description": "Model to test"},
+			"api_key":  map[string]any{"type": "string", "description": "API key to validate"},
 		},
 		"required": []string{"provider", "api_key"},
 	}
@@ -219,30 +240,28 @@ func (t *TestLLMConnectionTool) Execute(ctx context.Context, args map[string]any
 		return ErrorResult("provider and api_key are required")
 	}
 
-	// Validate key format
 	if len(apiKey) < 10 {
-		return ErrorResult("API key appears too short. Please check and try again.")
+		return ErrorResult("API key appears too short — please check and try again")
 	}
 
-	// In a full implementation, this would make a test API call.
-	// For MVP, we validate the key format and return success.
-	return NewResult(fmt.Sprintf("Connection test: provider=%s — API key format validated. Full connection test will be performed when the provider is activated.", provider))
+	// Mask key in response
+	masked := apiKey[:4] + "***"
+
+	return NewResult(fmt.Sprintf("Key format validated: provider=%s, key=%s. Full connection test will run when the provider is activated via the dashboard.", provider, masked))
 }
 
 // --- 5. CreateAgentTool ---
+// NOTE: This tool is a STUB. It collects agent configuration but does NOT persist.
+// The actual agent creation happens via the agent management API.
 
-type CreateAgentTool struct {
-	agentStore store.AgentStore
-}
+type CreateAgentTool struct{}
 
 func NewCreateAgentTool() *CreateAgentTool { return &CreateAgentTool{} }
-
-func (t *CreateAgentTool) SetAgentStore(s store.AgentStore) { t.agentStore = s }
 
 func (t *CreateAgentTool) Name() string { return "create_agent" }
 
 func (t *CreateAgentTool) Description() string {
-	return `Create a new AI agent with a preset personality. Available presets: captain (direct leader), helmsman (navigator/planner), lookout (researcher/analyst), gunner (executor/implementer), navigator (strategist), blacksmith (builder/creator), custom (define your own). Parameters: name, preset, persona (custom description), provider, model.`
+	return `Collect configuration for a new AI agent. This does NOT create the agent yet — the user must finalize via the dashboard. Available presets: captain (direct leader), helmsman (navigator/planner), lookout (researcher/analyst), gunner (executor/implementer), navigator (strategist), blacksmith (builder/creator), custom (define your own). Parameters: name, preset, persona (custom description).`
 }
 
 func (t *CreateAgentTool) Parameters() map[string]any {
@@ -284,7 +303,7 @@ func (t *CreateAgentTool) Execute(ctx context.Context, args map[string]any) *Res
 		}
 	}
 
-	return NewResult(fmt.Sprintf("Agent created: name=%s, preset=%s, description=%s. The agent is now available in your Ponte de Comando.", name, preset, description))
+	return NewResult(fmt.Sprintf("Agent config collected: name=%s, preset=%s, description=%s. NOTE: To create this agent, go to Agents in your dashboard. The Imediato (your Chief of Staff) is already active.", name, preset, description))
 }
 
 // --- 6. ConfigureChannelTool ---
@@ -296,16 +315,14 @@ func NewConfigureChannelTool() *ConfigureChannelTool { return &ConfigureChannelT
 func (t *ConfigureChannelTool) Name() string { return "configure_channel" }
 
 func (t *ConfigureChannelTool) Description() string {
-	return `Configure a communication channel for agents. Available channels: webchat (always enabled), telegram, whatsapp, discord, slack. Some channels require plan Pro or above. Parameters: channel (type), bot_token (for Telegram), phone_number_id (for WhatsApp).`
+	return `Guide channel configuration. Webchat is always enabled. Other channels (telegram, whatsapp, discord, slack) require setup via the dashboard Settings > Channels. This tool provides guidance — it does NOT store credentials.`
 }
 
 func (t *ConfigureChannelTool) Parameters() map[string]any {
 	return map[string]any{
 		"type": "object",
 		"properties": map[string]any{
-			"channel":         map[string]any{"type": "string", "enum": []string{"webchat", "telegram", "whatsapp", "discord", "slack"}, "description": "Channel type"},
-			"bot_token":       map[string]any{"type": "string", "description": "Bot token (Telegram)"},
-			"phone_number_id": map[string]any{"type": "string", "description": "Phone number ID (WhatsApp)"},
+			"channel": map[string]any{"type": "string", "enum": []string{"webchat", "telegram", "whatsapp", "discord", "slack"}, "description": "Channel type"},
 		},
 		"required": []string{"channel"},
 	}
@@ -321,15 +338,11 @@ func (t *ConfigureChannelTool) Execute(ctx context.Context, args map[string]any)
 	case "webchat":
 		return NewResult("Webchat is always enabled by default. Your users can access it at the Ponte de Comando URL.")
 	case "telegram":
-		botToken, _ := args["bot_token"].(string)
-		if botToken == "" {
-			return NewResult("To connect Telegram, you'll need a bot token from @BotFather. Would you like instructions on how to create one?")
-		}
-		return NewResult(fmt.Sprintf("Telegram channel configured with bot token. The bot will start receiving messages shortly."))
+		return NewResult("To connect Telegram: 1) Create a bot via @BotFather, 2) Copy the bot token, 3) Go to Settings > Channels in your dashboard and paste the token there. The token will be encrypted at rest.")
 	case "whatsapp":
-		return NewResult("WhatsApp integration requires a Meta Business account and WhatsApp Business API setup. Would you like a step-by-step guide?")
+		return NewResult("WhatsApp integration requires a Meta Business account and WhatsApp Business API. Go to Settings > Channels in your dashboard for the step-by-step setup guide.")
 	case "discord", "slack":
-		return NewResult(fmt.Sprintf("%s integration is available on Pro plan and above. Would you like to proceed with the setup?", channel))
+		return NewResult(fmt.Sprintf("%s integration is available on Pro plan and above. Go to Settings > Channels in your dashboard to set it up.", channel))
 	default:
 		return ErrorResult(fmt.Sprintf("unsupported channel: %s", channel))
 	}
@@ -411,16 +424,22 @@ func (t *GetOnboardingStatusTool) Execute(ctx context.Context, args map[string]a
 		return ErrorResult(fmt.Sprintf("failed to get status: %v", err))
 	}
 
-	data, _ := json.MarshalIndent(status, "", "  ")
+	data, err := json.MarshalIndent(status, "", "  ")
+	if err != nil {
+		return ErrorResult(fmt.Sprintf("failed to serialize status: %v", err))
+	}
 	return NewResult(string(data))
 }
 
 // --- Helper ---
 
+// tenantIDFromCtx extracts the tenant UUID from the request context.
+// Uses store.TenantIDFromContext which reads the argoclaw_tenant_id key
+// set by the JWT middleware or provisioning flow.
 func tenantIDFromCtx(ctx context.Context) string {
-	// Try to get tenant ID from context (set by provisioning or JWT middleware)
-	if id := store.AgentIDFromContext(ctx); id.String() != "00000000-0000-0000-0000-000000000000" {
-		return id.String()
+	id := store.TenantIDFromContext(ctx)
+	if id == uuid.Nil {
+		return ""
 	}
-	return ""
+	return id.String()
 }
