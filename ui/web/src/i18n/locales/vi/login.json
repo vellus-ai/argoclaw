@@ -45,6 +45,24 @@
     "errorServer": "Server trả về {{status}}. Vui lòng thử lại.",
     "errorCannotConnect": "Không thể kết nối đến gateway. Kiểm tra server đã chạy chưa."
   },
+  "changePassword": {
+    "title": "Thay đổi mật khẩu",
+    "description": "Bạn cần thay đổi mật khẩu tạm thời trước khi tiếp tục.",
+    "currentPassword": "Mật khẩu hiện tại",
+    "currentPasswordPlaceholder": "Nhập mật khẩu tạm thời",
+    "newPassword": "Mật khẩu mới",
+    "newPasswordPlaceholder": "Chọn mật khẩu mạnh",
+    "confirmPassword": "Xác nhận mật khẩu mới",
+    "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới",
+    "reqMatch": "Mật khẩu khớp",
+    "submit": "Đổi mật khẩu",
+    "submitting": "Đang đổi mật khẩu...",
+    "errorMismatch": "Mật khẩu không khớp.",
+    "errorWrongCurrent": "Mật khẩu hiện tại không đúng.",
+    "errorWeakPassword": "Mật khẩu không đáp ứng yêu cầu.",
+    "errorServer": "Lỗi máy chủ. Vui lòng thử lại.",
+    "errorNetwork": "Không thể kết nối đến máy chủ."
+  },
   "pairing": {
     "userId": "User ID",
     "userIdPlaceholder": "your-user-id",

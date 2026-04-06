@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/vellus-ai/argoclaw/internal/auth"
 	"github.com/vellus-ai/argoclaw/internal/store"
 )
@@ -43,17 +44,20 @@ func (h *UserAuthHandler) RegisterRoutes(mux *http.ServeMux) {
 	register := h.handleRegister
 	login := h.handleLogin
 	refresh := h.handleRefresh
+	changePassword := h.handleChangePassword
 
 	if h.rateLimiter != nil {
 		register = h.rateLimiter.WrapRegister(register)
 		login = h.rateLimiter.WrapLogin(login)
 		refresh = h.rateLimiter.WrapRefresh(refresh)
+		changePassword = h.rateLimiter.WrapChangePassword(changePassword)
 	}
 
 	mux.HandleFunc("POST /v1/auth/register", register)
 	mux.HandleFunc("POST /v1/auth/login", login)
 	mux.HandleFunc("POST /v1/auth/refresh", refresh)
 	mux.HandleFunc("POST /v1/auth/logout", h.handleLogout)
+	mux.HandleFunc("POST /v1/auth/change-password", changePassword)
 }
 
 type registerRequest struct {
@@ -311,6 +315,133 @@ func (h *UserAuthHandler) handleLogout(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 }
 
+type changePasswordRequest struct {
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
+}
+
+func (h *UserAuthHandler) handleChangePassword(w http.ResponseWriter, r *http.Request) {
+	// Extract JWT from Authorization header
+	tokenStr := extractBearerToken(r)
+	if tokenStr == "" {
+		writeJSONError(w, http.StatusUnauthorized, "authentication required")
+		return
+	}
+
+	claims, err := auth.ValidateAccessToken(tokenStr, h.jwtSecret)
+	if err != nil {
+		writeJSONError(w, http.StatusUnauthorized, "invalid or expired token")
+		return
+	}
+
+	var req changePasswordRequest
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	if req.CurrentPassword == "" || req.NewPassword == "" {
+		writeJSONError(w, http.StatusBadRequest, "current_password and new_password are required")
+		return
+	}
+
+	// Get user
+	userID, err := uuid.Parse(claims.UserID)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "invalid user ID in token")
+		return
+	}
+
+	user, err := h.users.GetByID(r.Context(), userID)
+	if err != nil || user == nil {
+		writeJSONError(w, http.StatusNotFound, "user not found")
+		return
+	}
+
+	// Verify current password
+	if !auth.VerifyPassword(req.CurrentPassword, user.PasswordHash) {
+		_ = h.users.LogAudit(r.Context(), &store.LoginAuditEntry{
+			UserID: &user.ID, Email: user.Email, Action: "password_change_failed",
+			IPAddress: clientIP(r), UserAgent: r.UserAgent(),
+			Details: `{"reason":"wrong_current_password"}`,
+		})
+		writeJSONError(w, http.StatusUnauthorized, "current password is incorrect")
+		return
+	}
+
+	// Validate new password (PCI DSS)
+	if err := auth.ValidatePassword(req.NewPassword, user.Email); err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Check password history (prevent reuse of last 4)
+	history, err := h.users.GetPasswordHistory(r.Context(), user.ID, auth.PasswordHistorySize)
+	if err != nil {
+		slog.Error("change-password: get history", "error", err)
+		writeJSONError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+	if !auth.CheckPasswordHistory(req.NewPassword, history) {
+		writeJSONError(w, http.StatusBadRequest, "password was used recently — choose a different one")
+		return
+	}
+
+	// Hash new password
+	newHash, err := auth.HashPassword(req.NewPassword)
+	if err != nil {
+		slog.Error("change-password: hash", "error", err)
+		writeJSONError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	// Store old password in history before updating (PCI DSS: must persist before changing)
+	if err := h.users.AddPasswordHistory(r.Context(), user.ID, user.PasswordHash); err != nil {
+		slog.Error("change-password: add password history failed — aborting to preserve reuse prevention", "error", err, "user_id", user.ID)
+		writeJSONError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	// Update password
+	if err := h.users.UpdatePassword(r.Context(), user.ID, newHash); err != nil {
+		slog.Error("change-password: update", "error", err)
+		writeJSONError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	// Clear forced password change flag
+	if err := h.users.ClearMustChangePassword(r.Context(), user.ID); err != nil {
+		slog.Warn("change-password: clear must_change_password flag failed", "error", err, "user_id", user.ID)
+	}
+
+	// Revoke all existing sessions (best-effort — password already changed)
+	if err := h.users.RevokeAllSessions(r.Context(), user.ID); err != nil {
+		slog.Warn("change-password: revoke sessions failed", "error", err, "user_id", user.ID)
+	}
+
+	// Update user struct for token issuance (flag cleared)
+	user.MustChangePassword = false
+
+	// Audit
+	_ = h.users.LogAudit(r.Context(), &store.LoginAuditEntry{
+		UserID: &user.ID, Email: user.Email, Action: "password_change",
+		IPAddress: clientIP(r), UserAgent: r.UserAgent(),
+	})
+
+	// Issue new tokens
+	resp, err := h.issueTokens(r, user)
+	if err != nil {
+		slog.Error("change-password: issue tokens", "error", err)
+		writeJSONError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	slog.Info("security.password_changed", "user_id", user.ID)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
 // --- Helpers ---
 
 func (h *UserAuthHandler) issueTokens(r *http.Request, user *store.User) (*authResponse, error) {
@@ -320,10 +451,11 @@ func (h *UserAuthHandler) issueTokens(r *http.Request, user *store.User) (*authR
 	}
 
 	claims := auth.TokenClaims{
-		UserID:   user.ID.String(),
-		Email:    user.Email,
-		TenantID: tenantID,
-		Role:     user.Role,
+		UserID:             user.ID.String(),
+		Email:              user.Email,
+		TenantID:           tenantID,
+		Role:               user.Role,
+		MustChangePassword: user.MustChangePassword,
 	}
 
 	accessToken, err := auth.GenerateAccessToken(claims, h.jwtSecret)

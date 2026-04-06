@@ -45,6 +45,24 @@
     "errorServer": "Il server ha risposto {{status}}. Riprova.",
     "errorCannotConnect": "Impossibile connettersi al gateway. Verifica che il server sia attivo."
   },
+  "changePassword": {
+    "title": "Cambia la tua password",
+    "description": "La tua password temporanea deve essere cambiata prima di continuare.",
+    "currentPassword": "Password attuale",
+    "currentPasswordPlaceholder": "Inserisci la tua password temporanea",
+    "newPassword": "Nuova password",
+    "newPasswordPlaceholder": "Scegli una password sicura",
+    "confirmPassword": "Conferma nuova password",
+    "confirmPasswordPlaceholder": "Reinserisci la nuova password",
+    "reqMatch": "Le password corrispondono",
+    "submit": "Cambia password",
+    "submitting": "Cambio in corso...",
+    "errorMismatch": "Le password non corrispondono.",
+    "errorWrongCurrent": "La password attuale non e corretta.",
+    "errorWeakPassword": "La password non soddisfa i requisiti.",
+    "errorServer": "Errore del server. Riprova.",
+    "errorNetwork": "Impossibile connettersi al server."
+  },
   "pairing": {
     "userId": "ID Utente",
     "userIdPlaceholder": "il-tuo-id-utente",

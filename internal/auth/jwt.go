@@ -19,10 +19,11 @@ const (
 
 // TokenClaims holds the claims embedded in an access token.
 type TokenClaims struct {
-	UserID   string `json:"uid"`
-	Email    string `json:"email"`
-	TenantID string `json:"tid"`
-	Role     string `json:"role"`
+	UserID             string `json:"uid"`
+	Email              string `json:"email"`
+	TenantID           string `json:"tid"`
+	Role               string `json:"role"`
+	MustChangePassword bool   `json:"mcp,omitempty"`
 }
 
 // argoClaims wraps TokenClaims with standard JWT claims.

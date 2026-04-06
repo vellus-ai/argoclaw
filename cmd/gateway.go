@@ -116,6 +116,10 @@ func runGateway() {
 	}
 
 	pgStores, traceCollector, snapshotWorker := setupStoresAndTracing(cfg, dataDir, msgBus)
+
+	// Onboarding tools (Imediato chat-first setup) — wired after stores are ready
+	wireOnboardingTools(toolsReg, pgStores.DB)
+
 	if traceCollector != nil {
 		defer traceCollector.Stop()
 		// OTel OTLP export: compiled via build tags. Build with 'go build -tags otel' to enable.

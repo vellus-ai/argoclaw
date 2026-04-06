@@ -72,6 +72,8 @@ func CleanupTenantData(t *testing.T, db *sql.DB, tenantID uuid.UUID) {
 	t.Helper()
 	ctx := context.Background()
 	tables := []string{
+		"setup_progress",
+		"tenant_branding",
 		"cron_jobs",
 		"sessions",
 		"custom_tools",

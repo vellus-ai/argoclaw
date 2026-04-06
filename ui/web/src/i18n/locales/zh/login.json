@@ -45,6 +45,24 @@
     "errorServer": "服务器返回 {{status}}，请重试。",
     "errorCannotConnect": "无法连接到 Gateway。请检查服务器是否在运行。"
   },
+  "changePassword": {
+    "title": "更改密码",
+    "description": "您需要更改临时密码才能继续使用。",
+    "currentPassword": "当前密码",
+    "currentPasswordPlaceholder": "输入临时密码",
+    "newPassword": "新密码",
+    "newPasswordPlaceholder": "选择一个强密码",
+    "confirmPassword": "确认新密码",
+    "confirmPasswordPlaceholder": "再次输入新密码",
+    "reqMatch": "密码匹配",
+    "submit": "更改密码",
+    "submitting": "正在更改密码...",
+    "errorMismatch": "两次输入的密码不一致。",
+    "errorWrongCurrent": "当前密码不正确。",
+    "errorWeakPassword": "密码不符合要求。",
+    "errorServer": "服务器错误，请重试。",
+    "errorNetwork": "无法连接到服务器。"
+  },
   "pairing": {
     "userId": "用户 ID",
     "userIdPlaceholder": "your-user-id",

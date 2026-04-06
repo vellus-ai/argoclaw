@@ -45,6 +45,24 @@
     "errorServer": "Server antwortete mit {{status}}. Bitte versuche es erneut.",
     "errorCannotConnect": "Verbindung zum Gateway nicht möglich. Prüfe, ob der Server läuft."
   },
+  "changePassword": {
+    "title": "Passwort andern",
+    "description": "Dein temporares Passwort muss geandert werden, bevor du fortfahren kannst.",
+    "currentPassword": "Aktuelles Passwort",
+    "currentPasswordPlaceholder": "Gib dein temporares Passwort ein",
+    "newPassword": "Neues Passwort",
+    "newPasswordPlaceholder": "Wahle ein starkes Passwort",
+    "confirmPassword": "Neues Passwort bestatigen",
+    "confirmPasswordPlaceholder": "Neues Passwort erneut eingeben",
+    "reqMatch": "Passworter stimmen uberein",
+    "submit": "Passwort andern",
+    "submitting": "Passwort wird geandert...",
+    "errorMismatch": "Die Passworter stimmen nicht uberein.",
+    "errorWrongCurrent": "Das aktuelle Passwort ist falsch.",
+    "errorWeakPassword": "Das Passwort erfullt die Anforderungen nicht.",
+    "errorServer": "Serverfehler. Bitte versuche es erneut.",
+    "errorNetwork": "Verbindung zum Server nicht moglich."
+  },
   "pairing": {
     "userId": "Benutzer-ID",
     "userIdPlaceholder": "deine-benutzer-id",

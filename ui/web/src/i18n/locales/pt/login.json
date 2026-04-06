@@ -45,6 +45,24 @@
     "errorServer": "Servidor retornou {{status}}. Tente novamente.",
     "errorCannotConnect": "Não foi possível conectar ao gateway. Verifique se o servidor está ativo."
   },
+  "changePassword": {
+    "title": "Alterar sua senha",
+    "description": "Sua senha temporaria precisa ser alterada antes de continuar.",
+    "currentPassword": "Senha atual",
+    "currentPasswordPlaceholder": "Digite sua senha temporaria",
+    "newPassword": "Nova senha",
+    "newPasswordPlaceholder": "Escolha uma senha forte",
+    "confirmPassword": "Confirmar nova senha",
+    "confirmPasswordPlaceholder": "Digite a nova senha novamente",
+    "reqMatch": "Senhas coincidem",
+    "submit": "Alterar senha",
+    "submitting": "Alterando senha...",
+    "errorMismatch": "As senhas nao coincidem.",
+    "errorWrongCurrent": "Senha atual incorreta.",
+    "errorWeakPassword": "A senha nao atende aos requisitos.",
+    "errorServer": "Erro no servidor. Tente novamente.",
+    "errorNetwork": "Nao foi possivel conectar ao servidor."
+  },
   "pairing": {
     "userId": "ID do Usuário",
     "userIdPlaceholder": "seu-id-de-usuario",

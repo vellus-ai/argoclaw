@@ -20,9 +20,10 @@ type User struct {
 	LockedUntil    *time.Time `json:"-"`
 	LastLoginAt    *time.Time `json:"last_login_at,omitempty"`
 	EmailVerified  bool       `json:"email_verified"`
-	MFAEnabled     bool       `json:"mfa_enabled"`
-	CreatedAt      time.Time  `json:"created_at"`
-	UpdatedAt      time.Time  `json:"updated_at"`
+	MFAEnabled         bool       `json:"mfa_enabled"`
+	MustChangePassword bool       `json:"-"`
+	CreatedAt          time.Time  `json:"created_at"`
+	UpdatedAt          time.Time  `json:"updated_at"`
 }
 
 // UserSession represents an active refresh token session.
@@ -95,6 +96,11 @@ type UserStore interface {
 
 	// CleanExpiredSessions removes expired/revoked sessions older than cutoff.
 	CleanExpiredSessions(ctx context.Context) error
+
+	// --- Password Change ---
+
+	// ClearMustChangePassword removes the forced password change flag.
+	ClearMustChangePassword(ctx context.Context, userID uuid.UUID) error
 
 	// --- Audit ---
 

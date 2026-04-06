@@ -68,9 +68,10 @@ func (il *ipLimiter) cleanupLoop() {
 
 // AuthRateLimiter wraps per-endpoint rate limiters for auth endpoints.
 type AuthRateLimiter struct {
-	login    *ipLimiter
-	register *ipLimiter
-	refresh  *ipLimiter
+	login          *ipLimiter
+	register       *ipLimiter
+	refresh        *ipLimiter
+	changePassword *ipLimiter
 }
 
 // NewAuthRateLimiter creates rate limiters for auth endpoints.
@@ -79,9 +80,10 @@ type AuthRateLimiter struct {
 // refreshRPM: requests per minute for refresh (recommended: 20).
 func NewAuthRateLimiter(loginRPM, registerRPM, refreshRPM int) *AuthRateLimiter {
 	return &AuthRateLimiter{
-		login:    newIPLimiter(loginRPM, 3),
-		register: newIPLimiter(registerRPM, 2),
-		refresh:  newIPLimiter(refreshRPM, 5),
+		login:          newIPLimiter(loginRPM, 3),
+		register:       newIPLimiter(registerRPM, 2),
+		refresh:        newIPLimiter(refreshRPM, 5),
+		changePassword: newIPLimiter(loginRPM, 3), // same rate as login — sensitive endpoint
 	}
 }
 
@@ -98,6 +100,11 @@ func (rl *AuthRateLimiter) WrapRegister(next http.HandlerFunc) http.HandlerFunc 
 // WrapRefresh returns an HTTP handler that enforces rate limiting on the refresh endpoint.
 func (rl *AuthRateLimiter) WrapRefresh(next http.HandlerFunc) http.HandlerFunc {
 	return rl.wrap(rl.refresh, next)
+}
+
+// WrapChangePassword returns an HTTP handler that enforces rate limiting on the change-password endpoint.
+func (rl *AuthRateLimiter) WrapChangePassword(next http.HandlerFunc) http.HandlerFunc {
+	return rl.wrap(rl.changePassword, next)
 }
 
 func (rl *AuthRateLimiter) wrap(limiter *ipLimiter, next http.HandlerFunc) http.HandlerFunc {
