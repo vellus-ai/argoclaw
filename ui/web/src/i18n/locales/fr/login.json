@@ -1,0 +1,62 @@
+{
+  "subtitle": "Se connecter au tableau de bord du gateway",
+  "tabs": {
+    "email": "Email",
+    "token": "Token",
+    "pairing": "Appairage"
+  },
+  "email": {
+    "signIn": "Se connecter",
+    "signUp": "Creer un compte",
+    "submitting": "Connexion en cours...",
+    "email": "Email",
+    "emailPlaceholder": "vous@exemple.com",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Entrez votre mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "confirmPasswordPlaceholder": "Ressaisissez votre mot de passe",
+    "displayName": "Nom d'affichage",
+    "displayNamePlaceholder": "Votre nom (facultatif)",
+    "req12Chars": "Au moins 12 caracteres",
+    "reqUppercase": "Au moins une lettre majuscule",
+    "reqLowercase": "Au moins une lettre minuscule",
+    "reqDigit": "Au moins un chiffre",
+    "reqSpecial": "Au moins un caractere special",
+    "reqNoEmail": "Ne doit pas contenir le nom d'utilisateur de l'email",
+    "errorPasswordMismatch": "Les mots de passe ne correspondent pas.",
+    "errorInvalidCredentials": "Email ou mot de passe invalide.",
+    "errorEmailTaken": "Cet email est deja enregistre.",
+    "errorAccountLocked": "Trop de tentatives. Reessayez plus tard.",
+    "errorServer": "Erreur serveur. Veuillez reessayer.",
+    "errorNetwork": "Impossible de se connecter au serveur. Verifiez que le gateway est actif.",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "hasAccount": "Vous avez deja un compte ?",
+    "signInLink": "Se connecter",
+    "signUpLink": "Creer un compte"
+  },
+  "token": {
+    "userId": "ID Utilisateur",
+    "userIdPlaceholder": "votre-id-utilisateur",
+    "gatewayToken": "Token du Gateway",
+    "tokenPlaceholder": "Token Bearer",
+    "connect": "Connecter",
+    "connecting": "Connexion...",
+    "errorInvalidCredentials": "Identifiants invalides. Verifiez le token et l'ID utilisateur.",
+    "errorServer": "Le serveur a renvoye {{status}}. Veuillez reessayer.",
+    "errorCannotConnect": "Impossible de se connecter au gateway. Verifiez que le serveur est actif."
+  },
+  "pairing": {
+    "userId": "ID Utilisateur",
+    "userIdPlaceholder": "votre-id-utilisateur",
+    "noTokenNeeded": "Aucun token necessaire. Un code d'appairage sera genere pour approbation par un administrateur.",
+    "requestAccess": "Demander l'acces",
+    "connecting": "Connexion...",
+    "errorConnectionLost": "Connexion perdue. Veuillez reessayer.",
+    "errorCannotConnect": "Impossible de se connecter au gateway.",
+    "askAdmin": "Demandez a un administrateur d'approuver ce code :",
+    "orRun": "Ou executez :",
+    "waitingForApproval": "En attente d'approbation...",
+    "cancel": "Annuler",
+    "approved": "Acces approuve ! Redirection..."
+  }
+}

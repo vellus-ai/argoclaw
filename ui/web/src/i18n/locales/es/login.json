@@ -1,0 +1,62 @@
+{
+  "subtitle": "Iniciar sesion en el panel del gateway",
+  "tabs": {
+    "email": "Email",
+    "token": "Token",
+    "pairing": "Emparejamiento"
+  },
+  "email": {
+    "signIn": "Iniciar sesion",
+    "signUp": "Registrarse",
+    "submitting": "Iniciando sesion...",
+    "email": "Email",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "password": "Contrasena",
+    "passwordPlaceholder": "Ingresa tu contrasena",
+    "confirmPassword": "Confirmar contrasena",
+    "confirmPasswordPlaceholder": "Vuelve a ingresar tu contrasena",
+    "displayName": "Nombre para mostrar",
+    "displayNamePlaceholder": "Tu nombre (opcional)",
+    "req12Chars": "Al menos 12 caracteres",
+    "reqUppercase": "Al menos una letra mayuscula",
+    "reqLowercase": "Al menos una letra minuscula",
+    "reqDigit": "Al menos un digito",
+    "reqSpecial": "Al menos un caracter especial",
+    "reqNoEmail": "No debe contener el usuario del email",
+    "errorPasswordMismatch": "Las contrasenas no coinciden.",
+    "errorInvalidCredentials": "Email o contrasena invalidos.",
+    "errorEmailTaken": "Este email ya esta registrado.",
+    "errorAccountLocked": "Demasiados intentos. Intenta de nuevo mas tarde.",
+    "errorServer": "Error del servidor. Intenta de nuevo.",
+    "errorNetwork": "No se puede conectar al servidor. Verifica si el gateway esta activo.",
+    "noAccount": "No tienes una cuenta?",
+    "hasAccount": "Ya tienes una cuenta?",
+    "signInLink": "Iniciar sesion",
+    "signUpLink": "Registrarse"
+  },
+  "token": {
+    "userId": "ID de Usuario",
+    "userIdPlaceholder": "tu-id-de-usuario",
+    "gatewayToken": "Token del Gateway",
+    "tokenPlaceholder": "Token Bearer",
+    "connect": "Conectar",
+    "connecting": "Conectando...",
+    "errorInvalidCredentials": "Credenciales invalidas. Verifica el token y el ID de usuario.",
+    "errorServer": "El servidor respondio {{status}}. Intenta de nuevo.",
+    "errorCannotConnect": "No se puede conectar al gateway. Verifica si el servidor esta activo."
+  },
+  "pairing": {
+    "userId": "ID de Usuario",
+    "userIdPlaceholder": "tu-id-de-usuario",
+    "noTokenNeeded": "No se necesita token. Se generara un codigo de emparejamiento para que un administrador lo apruebe.",
+    "requestAccess": "Solicitar Acceso",
+    "connecting": "Conectando...",
+    "errorConnectionLost": "Conexion perdida. Intenta de nuevo.",
+    "errorCannotConnect": "No se pudo conectar al gateway.",
+    "askAdmin": "Pide a un administrador que apruebe este codigo:",
+    "orRun": "O ejecuta:",
+    "waitingForApproval": "Esperando aprobacion...",
+    "cancel": "Cancelar",
+    "approved": "Acceso aprobado! Redirigiendo..."
+  }
+}

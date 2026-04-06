@@ -1,8 +1,10 @@
 import { useEffect, useRef, useMemo, useCallback } from "react";
 import { WsClient, type ConnectionState } from "@/api/ws-client";
 import { HttpClient } from "@/api/http-client";
+import { refresh as refreshToken } from "@/api/auth-client";
 import { WsContext } from "@/hooks/use-ws";
 import { useAuthStore } from "@/stores/use-auth-store";
+import { useJwtRefresh } from "@/hooks/use-jwt-refresh";
 import { useWsQueryInvalidation } from "@/hooks/use-query-invalidation";
 import { useWsEvent } from "@/hooks/use-ws-event";
 import { TEAM_RELATED_EVENTS } from "@/api/protocol";
@@ -52,6 +54,25 @@ export function WsProvider({ children }: { children: React.ReactNode }) {
       if (state.senderID && !state.token) return;
       state.logout();
     };
+
+    // Wire JWT refresh: on 401 → try refresh token → retry request
+    client.setRefreshFn(async () => {
+      const { refreshToken: rt } = useAuthStore.getState();
+      if (!rt) return null;
+      try {
+        const res = await refreshToken(rt);
+        return { accessToken: res.access_token, refreshToken: res.refresh_token };
+      } catch {
+        return null;
+      }
+    });
+
+    // When refresh succeeds, persist new tokens to store
+    client.onTokenRefreshed = (accessToken, rt) => {
+      const { userId: uid } = useAuthStore.getState();
+      useAuthStore.getState().setJwtAuth(accessToken, rt, uid);
+    };
+
     return client;
   }, []);
 
@@ -63,6 +84,9 @@ export function WsProvider({ children }: { children: React.ReactNode }) {
       ws.disconnect();
     }
   }, [token, userId, senderID, ws]);
+
+  // Proactive JWT refresh: renew token 2 min before expiry
+  useJwtRefresh();
 
   const value = useMemo(() => ({ ws, http }), [ws, http]);
 
