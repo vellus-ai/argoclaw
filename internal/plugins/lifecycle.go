@@ -45,6 +45,10 @@ func (l *Lifecycle) LoadAll(ctx context.Context) error {
 		}
 		state := &RegistryEntry{
 			Manifest: &PluginManifest{
+				Metadata: ManifestMetadata{
+					Name:    tp.PluginName,
+					Version: tp.PluginVersion,
+				},
 				Name:    tp.PluginName,
 				Version: tp.PluginVersion,
 			},

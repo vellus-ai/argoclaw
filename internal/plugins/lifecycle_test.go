@@ -200,7 +200,11 @@ func TestLifecycle_RegisterPlugin_AddsToRegistry(t *testing.T) {
 	lc := plugins.NewLifecycle(&stubLifecycleStore{}, reg)
 
 	state := &plugins.RegistryEntry{
-		Manifest:  &plugins.PluginManifest{Name: "vault", Version: "1.0.0"},
+		Manifest: &plugins.PluginManifest{
+			Metadata: plugins.ManifestMetadata{Name: "vault", Version: "1.0.0"},
+			Name:     "vault",
+			Version:  "1.0.0",
+		},
 		CatalogID: uuid.New(),
 		Status:    plugins.RegistryActive,
 	}
@@ -218,8 +222,11 @@ func TestLifecycle_RegisterPlugin_AddsToRegistry(t *testing.T) {
 func TestLifecycle_UnregisterPlugin_RemovesFromRegistry(t *testing.T) {
 	reg := plugins.NewRegistry()
 	reg.Register("vault", &plugins.RegistryEntry{
-		Manifest: &plugins.PluginManifest{Name: "vault"},
-		Status:   plugins.RegistryActive,
+		Manifest: &plugins.PluginManifest{
+			Metadata: plugins.ManifestMetadata{Name: "vault"},
+			Name:     "vault",
+		},
+		Status: plugins.RegistryActive,
 	})
 	lc := plugins.NewLifecycle(&stubLifecycleStore{}, reg)
 

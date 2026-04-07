@@ -12,6 +12,10 @@ import (
 func makeState(name string) *plugins.RegistryEntry {
 	return &plugins.RegistryEntry{
 		Manifest: &plugins.PluginManifest{
+			Metadata: plugins.ManifestMetadata{
+				Name:    name,
+				Version: "1.0.0",
+			},
 			Name:    name,
 			Version: "1.0.0",
 		},
