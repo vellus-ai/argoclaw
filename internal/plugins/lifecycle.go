@@ -43,12 +43,12 @@ func (l *Lifecycle) LoadAll(ctx context.Context) error {
 		if tp.State != store.PluginStateEnabled {
 			continue
 		}
-		state := &PluginState{
+		state := &RegistryEntry{
 			Manifest: &PluginManifest{
 				Name:    tp.PluginName,
 				Version: tp.PluginVersion,
 			},
-			Status: StatusActive,
+			Status: RegistryActive,
 		}
 		l.registry.Register(tp.PluginName, state)
 		// Register an empty tool group for the plugin. Tools are populated by
@@ -64,7 +64,7 @@ func (l *Lifecycle) LoadAll(ctx context.Context) error {
 
 // RegisterPlugin adds a plugin to the in-memory registry and registers its tool group.
 // Called when a plugin is enabled at runtime (after the gateway is running).
-func (l *Lifecycle) RegisterPlugin(name string, state *PluginState) {
+func (l *Lifecycle) RegisterPlugin(name string, state *RegistryEntry) {
 	l.registry.Register(name, state)
 	tools.RegisterToolGroup("plugin:"+name, []string{})
 	slog.Info("plugins.lifecycle.registered", "plugin", name)

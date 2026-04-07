@@ -9,14 +9,14 @@ import (
 	"github.com/vellus-ai/argoclaw/internal/plugins"
 )
 
-func makeState(name string) *plugins.PluginState {
-	return &plugins.PluginState{
+func makeState(name string) *plugins.RegistryEntry {
+	return &plugins.RegistryEntry{
 		Manifest: &plugins.PluginManifest{
 			Name:    name,
 			Version: "1.0.0",
 		},
 		CatalogID: uuid.New(),
-		Status:    plugins.StatusActive,
+		Status:    plugins.RegistryActive,
 	}
 }
 
@@ -85,15 +85,15 @@ func TestRegistry_List_Empty(t *testing.T) {
 func TestRegistry_Register_Overwrites(t *testing.T) {
 	r := plugins.NewRegistry()
 	s1 := makeState("vault")
-	s1.Status = plugins.StatusActive
+	s1.Status = plugins.RegistryActive
 	r.Register("vault", s1)
 
 	s2 := makeState("vault")
-	s2.Status = plugins.StatusError
+	s2.Status = plugins.RegistryError
 	r.Register("vault", s2)
 
 	got, _ := r.Get("vault")
-	if got.Status != plugins.StatusError {
+	if got.Status != plugins.RegistryError {
 		t.Errorf("expected overwritten state to have StatusError")
 	}
 }
