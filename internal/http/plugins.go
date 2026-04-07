@@ -117,7 +117,10 @@ func (h *PluginHandler) handleCreateCatalogEntry(w http.ResponseWriter, r *http.
 	if len(req.Manifest) > 0 {
 		var m plugins.PluginManifest
 		if err := json.Unmarshal(req.Manifest, &m); err == nil {
-			if err := plugins.ValidatePermissions(m.Permissions); err != nil {
+			if err := plugins.ValidatePermissions(plugins.Permissions{
+				Tools: m.Spec.Permissions.Tools,
+				Data:  m.Spec.Permissions.Data,
+			}); err != nil {
 				writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 				return
 			}

@@ -106,7 +106,55 @@ type ManifestSpec struct {
 	Runtime      ManifestRuntime     `yaml:"runtime" json:"runtime"`
 	Migrations   *ManifestMigrations `yaml:"migrations" json:"migrations"`
 	UI           *ManifestUI         `yaml:"ui" json:"ui"`
-	ConfigSchema json.RawMessage     `yaml:"configSchema" json:"config_schema"`
+	ConfigSchema YAMLRawJSON         `yaml:"configSchema" json:"config_schema"`
+}
+
+// YAMLRawJSON is a json.RawMessage that can be unmarshaled from YAML.
+// When the YAML source contains a map/sequence, it is re-encoded as JSON bytes.
+type YAMLRawJSON json.RawMessage
+
+// UnmarshalYAML implements yaml.Unmarshaler. It accepts any YAML value and
+// stores it as compact JSON bytes so that downstream code can treat ConfigSchema
+// as json.RawMessage.
+func (r *YAMLRawJSON) UnmarshalYAML(value *yaml.Node) error {
+	var generic interface{}
+	if err := value.Decode(&generic); err != nil {
+		return err
+	}
+	if generic == nil {
+		*r = nil
+		return nil
+	}
+	b, err := json.Marshal(generic)
+	if err != nil {
+		return fmt.Errorf("configSchema: marshal to JSON: %w", err)
+	}
+	*r = YAMLRawJSON(b)
+	return nil
+}
+
+// MarshalJSON implements json.Marshaler so that YAMLRawJSON serializes
+// as raw JSON bytes (not base64-encoded).
+func (r YAMLRawJSON) MarshalJSON() ([]byte, error) {
+	if r == nil {
+		return []byte("null"), nil
+	}
+	return []byte(r), nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (r *YAMLRawJSON) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		*r = nil
+		return nil
+	}
+	*r = append((*r)[0:0], data...)
+	return nil
+}
+
+// RawMessage returns the underlying json.RawMessage.
+func (r YAMLRawJSON) RawMessage() json.RawMessage {
+	return json.RawMessage(r)
 }
 
 type ManifestRequires struct {
