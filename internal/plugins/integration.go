@@ -21,7 +21,7 @@ type TenantPluginInfo struct {
 	PluginVersion string `json:"plugin_version"`
 }
 
-// PluginStoreSubset abstracts the store operations needed by PluginHost.
+// PluginStoreSubset abstracts the store operations needed by GatewayPluginBridge.
 // This is a subset of store.PluginStore to keep the dependency minimal
 // and make testing straightforward.
 type PluginStoreSubset interface {
@@ -140,7 +140,7 @@ func (al *AuditLogger) LogToolCall(ctx context.Context, params LogToolCallParams
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 19.5 + 19.6 — PluginHost: gateway startup/shutdown integration
+// 19.5 + 19.6 — GatewayPluginBridge: gateway startup/shutdown integration
 // ─────────────────────────────────────────────────────────────────────────────
 
 // IntegrationConfig holds all configuration for the Plugin Host gateway
@@ -170,17 +170,17 @@ func DefaultIntegrationConfig() IntegrationConfig {
 	}
 }
 
-// PluginHostDeps holds all dependencies injected into the PluginHost.
+// GatewayBridgeDeps holds all dependencies injected into the GatewayPluginBridge.
 // Using a struct avoids long constructor parameter lists and makes
 // adding new dependencies backward-compatible.
-type PluginHostDeps struct {
+type GatewayBridgeDeps struct {
 	Config       IntegrationConfig
 	Store        PluginStoreSubset
 	ToolRegistry ToolRegistrySubset
 	Logger       *slog.Logger
 }
 
-// PluginHost orchestrates the plugin subsystem lifecycle within the gateway.
+// GatewayPluginBridge orchestrates the plugin subsystem lifecycle within the gateway.
 // It is the single entry point for gateway startup/shutdown code to interact
 // with the plugin system.
 //
@@ -197,13 +197,13 @@ type PluginHostDeps struct {
 //
 // Integration in cmd/ startup:
 //
-//	host := plugins.NewPluginHost(plugins.PluginHostDeps{...})
+//	host := plugins.NewGatewayBridge(plugins.GatewayBridgeDeps{...})
 //	if err := host.Init(ctx); err != nil {
 //	    slog.Warn("plugins.init_failed", "error", err)
 //	    // Continue gateway startup — plugin failures are non-fatal
 //	}
 //	defer host.Shutdown()
-type PluginHost struct {
+type GatewayPluginBridge struct {
 	config       IntegrationConfig
 	store        PluginStoreSubset
 	toolRegistry ToolRegistrySubset
@@ -212,13 +212,13 @@ type PluginHost struct {
 	plugins      []string // names of loaded plugins
 }
 
-// NewPluginHost creates a PluginHost with the given dependencies.
-func NewPluginHost(deps PluginHostDeps) *PluginHost {
+// NewGatewayBridge creates a GatewayPluginBridge with the given dependencies.
+func NewGatewayBridge(deps GatewayBridgeDeps) *GatewayPluginBridge {
 	logger := deps.Logger
 	if logger == nil {
 		logger = slog.Default()
 	}
-	return &PluginHost{
+	return &GatewayPluginBridge{
 		config:       deps.Config,
 		store:        deps.Store,
 		toolRegistry: deps.ToolRegistry,
@@ -231,7 +231,7 @@ func NewPluginHost(deps PluginHostDeps) *PluginHost {
 // Store errors are logged as warnings and do NOT prevent the gateway
 // from starting — this is intentional to ensure plugin failures are
 // non-fatal.
-func (h *PluginHost) Init(ctx context.Context) error {
+func (h *GatewayPluginBridge) Init(ctx context.Context) error {
 	if !h.config.PluginSystemEnabled {
 		h.logger.Info("plugins.host.disabled", "reason", "feature_flag")
 		return nil
@@ -271,7 +271,7 @@ func (h *PluginHost) Init(ctx context.Context) error {
 
 // Shutdown stops all plugin processes and unregisters tool groups.
 // It is safe to call even when the plugin system is disabled.
-func (h *PluginHost) Shutdown() {
+func (h *GatewayPluginBridge) Shutdown() {
 	if !h.enabled {
 		return
 	}
@@ -295,12 +295,12 @@ func (h *PluginHost) Shutdown() {
 }
 
 // IsEnabled returns whether the plugin system is currently active.
-func (h *PluginHost) IsEnabled() bool {
+func (h *GatewayPluginBridge) IsEnabled() bool {
 	return h.enabled
 }
 
 // ActivePluginNames returns the names of all currently loaded plugins.
-func (h *PluginHost) ActivePluginNames() []string {
+func (h *GatewayPluginBridge) ActivePluginNames() []string {
 	result := make([]string, len(h.plugins))
 	copy(result, h.plugins)
 	return result

@@ -50,24 +50,24 @@ func (m *mockIntegrationStore) IsPluginEnabledForAgent(ctx context.Context, agen
 	return m.agentEnabled[key], nil
 }
 
-// mockToolRegistry implements ToolRegistrySubset for integration tests.
-type mockToolRegistry struct {
+// mockIntegToolRegistry implements ToolRegistrySubset for integration tests.
+type mockIntegToolRegistry struct {
 	registered   map[string]bool
 	unregistered map[string]bool
 }
 
-func newMockToolRegistry() *mockToolRegistry {
-	return &mockToolRegistry{
+func newIntegToolRegistry() *mockIntegToolRegistry {
+	return &mockIntegToolRegistry{
 		registered:   make(map[string]bool),
 		unregistered: make(map[string]bool),
 	}
 }
 
-func (m *mockToolRegistry) RegisterGroup(name string, members []string) {
+func (m *mockIntegToolRegistry) RegisterGroup(name string, members []string) {
 	m.registered[name] = true
 }
 
-func (m *mockToolRegistry) UnregisterGroup(name string) {
+func (m *mockIntegToolRegistry) UnregisterGroup(name string) {
 	m.unregistered[name] = true
 }
 
@@ -199,10 +199,10 @@ func TestIntegrationConfig_Defaults(t *testing.T) {
 	}
 }
 
-func TestPluginHost_Init_FeatureFlagDisabled(t *testing.T) {
+func TestGatewayBridge_Init_FeatureFlagDisabled(t *testing.T) {
 	t.Parallel()
 
-	host := NewPluginHost(PluginHostDeps{
+	host := NewGatewayBridge(GatewayBridgeDeps{
 		Config: IntegrationConfig{PluginSystemEnabled: false},
 		Logger: slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError})),
 	})
@@ -216,7 +216,7 @@ func TestPluginHost_Init_FeatureFlagDisabled(t *testing.T) {
 	}
 }
 
-func TestPluginHost_Init_LoadsEnabledPlugins(t *testing.T) {
+func TestGatewayBridge_Init_LoadsEnabledPlugins(t *testing.T) {
 	t.Parallel()
 
 	store := &mockIntegrationStore{
@@ -225,9 +225,9 @@ func TestPluginHost_Init_LoadsEnabledPlugins(t *testing.T) {
 			{PluginName: "bridge-pm", PluginVersion: "0.2.0"},
 		},
 	}
-	reg := newMockToolRegistry()
+	reg := newIntegToolRegistry()
 
-	host := NewPluginHost(PluginHostDeps{
+	host := NewGatewayBridge(GatewayBridgeDeps{
 		Config:       IntegrationConfig{PluginSystemEnabled: true},
 		Store:        store,
 		ToolRegistry: reg,
@@ -252,14 +252,14 @@ func TestPluginHost_Init_LoadsEnabledPlugins(t *testing.T) {
 	}
 }
 
-func TestPluginHost_Init_FailingPlugin_DoesNotPreventStartup(t *testing.T) {
+func TestGatewayBridge_Init_FailingPlugin_DoesNotPreventStartup(t *testing.T) {
 	t.Parallel()
 
 	store := &mockIntegrationStore{
 		listErr: errors.New("database unavailable"),
 	}
 
-	host := NewPluginHost(PluginHostDeps{
+	host := NewGatewayBridge(GatewayBridgeDeps{
 		Config: IntegrationConfig{PluginSystemEnabled: true},
 		Store:  store,
 		Logger: slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError})),
@@ -272,7 +272,7 @@ func TestPluginHost_Init_FailingPlugin_DoesNotPreventStartup(t *testing.T) {
 	}
 }
 
-func TestPluginHost_Shutdown_ClearsRegistry(t *testing.T) {
+func TestGatewayBridge_Shutdown_ClearsRegistry(t *testing.T) {
 	t.Parallel()
 
 	store := &mockIntegrationStore{
@@ -280,9 +280,9 @@ func TestPluginHost_Shutdown_ClearsRegistry(t *testing.T) {
 			{PluginName: "test-plugin", PluginVersion: "1.0.0"},
 		},
 	}
-	reg := newMockToolRegistry()
+	reg := newIntegToolRegistry()
 
-	host := NewPluginHost(PluginHostDeps{
+	host := NewGatewayBridge(GatewayBridgeDeps{
 		Config:       IntegrationConfig{PluginSystemEnabled: true},
 		Store:        store,
 		ToolRegistry: reg,
@@ -300,10 +300,10 @@ func TestPluginHost_Shutdown_ClearsRegistry(t *testing.T) {
 	}
 }
 
-func TestPluginHost_Shutdown_WhenDisabled_NoOp(t *testing.T) {
+func TestGatewayBridge_Shutdown_WhenDisabled_NoOp(t *testing.T) {
 	t.Parallel()
 
-	host := NewPluginHost(PluginHostDeps{
+	host := NewGatewayBridge(GatewayBridgeDeps{
 		Config: IntegrationConfig{PluginSystemEnabled: false},
 		Logger: slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError})),
 	})
