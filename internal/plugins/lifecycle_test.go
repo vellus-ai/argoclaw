@@ -199,10 +199,14 @@ func TestLifecycle_RegisterPlugin_AddsToRegistry(t *testing.T) {
 	reg := plugins.NewRegistry()
 	lc := plugins.NewLifecycle(&stubLifecycleStore{}, reg)
 
-	state := &plugins.PluginState{
-		Manifest:  &plugins.PluginManifest{Name: "vault", Version: "1.0.0"},
+	state := &plugins.RegistryEntry{
+		Manifest: &plugins.PluginManifest{
+			Metadata: plugins.ManifestMetadata{Name: "vault", Version: "1.0.0"},
+			Name:     "vault",
+			Version:  "1.0.0",
+		},
 		CatalogID: uuid.New(),
-		Status:    plugins.StatusActive,
+		Status:    plugins.RegistryActive,
 	}
 	lc.RegisterPlugin("vault", state)
 
@@ -210,16 +214,19 @@ func TestLifecycle_RegisterPlugin_AddsToRegistry(t *testing.T) {
 	if !ok {
 		t.Fatal("expected 'vault' in registry after RegisterPlugin")
 	}
-	if got.Status != plugins.StatusActive {
-		t.Errorf("expected StatusActive, got %q", got.Status)
+	if got.Status != plugins.RegistryActive {
+		t.Errorf("expected RegistryActive, got %q", got.Status)
 	}
 }
 
 func TestLifecycle_UnregisterPlugin_RemovesFromRegistry(t *testing.T) {
 	reg := plugins.NewRegistry()
-	reg.Register("vault", &plugins.PluginState{
-		Manifest: &plugins.PluginManifest{Name: "vault"},
-		Status:   plugins.StatusActive,
+	reg.Register("vault", &plugins.RegistryEntry{
+		Manifest: &plugins.PluginManifest{
+			Metadata: plugins.ManifestMetadata{Name: "vault"},
+			Name:     "vault",
+		},
+		Status: plugins.RegistryActive,
 	})
 	lc := plugins.NewLifecycle(&stubLifecycleStore{}, reg)
 
@@ -239,9 +246,9 @@ func TestLifecycle_UnregisterPlugin_NonExistent_IsNoOp(t *testing.T) {
 
 func TestLifecycle_ActivePluginNames_ReturnsOnlyActive(t *testing.T) {
 	reg := plugins.NewRegistry()
-	reg.Register("vault", &plugins.PluginState{Status: plugins.StatusActive})
-	reg.Register("memory", &plugins.PluginState{Status: plugins.StatusError})
-	reg.Register("bridge", &plugins.PluginState{Status: plugins.StatusActive})
+	reg.Register("vault", &plugins.RegistryEntry{Status: plugins.RegistryActive})
+	reg.Register("memory", &plugins.RegistryEntry{Status: plugins.RegistryError})
+	reg.Register("bridge", &plugins.RegistryEntry{Status: plugins.RegistryActive})
 
 	lc := plugins.NewLifecycle(&stubLifecycleStore{}, reg)
 	names := lc.ActivePluginNames()
@@ -253,8 +260,8 @@ func TestLifecycle_ActivePluginNames_ReturnsOnlyActive(t *testing.T) {
 
 func TestLifecycle_Stop_ClearsRegistry(t *testing.T) {
 	reg := plugins.NewRegistry()
-	reg.Register("vault", &plugins.PluginState{Status: plugins.StatusActive})
-	reg.Register("memory", &plugins.PluginState{Status: plugins.StatusActive})
+	reg.Register("vault", &plugins.RegistryEntry{Status: plugins.RegistryActive})
+	reg.Register("memory", &plugins.RegistryEntry{Status: plugins.RegistryActive})
 
 	lc := plugins.NewLifecycle(&stubLifecycleStore{}, reg)
 	lc.Stop()

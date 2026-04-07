@@ -26,8 +26,8 @@ var ErrKeyTooLong = fmt.Errorf("data proxy: key exceeds maximum length of %d cha
 // ErrCollectionTooLong is returned when a collection name exceeds the maximum allowed length.
 var ErrCollectionTooLong = fmt.Errorf("data proxy: collection exceeds maximum length of %d characters", maxCollectionLength)
 
-// ErrPluginNotInstalled is returned when the plugin is not installed for the tenant.
-var ErrPluginNotInstalled = errors.New("data proxy: plugin is not installed for this tenant")
+// ErrPluginNotInstalled is defined in errors.go as the canonical sentinel.
+// This file uses it via the package-level variable.
 
 // DataProxy validates and proxies plugin data access to the store.
 //

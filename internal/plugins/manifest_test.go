@@ -34,17 +34,17 @@ permissions:
 	if m.Name != "prompt-vault" {
 		t.Errorf("expected name 'prompt-vault', got %q", m.Name)
 	}
-	if m.DisplayName != "Prompt Vault" {
-		t.Errorf("expected display_name 'Prompt Vault', got %q", m.DisplayName)
+	if m.Metadata.DisplayName != "Prompt Vault" {
+		t.Errorf("expected display_name 'Prompt Vault', got %q", m.Metadata.DisplayName)
 	}
 	if m.Version != "0.1.0" {
 		t.Errorf("expected version '0.1.0', got %q", m.Version)
 	}
-	if m.Runtime.Transport != "stdio" {
-		t.Errorf("expected transport 'stdio', got %q", m.Runtime.Transport)
+	if m.Spec.Runtime.Transport != "stdio" {
+		t.Errorf("expected transport 'stdio', got %q", m.Spec.Runtime.Transport)
 	}
-	if len(m.Permissions.Tools.Provide) != 1 {
-		t.Errorf("expected 1 tool, got %d", len(m.Permissions.Tools.Provide))
+	if len(m.Spec.Permissions.Tools.Provide) != 1 {
+		t.Errorf("expected 1 tool, got %d", len(m.Spec.Permissions.Tools.Provide))
 	}
 }
 
