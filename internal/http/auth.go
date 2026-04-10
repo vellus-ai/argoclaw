@@ -110,7 +110,7 @@ type authResult struct {
 }
 
 // resolveAuth determines the caller's role from the request.
-// Priority: gateway token → API key → browser pairing.
+// Priority: gateway token → API key → browser pairing → JWT claims.
 func resolveAuth(r *http.Request, gatewayToken string) authResult {
 	return resolveAuthBearer(r, gatewayToken, extractBearerToken(r))
 }
@@ -138,7 +138,23 @@ func resolveAuthBearer(r *http.Request, gatewayToken, bearer string) authResult 
 			slog.Warn("security.http_pairing_auth_failed", "sender_id", senderID, "ip", r.RemoteAddr)
 		}
 	}
+	// JWT claims → role from token (injected by JWTMiddleware)
+	if claims := UserClaimsFromContext(r.Context()); claims != nil {
+		return authResult{Role: jwtRoleToPermission(claims.Role), Authenticated: true}
+	}
 	return authResult{}
+}
+
+// jwtRoleToPermission maps JWT user roles to system permission roles.
+func jwtRoleToPermission(role string) permissions.Role {
+	switch role {
+	case "owner", "admin":
+		return permissions.RoleAdmin
+	case "member", "operator":
+		return permissions.RoleOperator
+	default:
+		return permissions.RoleViewer
+	}
 }
 
 // httpMinRole returns the minimum role required for an HTTP endpoint based on HTTP method.

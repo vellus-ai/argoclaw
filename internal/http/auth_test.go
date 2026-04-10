@@ -1,11 +1,13 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/vellus-ai/argoclaw/internal/auth"
 	"github.com/vellus-ai/argoclaw/internal/bus"
 	"github.com/vellus-ai/argoclaw/internal/permissions"
 	"github.com/vellus-ai/argoclaw/internal/store"
@@ -125,6 +127,107 @@ func TestResolveAuth_APIKeyWriteScope(t *testing.T) {
 	}
 	if role != permissions.RoleOperator {
 		t.Errorf("role = %v, want operator for write scope", role)
+	}
+}
+
+func TestResolveAuth_JWTOwner(t *testing.T) {
+	setupTestCache(t, nil)
+
+	r := httptest.NewRequest("GET", "/v1/providers", nil)
+	// Simulate JWT middleware having already validated the token and set claims
+	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
+		UserID:   "user-123",
+		Email:    "milton@consilium.tec.br",
+		TenantID: uuid.New().String(),
+		Role:     "owner",
+	})
+	r = r.WithContext(ctx)
+
+	result := resolveAuth(r, "gateway-token") // JWT should win even if gateway token is wrong
+	if !result.Authenticated {
+		t.Fatal("expected authenticated for JWT owner")
+	}
+	if result.Role != permissions.RoleAdmin {
+		t.Errorf("role = %v, want admin for JWT owner", result.Role)
+	}
+}
+
+func TestResolveAuth_JWTAdmin(t *testing.T) {
+	setupTestCache(t, nil)
+
+	r := httptest.NewRequest("GET", "/v1/agents", nil)
+	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
+		UserID: "user-456",
+		Role:   "admin",
+	})
+	r = r.WithContext(ctx)
+
+	result := resolveAuth(r, "gateway-token")
+	if !result.Authenticated {
+		t.Fatal("expected authenticated for JWT admin")
+	}
+	if result.Role != permissions.RoleAdmin {
+		t.Errorf("role = %v, want admin", result.Role)
+	}
+}
+
+func TestResolveAuth_JWTMember(t *testing.T) {
+	setupTestCache(t, nil)
+
+	r := httptest.NewRequest("GET", "/v1/agents", nil)
+	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
+		UserID: "user-789",
+		Role:   "member",
+	})
+	r = r.WithContext(ctx)
+
+	result := resolveAuth(r, "gateway-token")
+	if !result.Authenticated {
+		t.Fatal("expected authenticated for JWT member")
+	}
+	if result.Role != permissions.RoleOperator {
+		t.Errorf("role = %v, want operator for JWT member", result.Role)
+	}
+}
+
+func TestResolveAuth_JWTUnknownRole(t *testing.T) {
+	setupTestCache(t, nil)
+
+	r := httptest.NewRequest("GET", "/v1/agents", nil)
+	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
+		UserID: "user-unknown",
+		Role:   "guest",
+	})
+	r = r.WithContext(ctx)
+
+	result := resolveAuth(r, "gateway-token")
+	if !result.Authenticated {
+		t.Fatal("expected authenticated for JWT with unknown role")
+	}
+	if result.Role != permissions.RoleViewer {
+		t.Errorf("role = %v, want viewer (fallback) for unknown JWT role", result.Role)
+	}
+}
+
+func TestRequireAuth_JWTPasses(t *testing.T) {
+	setupTestCache(t, nil)
+
+	handler := requireAuth("gateway-secret", "", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	r := httptest.NewRequest("GET", "/v1/providers", nil)
+	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
+		UserID:   "user-123",
+		TenantID: uuid.New().String(),
+		Role:     "owner",
+	})
+	r = r.WithContext(ctx)
+	w := httptest.NewRecorder()
+	handler(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("status = %d, want 200 for JWT auth", w.Code)
 	}
 }
 

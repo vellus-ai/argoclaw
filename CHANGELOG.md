@@ -7,6 +7,10 @@
 
 ## [Unreleased]
 
+### Fixed
+- Login por email retornava 401 em endpoints autenticados (ex: /v1/providers) porque `resolveAuth()` nao reconhecia JWT como metodo de autenticacao
+- Tela de login exibia opcoes de Token e Pareamento alem do email; agora exibe apenas login por email conforme definicao de projeto
+
 ### Upstream Community Merges (from ArgoClaw)
 
 | PR | Title | Author | Status | Date |
