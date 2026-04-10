@@ -198,6 +198,10 @@ func requireAuth(token string, minRole permissions.Role, next http.HandlerFunc) 
 		if userID := extractUserID(r); userID != "" {
 			ctx = store.WithUserID(ctx, userID)
 		}
+		// Inject tenant isolation from JWT claims so stores filter by tenant.
+		if claims := UserClaimsFromContext(r.Context()); claims != nil && claims.TenantID != "" {
+			ctx = WithTenantID(ctx, claims.TenantID)
+		}
 		next(w, r.WithContext(ctx))
 	}
 }
