@@ -110,7 +110,7 @@ type authResult struct {
 }
 
 // resolveAuth determines the caller's role from the request.
-// Priority: gateway token → API key → browser pairing.
+// Priority: gateway token → API key → browser pairing → JWT claims.
 func resolveAuth(r *http.Request, gatewayToken string) authResult {
 	return resolveAuthBearer(r, gatewayToken, extractBearerToken(r))
 }
@@ -138,7 +138,23 @@ func resolveAuthBearer(r *http.Request, gatewayToken, bearer string) authResult 
 			slog.Warn("security.http_pairing_auth_failed", "sender_id", senderID, "ip", r.RemoteAddr)
 		}
 	}
+	// JWT claims → role from token (injected by JWTMiddleware)
+	if claims := UserClaimsFromContext(r.Context()); claims != nil {
+		return authResult{Role: jwtRoleToPermission(claims.Role), Authenticated: true}
+	}
 	return authResult{}
+}
+
+// jwtRoleToPermission maps JWT user roles to system permission roles.
+func jwtRoleToPermission(role string) permissions.Role {
+	switch role {
+	case "owner", "admin":
+		return permissions.RoleAdmin
+	case "member", "operator":
+		return permissions.RoleOperator
+	default:
+		return permissions.RoleViewer
+	}
 }
 
 // httpMinRole returns the minimum role required for an HTTP endpoint based on HTTP method.
@@ -149,6 +165,23 @@ func httpMinRole(method string) permissions.Role {
 	default: // POST, PUT, PATCH, DELETE
 		return permissions.RoleOperator
 	}
+}
+
+// injectJWTContext enriches the context with tenant_id and user_id from JWT claims
+// when present. Used by both requireAuth middleware and handlers that call
+// resolveAuth directly.
+func injectJWTContext(ctx context.Context, r *http.Request) context.Context {
+	claims := UserClaimsFromContext(r.Context())
+	if claims == nil {
+		return ctx
+	}
+	if claims.TenantID != "" {
+		ctx = WithTenantID(ctx, claims.TenantID)
+	}
+	if claims.UserID != "" {
+		ctx = store.WithUserID(ctx, claims.UserID)
+	}
+	return ctx
 }
 
 // requireAuth is a middleware that checks authentication and minimum role.
@@ -182,13 +215,17 @@ func requireAuth(token string, minRole permissions.Role, next http.HandlerFunc) 
 		if userID := extractUserID(r); userID != "" {
 			ctx = store.WithUserID(ctx, userID)
 		}
+		// Inject tenant isolation from JWT claims so stores filter by tenant.
+		ctx = injectJWTContext(ctx, r)
 		next(w, r.WithContext(ctx))
 	}
 }
 
 // requireAuthBearer is like requireAuth but accepts a pre-extracted bearer token.
 // Used by handlers that accept tokens from query params (files, media).
-func requireAuthBearer(token string, minRole permissions.Role, bearer string, w http.ResponseWriter, r *http.Request) bool {
+// On success, enriches r's context with JWT tenant/user context and returns the
+// updated request alongside true. Callers MUST use the returned *http.Request.
+func requireAuthBearer(token string, minRole permissions.Role, bearer string, w http.ResponseWriter, r *http.Request) (*http.Request, bool) {
 	locale := extractLocale(r)
 	auth := resolveAuthBearer(r, token, bearer)
 
@@ -196,7 +233,7 @@ func requireAuthBearer(token string, minRole permissions.Role, bearer string, w 
 		writeJSON(w, http.StatusUnauthorized, map[string]string{
 			"error": i18n.T(locale, i18n.MsgUnauthorized),
 		})
-		return false
+		return r, false
 	}
 
 	required := minRole
@@ -208,9 +245,12 @@ func requireAuthBearer(token string, minRole permissions.Role, bearer string, w 
 		writeJSON(w, http.StatusForbidden, map[string]string{
 			"error": i18n.T(locale, i18n.MsgPermissionDenied, r.URL.Path),
 		})
-		return false
+		return r, false
 	}
-	return true
+
+	// Inject tenant isolation from JWT claims so stores filter by tenant.
+	ctx := injectJWTContext(r.Context(), r)
+	return r.WithContext(ctx), true
 }
 
 // extractLocale parses the Accept-Language header and returns a supported locale.

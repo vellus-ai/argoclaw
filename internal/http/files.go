@@ -38,7 +38,8 @@ func (h *FilesHandler) auth(next http.HandlerFunc) http.HandlerFunc {
 		if provided == "" {
 			provided = r.URL.Query().Get("token")
 		}
-		if !requireAuthBearer(h.token, "", provided, w, r) {
+		var ok bool
+		if r, ok = requireAuthBearer(h.token, "", provided, w, r); !ok {
 			return
 		}
 		next(w, r)

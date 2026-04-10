@@ -72,6 +72,9 @@ func (h *WakeHandler) handleWake(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Inject tenant/user isolation from JWT claims so stores filter by tenant.
+	r = r.WithContext(injectJWTContext(r.Context(), r))
+
 	agentID := r.PathValue("id")
 	if agentID == "" {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": i18n.T(locale, i18n.MsgInvalidID, "agent")})

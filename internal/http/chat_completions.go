@@ -101,6 +101,9 @@ func (h *ChatCompletionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// Inject tenant/user isolation from JWT claims so stores filter by tenant.
+	r = r.WithContext(injectJWTContext(r.Context(), r))
+
 	// Rate limit check (per IP or bearer token)
 	if h.rateLimiter != nil {
 		key := r.RemoteAddr
