@@ -27,21 +27,27 @@ export function LoginPage() {
   // Detect whether email auth endpoints are available.
   // When JWTSecret is not configured, /v1/auth/* routes are not registered.
   useEffect(() => {
-    fetch("/v1/auth/login", { method: "HEAD" }).then((res) => {
-      // 405 Method Not Allowed = endpoint exists (POST-only). 404 = not registered.
-      setEmailAuthAvailable(res.status !== 404);
-    }).catch(() => {
-      setEmailAuthAvailable(false);
-    });
+    const controller = new AbortController();
+    fetch("/v1/auth/login", { method: "HEAD", signal: controller.signal })
+      .then((res) => {
+        // 405 Method Not Allowed = endpoint exists (POST-only). 404 = not registered.
+        setEmailAuthAvailable(res.status !== 404);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setEmailAuthAvailable(false);
+      });
+    return () => controller.abort();
   }, []);
 
   // Show legacy tabs (token/pairing) only when email auth is unavailable.
   const showTabs = emailAuthAvailable === false;
 
-  // While detecting, default to email form (avoids flash).
-  if (emailAuthAvailable === false && mode === "email") {
-    setMode("token");
-  }
+  // When email auth is unavailable, switch to token mode.
+  useEffect(() => {
+    if (emailAuthAvailable === false && mode === "email") {
+      setMode("token");
+    }
+  }, [emailAuthAvailable]);
 
   function handleTokenLogin(userId: string, token: string) {
     setCredentials(token, userId);
