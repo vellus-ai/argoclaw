@@ -167,6 +167,23 @@ func httpMinRole(method string) permissions.Role {
 	}
 }
 
+// injectJWTContext enriches the context with tenant_id and user_id from JWT claims
+// when present. Used by both requireAuth middleware and handlers that call
+// resolveAuth directly.
+func injectJWTContext(ctx context.Context, r *http.Request) context.Context {
+	claims := UserClaimsFromContext(r.Context())
+	if claims == nil {
+		return ctx
+	}
+	if claims.TenantID != "" {
+		ctx = WithTenantID(ctx, claims.TenantID)
+	}
+	if claims.UserID != "" {
+		ctx = store.WithUserID(ctx, claims.UserID)
+	}
+	return ctx
+}
+
 // requireAuth is a middleware that checks authentication and minimum role.
 // Pass "" for minRole to auto-detect from HTTP method (GET→Viewer, POST→Operator).
 // Injects locale and userID into request context.
@@ -199,16 +216,16 @@ func requireAuth(token string, minRole permissions.Role, next http.HandlerFunc) 
 			ctx = store.WithUserID(ctx, userID)
 		}
 		// Inject tenant isolation from JWT claims so stores filter by tenant.
-		if claims := UserClaimsFromContext(r.Context()); claims != nil && claims.TenantID != "" {
-			ctx = WithTenantID(ctx, claims.TenantID)
-		}
+		ctx = injectJWTContext(ctx, r)
 		next(w, r.WithContext(ctx))
 	}
 }
 
 // requireAuthBearer is like requireAuth but accepts a pre-extracted bearer token.
 // Used by handlers that accept tokens from query params (files, media).
-func requireAuthBearer(token string, minRole permissions.Role, bearer string, w http.ResponseWriter, r *http.Request) bool {
+// On success, enriches r's context with JWT tenant/user context and returns the
+// updated request alongside true. Callers MUST use the returned *http.Request.
+func requireAuthBearer(token string, minRole permissions.Role, bearer string, w http.ResponseWriter, r *http.Request) (*http.Request, bool) {
 	locale := extractLocale(r)
 	auth := resolveAuthBearer(r, token, bearer)
 
@@ -216,7 +233,7 @@ func requireAuthBearer(token string, minRole permissions.Role, bearer string, w 
 		writeJSON(w, http.StatusUnauthorized, map[string]string{
 			"error": i18n.T(locale, i18n.MsgUnauthorized),
 		})
-		return false
+		return r, false
 	}
 
 	required := minRole
@@ -228,9 +245,12 @@ func requireAuthBearer(token string, minRole permissions.Role, bearer string, w 
 		writeJSON(w, http.StatusForbidden, map[string]string{
 			"error": i18n.T(locale, i18n.MsgPermissionDenied, r.URL.Path),
 		})
-		return false
+		return r, false
 	}
-	return true
+
+	// Inject tenant isolation from JWT claims so stores filter by tenant.
+	ctx := injectJWTContext(r.Context(), r)
+	return r.WithContext(ctx), true
 }
 
 // extractLocale parses the Accept-Language header and returns a supported locale.

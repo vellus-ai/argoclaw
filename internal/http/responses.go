@@ -62,6 +62,9 @@ func (h *ResponsesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Inject tenant/user isolation from JWT claims so stores filter by tenant.
+	r = r.WithContext(injectJWTContext(r.Context(), r))
+
 	// Limit request body size to prevent DoS
 	const maxRequestBodySize = 1 << 20 // 1MB
 	r.Body = http.MaxBytesReader(w, r.Body, maxRequestBodySize)

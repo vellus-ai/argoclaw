@@ -57,6 +57,9 @@ func (h *ToolsInvokeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Inject tenant/user isolation from JWT claims so stores filter by tenant.
+	r = r.WithContext(injectJWTContext(r.Context(), r))
+
 	var req toolsInvokeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": i18n.T(locale, i18n.MsgInvalidJSON)})

@@ -399,6 +399,100 @@ func TestRequireAuth_JWTInjectsUserID(t *testing.T) {
 	}
 }
 
+func TestInjectJWTContext_WithClaims(t *testing.T) {
+	tenantID := uuid.New()
+	tests := []struct {
+		name         string
+		claims       *auth.TokenClaims
+		wantTenantID uuid.UUID
+		wantUserID   string
+	}{
+		{
+			name:         "nil claims does nothing",
+			claims:       nil,
+			wantTenantID: uuid.Nil,
+			wantUserID:   "",
+		},
+		{
+			name: "injects both tenant and user",
+			claims: &auth.TokenClaims{
+				UserID:   "user-42",
+				TenantID: tenantID.String(),
+				Role:     "member",
+			},
+			wantTenantID: tenantID,
+			wantUserID:   "user-42",
+		},
+		{
+			name: "injects tenant only when user empty",
+			claims: &auth.TokenClaims{
+				TenantID: tenantID.String(),
+				Role:     "admin",
+			},
+			wantTenantID: tenantID,
+			wantUserID:   "",
+		},
+		{
+			name: "injects user only when tenant empty",
+			claims: &auth.TokenClaims{
+				UserID: "user-99",
+				Role:   "member",
+			},
+			wantTenantID: uuid.Nil,
+			wantUserID:   "user-99",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := httptest.NewRequest("GET", "/", nil)
+			if tt.claims != nil {
+				ctx := context.WithValue(r.Context(), ctxKeyUserClaims, tt.claims)
+				r = r.WithContext(ctx)
+			}
+
+			ctx := injectJWTContext(r.Context(), r)
+
+			gotTenant := store.TenantIDFromContext(ctx)
+			if gotTenant != tt.wantTenantID {
+				t.Errorf("tenantID = %v, want %v", gotTenant, tt.wantTenantID)
+			}
+			gotUser := store.UserIDFromContext(ctx)
+			if gotUser != tt.wantUserID {
+				t.Errorf("userID = %q, want %q", gotUser, tt.wantUserID)
+			}
+		})
+	}
+}
+
+func TestRequireAuthBearer_InjectsTenantFromJWT(t *testing.T) {
+	setupTestCache(t, nil)
+
+	tenantID := uuid.New()
+	r := httptest.NewRequest("GET", "/v1/files/test.txt", nil)
+	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
+		UserID:   "user-bearer-1",
+		TenantID: tenantID.String(),
+		Role:     "admin",
+	})
+	r = r.WithContext(ctx)
+	w := httptest.NewRecorder()
+
+	// Use empty gateway token so JWT path is taken.
+	updatedR, ok := requireAuthBearer("", "", "", w, r)
+	if !ok {
+		t.Fatalf("expected auth to succeed, status = %d", w.Code)
+	}
+
+	gotTenant := store.TenantIDFromContext(updatedR.Context())
+	if gotTenant != tenantID {
+		t.Errorf("tenantID = %v, want %v", gotTenant, tenantID)
+	}
+	gotUser := store.UserIDFromContext(updatedR.Context())
+	if gotUser != "user-bearer-1" {
+		t.Errorf("userID = %q, want %q", gotUser, "user-bearer-1")
+	}
+}
+
 func TestInitAPIKeyCache_PubsubInvalidation(t *testing.T) {
 	mb := bus.New()
 	ms := newMockAPIKeyStore()
