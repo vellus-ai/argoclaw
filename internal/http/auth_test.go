@@ -143,12 +143,35 @@ func TestResolveAuth_JWTOwner(t *testing.T) {
 	})
 	r = r.WithContext(ctx)
 
-	result := resolveAuth(r, "gateway-token") // JWT should win even if gateway token is wrong
+	result := resolveAuth(r, "gateway-token") // JWT is 4th fallback; authenticates here because no Bearer header is set
 	if !result.Authenticated {
 		t.Fatal("expected authenticated for JWT owner")
 	}
 	if result.Role != permissions.RoleAdmin {
 		t.Errorf("role = %v, want admin for JWT owner", result.Role)
+	}
+}
+
+func TestResolveAuth_GatewayTokenTakesPriorityOverJWT(t *testing.T) {
+	setupTestCache(t, nil)
+
+	r := httptest.NewRequest("GET", "/v1/agents", nil)
+	// Set Bearer header to match the gateway token
+	r.Header.Set("Authorization", "Bearer gateway-secret")
+	// Also inject JWT claims with a different (lower) role
+	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
+		UserID:   "user-jwt",
+		TenantID: uuid.New().String(),
+		Role:     "member", // would map to RoleOperator if JWT were used
+	})
+	r = r.WithContext(ctx)
+
+	result := resolveAuth(r, "gateway-secret") // gateway token is 1st priority, JWT is 4th
+	if !result.Authenticated {
+		t.Fatal("expected authenticated")
+	}
+	if result.Role != permissions.RoleAdmin {
+		t.Errorf("role = %v, want admin (gateway token should take priority over JWT member)", result.Role)
 	}
 }
 
