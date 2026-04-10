@@ -190,6 +190,63 @@ func TestResolveAuth_JWTMember(t *testing.T) {
 	}
 }
 
+func TestResolveAuth_JWTOperator(t *testing.T) {
+	setupTestCache(t, nil)
+
+	r := httptest.NewRequest("GET", "/v1/agents", nil)
+	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
+		UserID: "user-op",
+		Role:   "operator",
+	})
+	r = r.WithContext(ctx)
+
+	result := resolveAuth(r, "gateway-token")
+	if !result.Authenticated {
+		t.Fatal("expected authenticated for JWT operator")
+	}
+	if result.Role != permissions.RoleOperator {
+		t.Errorf("role = %v, want operator for JWT operator", result.Role)
+	}
+}
+
+func TestResolveAuth_JWTEmptyUserID(t *testing.T) {
+	setupTestCache(t, nil)
+
+	r := httptest.NewRequest("GET", "/v1/agents", nil)
+	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
+		UserID: "",
+		Role:   "member",
+	})
+	r = r.WithContext(ctx)
+
+	result := resolveAuth(r, "gateway-token")
+	if !result.Authenticated {
+		t.Fatal("expected authenticated for JWT with empty UserID")
+	}
+	if result.Role != permissions.RoleOperator {
+		t.Errorf("role = %v, want operator for JWT member with empty UserID", result.Role)
+	}
+}
+
+func TestResolveAuth_JWTEmptyRole(t *testing.T) {
+	setupTestCache(t, nil)
+
+	r := httptest.NewRequest("GET", "/v1/agents", nil)
+	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
+		UserID: "user-empty",
+		Role:   "",
+	})
+	r = r.WithContext(ctx)
+
+	result := resolveAuth(r, "gateway-token")
+	if !result.Authenticated {
+		t.Fatal("expected authenticated for JWT with empty role")
+	}
+	if result.Role != permissions.RoleViewer {
+		t.Errorf("role = %v, want viewer (fallback) for empty JWT role", result.Role)
+	}
+}
+
 func TestResolveAuth_JWTUnknownRole(t *testing.T) {
 	setupTestCache(t, nil)
 
