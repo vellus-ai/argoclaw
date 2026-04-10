@@ -130,25 +130,38 @@ func TestResolveAuth_APIKeyWriteScope(t *testing.T) {
 	}
 }
 
-func TestResolveAuth_JWTOwner(t *testing.T) {
-	setupTestCache(t, nil)
-
-	r := httptest.NewRequest("GET", "/v1/providers", nil)
-	// Simulate JWT middleware having already validated the token and set claims
-	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
-		UserID:   "user-123",
-		Email:    "milton@consilium.tec.br",
-		TenantID: uuid.New().String(),
-		Role:     "owner",
-	})
-	r = r.WithContext(ctx)
-
-	result := resolveAuth(r, "gateway-token") // JWT is 4th fallback; authenticates here because no Bearer header is set
-	if !result.Authenticated {
-		t.Fatal("expected authenticated for JWT owner")
+func TestResolveAuth_JWTRoleMapping(t *testing.T) {
+	tests := []struct {
+		name     string
+		userID   string
+		role     string
+		wantRole permissions.Role
+	}{
+		{"owner maps to admin", "user-123", "owner", permissions.RoleAdmin},
+		{"admin maps to admin", "user-456", "admin", permissions.RoleAdmin},
+		{"member maps to operator", "user-789", "member", permissions.RoleOperator},
+		{"operator maps to operator", "user-op", "operator", permissions.RoleOperator},
+		{"unknown role maps to viewer", "user-unknown", "guest", permissions.RoleViewer},
+		{"empty role maps to viewer", "user-empty", "", permissions.RoleViewer},
+		{"empty userID still authenticates", "", "member", permissions.RoleOperator},
 	}
-	if result.Role != permissions.RoleAdmin {
-		t.Errorf("role = %v, want admin for JWT owner", result.Role)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			setupTestCache(t, nil)
+			r := httptest.NewRequest("GET", "/v1/agents", nil)
+			ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
+				UserID: tt.userID,
+				Role:   tt.role,
+			})
+			r = r.WithContext(ctx)
+			result := resolveAuth(r, "gateway-token")
+			if !result.Authenticated {
+				t.Fatal("expected authenticated")
+			}
+			if result.Role != tt.wantRole {
+				t.Errorf("role = %v, want %v for JWT role %q", result.Role, tt.wantRole, tt.role)
+			}
+		})
 	}
 }
 
@@ -172,120 +185,6 @@ func TestResolveAuth_GatewayTokenTakesPriorityOverJWT(t *testing.T) {
 	}
 	if result.Role != permissions.RoleAdmin {
 		t.Errorf("role = %v, want admin (gateway token should take priority over JWT member)", result.Role)
-	}
-}
-
-func TestResolveAuth_JWTAdmin(t *testing.T) {
-	setupTestCache(t, nil)
-
-	r := httptest.NewRequest("GET", "/v1/agents", nil)
-	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
-		UserID: "user-456",
-		Role:   "admin",
-	})
-	r = r.WithContext(ctx)
-
-	result := resolveAuth(r, "gateway-token")
-	if !result.Authenticated {
-		t.Fatal("expected authenticated for JWT admin")
-	}
-	if result.Role != permissions.RoleAdmin {
-		t.Errorf("role = %v, want admin", result.Role)
-	}
-}
-
-func TestResolveAuth_JWTMember(t *testing.T) {
-	setupTestCache(t, nil)
-
-	r := httptest.NewRequest("GET", "/v1/agents", nil)
-	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
-		UserID: "user-789",
-		Role:   "member",
-	})
-	r = r.WithContext(ctx)
-
-	result := resolveAuth(r, "gateway-token")
-	if !result.Authenticated {
-		t.Fatal("expected authenticated for JWT member")
-	}
-	if result.Role != permissions.RoleOperator {
-		t.Errorf("role = %v, want operator for JWT member", result.Role)
-	}
-}
-
-func TestResolveAuth_JWTOperator(t *testing.T) {
-	setupTestCache(t, nil)
-
-	r := httptest.NewRequest("GET", "/v1/agents", nil)
-	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
-		UserID: "user-op",
-		Role:   "operator",
-	})
-	r = r.WithContext(ctx)
-
-	result := resolveAuth(r, "gateway-token")
-	if !result.Authenticated {
-		t.Fatal("expected authenticated for JWT operator")
-	}
-	if result.Role != permissions.RoleOperator {
-		t.Errorf("role = %v, want operator for JWT operator", result.Role)
-	}
-}
-
-func TestResolveAuth_JWTEmptyUserID(t *testing.T) {
-	setupTestCache(t, nil)
-
-	r := httptest.NewRequest("GET", "/v1/agents", nil)
-	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
-		UserID: "",
-		Role:   "member",
-	})
-	r = r.WithContext(ctx)
-
-	result := resolveAuth(r, "gateway-token")
-	if !result.Authenticated {
-		t.Fatal("expected authenticated for JWT with empty UserID")
-	}
-	if result.Role != permissions.RoleOperator {
-		t.Errorf("role = %v, want operator for JWT member with empty UserID", result.Role)
-	}
-}
-
-func TestResolveAuth_JWTEmptyRole(t *testing.T) {
-	setupTestCache(t, nil)
-
-	r := httptest.NewRequest("GET", "/v1/agents", nil)
-	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
-		UserID: "user-empty",
-		Role:   "",
-	})
-	r = r.WithContext(ctx)
-
-	result := resolveAuth(r, "gateway-token")
-	if !result.Authenticated {
-		t.Fatal("expected authenticated for JWT with empty role")
-	}
-	if result.Role != permissions.RoleViewer {
-		t.Errorf("role = %v, want viewer (fallback) for empty JWT role", result.Role)
-	}
-}
-
-func TestResolveAuth_JWTUnknownRole(t *testing.T) {
-	setupTestCache(t, nil)
-
-	r := httptest.NewRequest("GET", "/v1/agents", nil)
-	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
-		UserID: "user-unknown",
-		Role:   "guest",
-	})
-	r = r.WithContext(ctx)
-
-	result := resolveAuth(r, "gateway-token")
-	if !result.Authenticated {
-		t.Fatal("expected authenticated for JWT with unknown role")
-	}
-	if result.Role != permissions.RoleViewer {
-		t.Errorf("role = %v, want viewer (fallback) for unknown JWT role", result.Role)
 	}
 }
 
@@ -451,6 +350,52 @@ func TestRequireAuth_AutoDetectRole_GET(t *testing.T) {
 
 	if w.Code != http.StatusUnauthorized {
 		t.Errorf("status = %d, want 401", w.Code)
+	}
+}
+
+// TestRequireAuth_JWTInjectsUserID verifies that when JWTMiddleware processes a
+// valid JWT, it sets the X-ArgoClaw-User-Id header, and requireAuth then picks
+// up the user ID via extractUserID and injects it into the store context.
+// This documents the end-to-end flow: JWT claims → header → store context.
+func TestRequireAuth_JWTInjectsUserID(t *testing.T) {
+	setupTestCache(t, nil)
+
+	jwtSecret := "test-jwt-secret-for-userid-flow!!"
+	mw := NewJWTMiddleware(jwtSecret)
+
+	tenantID := uuid.New()
+	claims := auth.TokenClaims{
+		UserID:   "jwt-user-42",
+		Email:    "test@example.com",
+		TenantID: tenantID.String(),
+		Role:     "admin",
+	}
+	token, err := auth.GenerateAccessToken(claims, jwtSecret)
+	if err != nil {
+		t.Fatalf("generate token: %v", err)
+	}
+
+	var gotUserID string
+	// Chain: JWTMiddleware → requireAuth → inner handler that reads context.
+	inner := requireAuth("", "", func(w http.ResponseWriter, r *http.Request) {
+		gotUserID = store.UserIDFromContext(r.Context())
+		w.WriteHeader(http.StatusOK)
+	})
+
+	// Wrap the requireAuth handler with JWTMiddleware so the full flow executes.
+	handler := mw.Wrap(http.HandlerFunc(inner))
+
+	r := httptest.NewRequest("GET", "/v1/agents", nil)
+	r.Header.Set("Authorization", "Bearer "+token)
+	// Do NOT set X-ArgoClaw-User-Id header — it must come from JWT middleware.
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", w.Code)
+	}
+	if gotUserID != "jwt-user-42" {
+		t.Errorf("UserIDFromContext = %q, want %q", gotUserID, "jwt-user-42")
 	}
 }
 
