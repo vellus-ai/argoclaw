@@ -5,8 +5,10 @@ import (
 	"crypto/subtle"
 	"encoding/json"
 	"log/slog"
+	"strings"
 	"time"
 
+	"github.com/vellus-ai/argoclaw/internal/auth"
 	httpapi "github.com/vellus-ai/argoclaw/internal/http"
 	"github.com/vellus-ai/argoclaw/internal/i18n"
 	"github.com/vellus-ai/argoclaw/internal/permissions"
@@ -126,6 +128,39 @@ func (r *MethodRouter) handleConnect(ctx context.Context, client *Client, req *p
 		}
 	}
 
+	// Path 1c: JWT token → role from claims (email/password auth)
+	// JWTs contain dots (header.payload.signature); gateway tokens and API keys don't.
+	if params.Token != "" && strings.Contains(params.Token, ".") {
+		jwtSecret := r.server.cfg.Gateway.JWTSecret
+		if jwtSecret != "" {
+			claims, err := auth.ValidateAccessToken(params.Token, jwtSecret)
+			if err != nil {
+				slog.Warn("security.jwt_ws_auth_failed",
+					"client", client.id,
+					"error", err,
+					"remote_addr", client.remoteAddr)
+				// Fail-closed: reject with explicit error, don't fall through to viewer.
+				locale := i18n.Normalize(client.locale)
+				client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized,
+					i18n.T(locale, i18n.MsgUnauthorized)))
+				return
+			}
+			client.role = httpapi.JWTRoleToPermission(claims.Role)
+			client.authenticated = true
+			client.userID = claims.UserID       // Trust claims over params
+			client.tenantID = claims.TenantID   // From JWT only, never params
+			client.mustChangePassword = claims.MustChangePassword
+			slog.Info("security.jwt_ws_auth_success",
+				"client", client.id,
+				"user_id", claims.UserID,
+				"tenant_id", claims.TenantID,
+				"role", claims.Role,
+				"remote_addr", client.remoteAddr)
+			r.sendConnectResponse(client, req.ID)
+			return
+		}
+	}
+
 	// Path 2: No token configured → operator (backward compat)
 	// SECURITY: Log warning — production deployments MUST set ARGOCLAW_GATEWAY_TOKEN.
 	if configToken == "" {
@@ -203,7 +238,7 @@ func (r *MethodRouter) handleConnect(ctx context.Context, client *Client, req *p
 }
 
 func (r *MethodRouter) sendConnectResponse(client *Client, reqID string) {
-	client.SendResponse(protocol.NewOKResponse(reqID, map[string]any{
+	payload := map[string]any{
 		"protocol": protocol.ProtocolVersion,
 		"role":     string(client.role),
 		"user_id":  client.userID,
@@ -211,7 +246,14 @@ func (r *MethodRouter) sendConnectResponse(client *Client, reqID string) {
 			"name":    "argoclaw",
 			"version": "0.2.0",
 		},
-	}))
+	}
+	if client.tenantID != "" {
+		payload["tenant_id"] = client.tenantID
+	}
+	if client.mustChangePassword {
+		payload["must_change_password"] = true
+	}
+	client.SendResponse(protocol.NewOKResponse(reqID, payload))
 }
 
 func (r *MethodRouter) handleHealth(ctx context.Context, client *Client, req *protocol.RequestFrame) {

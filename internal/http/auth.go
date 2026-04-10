@@ -140,13 +140,13 @@ func resolveAuthBearer(r *http.Request, gatewayToken, bearer string) authResult 
 	}
 	// JWT claims → role from token (injected by JWTMiddleware)
 	if claims := UserClaimsFromContext(r.Context()); claims != nil {
-		return authResult{Role: jwtRoleToPermission(claims.Role), Authenticated: true}
+		return authResult{Role: JWTRoleToPermission(claims.Role), Authenticated: true}
 	}
 	return authResult{}
 }
 
-// jwtRoleToPermission maps JWT user roles to system permission roles.
-func jwtRoleToPermission(role string) permissions.Role {
+// JWTRoleToPermission maps JWT user roles to system permission roles.
+func JWTRoleToPermission(role string) permissions.Role {
 	switch role {
 	case "owner", "admin":
 		return permissions.RoleAdmin
