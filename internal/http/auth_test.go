@@ -238,6 +238,33 @@ func TestRequireAuth_JWTInjectsTenantID(t *testing.T) {
 	}
 }
 
+func TestRequireAuth_JWTEmptyTenantID_DoesNotInjectTenant(t *testing.T) {
+	setupTestCache(t, nil)
+
+	var gotTenantID uuid.UUID
+	handler := requireAuth("gateway-secret", "", func(w http.ResponseWriter, r *http.Request) {
+		gotTenantID = store.TenantIDFromContext(r.Context())
+		w.WriteHeader(http.StatusOK)
+	})
+
+	r := httptest.NewRequest("GET", "/v1/providers", nil)
+	ctx := context.WithValue(r.Context(), ctxKeyUserClaims, &auth.TokenClaims{
+		UserID:   "user-123",
+		TenantID: "", // empty TenantID — should NOT be injected
+		Role:     "owner",
+	})
+	r = r.WithContext(ctx)
+	w := httptest.NewRecorder()
+	handler(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", w.Code)
+	}
+	if gotTenantID != uuid.Nil {
+		t.Errorf("tenantID = %v, want uuid.Nil (no tenant injected for empty TenantID)", gotTenantID)
+	}
+}
+
 func TestHttpMinRole(t *testing.T) {
 	tests := []struct {
 		method string
