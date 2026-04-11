@@ -31,7 +31,7 @@ const PASSWORD_REQUIREMENTS: PasswordRequirement[] = [
 
 export function EmailForm({ onSuccess }: EmailFormProps) {
   const { t } = useTranslation("login");
-  const [mode, setMode] = useState<Mode>("signIn");
+  const [mode] = useState<Mode>("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -193,16 +193,6 @@ export function EmailForm({ onSuccess }: EmailFormProps) {
             : t("email.signIn")}
       </button>
 
-      <p className="text-center text-sm text-muted-foreground">
-        {isSignUp ? t("email.hasAccount") : t("email.noAccount")}{" "}
-        <button
-          type="button"
-          onClick={() => { setMode(isSignUp ? "signIn" : "signUp"); setError(null); }}
-          className="font-medium text-primary underline-offset-4 hover:underline"
-        >
-          {isSignUp ? t("email.signInLink") : t("email.signUpLink")}
-        </button>
-      </p>
     </form>
   );
 }
