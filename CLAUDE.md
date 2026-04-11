@@ -49,6 +49,15 @@ migrations/                   PostgreSQL migration files
 ui/web/                       React SPA (pnpm, Vite, Tailwind, Radix UI)
 ```
 
+## Auth Context Injection
+
+- `injectJWTContext(ctx, r)` — helper central para injetar tenant_id + user_id dos JWT claims no contexto
+- Chamado por: `requireAuth`, `requireAuthBearer`, e 4 handlers diretos (chat_completions, responses, tools_invoke, wake)
+- `requireAuthBearer` retorna `(*http.Request, bool)` — callers DEVEM usar o request retornado: `if r, ok = requireAuthBearer(...); !ok { return }`
+- HTTP auth priority: gateway token → API key → browser pairing → JWT claims (4th fallback)
+- WS auth priority (`handleConnect`): gateway token → API key → **JWT token** → no-token fallback → browser pairing → viewer fallback. JWT path added in PR #44 (`v1.90.0-ws-jwt-auth`). Fail-closed: invalid JWT → ErrUnauthorized (never falls to viewer).
+- Role mapping: owner/admin → RoleAdmin, member/operator → RoleOperator, default → RoleViewer
+
 ## Key Patterns
 
 - **Store layer:** Interface-based (`store.SessionStore`, `store.AgentStore`, etc.) with pg/ (PostgreSQL) implementations. Uses `database/sql` + `pgx/v5/stdlib`, raw SQL, `execMapUpdate()` helper in `pg/helpers.go`
@@ -66,12 +75,14 @@ ui/web/                       React SPA (pnpm, Vite, Tailwind, Radix UI)
 ## Running
 
 ```bash
-go build -o argoclaw . && ./argoclaw onboard && source .env.local && ./argoclaw
+go build -o argoclaw . && ./argoclaw onboard && source .env.local && ./argoclaw  # entrypoint is root `.`, NOT ./cmd/argoclaw/
 ./argoclaw migrate up                 # DB migrations
 go test -v ./tests/integration/     # Integration tests
 
 cd ui/web && pnpm install && pnpm dev   # Web dashboard (dev)
 ```
+
+- **Web UI Docker build**: Arquivos `.test.tsx` são incluídos no `tsc -b` quando `ENABLE_WEB_UI=true`. Imports não usados ou erros de tipo em testes quebram o Docker build. Sempre rodar `cd ui/web && pnpm exec tsc -b` antes de push.
 
 ## Post-Implementation Checklist
 
@@ -80,8 +91,8 @@ After implementing or modifying Go code, run these checks:
 ```bash
 go fix ./...                        # Apply Go version upgrades (run before commit)
 go build ./...                      # Compile check
-go vet ./...                        # Static analysis
-go test -race ./tests/integration/  # Integration tests with race detector
+go vet ./internal/... ./pkg/...     # Static analysis (skip cmd/pkg-helper — uses syscall.Umask, Linux-only)
+go test ./internal/... ./pkg/...    # Unit tests (race detector requires CGO on Windows — use CI for -race)
 ```
 
 Go conventions to follow:
@@ -93,6 +104,7 @@ Go conventions to follow:
 - **i18n strings:** When adding user-facing error messages, add key to `internal/i18n/keys.go` and translations to `catalog_en.go`, `catalog_vi.go`, `catalog_zh.go`. For UI strings, add to all locale JSON files in `ui/web/src/i18n/locales/{en,vi,zh}/`
 - **SQL safety:** When implementing or modifying SQL store code (`store/pg/*.go`), always verify: (1) All user inputs use parameterized queries (`$1, $2, ...`), never string concatenation — prevents SQL injection. (2) Queries are optimized — no N+1 queries, no unnecessary full table scans. (3) WHERE clauses, JOINs, and ORDER BY columns use existing indices — check migration files for available indexes
 - **DB query reuse:** Before adding a new DB query for key entities (teams, agents, sessions, users), check if the same data is already fetched earlier in the current flow/pipeline. Prefer passing resolved data through context, event payloads, or function params rather than re-querying. Duplicate queries waste DB resources and add latency
+- **Known flaky test:** `TestPluginHandler_CreateCatalogEntry_InvalidPermissions` (`internal/http/plugins_test.go:268`) — pré-existente, bug na validação de permissões do catálogo de plugins
 - **Solution design:** When designing a fix or feature, identify the root cause first — don't just patch symptoms. Think through production scenarios (high concurrency, multi-tenant isolation, failure cascades, long-running sessions) to ensure the solution holds up. Prefer explicit configuration over runtime heuristics. Prefer the simplest solution that addresses the root cause directly
 
 ## Mobile UI/UX Rules
