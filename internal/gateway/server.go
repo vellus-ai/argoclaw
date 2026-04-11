@@ -456,7 +456,7 @@ func (s *Server) Start(ctx context.Context) error {
 	// General rate limiting: 60 rpm per IP across all HTTP endpoints.
 	// Auth endpoints have their own stricter limits; this is a baseline defense.
 	generalRL := httpapi.NewGeneralRateLimiter(60, 10)
-	handler = generalRL.Wrap(handler)
+	handler = generalRL.WrapPaths([]string{"/v1/", "/ws", "/mcp/", "/health"}, handler)
 
 	// Wrap with JWT middleware when JWT secret is configured.
 	// Falls through to gateway token auth when no JWT is present (backward compat).

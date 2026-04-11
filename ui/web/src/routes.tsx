@@ -1,9 +1,10 @@
 import { Suspense } from "react";
-import { Routes, Route, Navigate } from "react-router";
+import { Routes, Route, Navigate, useLocation } from "react-router";
 import { AppLayout } from "@/components/layout/app-layout";
 import { RequireAuth } from "@/components/shared/require-auth";
 import { RequireSetup } from "@/components/shared/require-setup";
 import { ErrorBoundary } from "@/components/shared/error-boundary";
+import { useAuthStore } from "@/stores/use-auth-store";
 import { ROUTES } from "@/lib/constants";
 import { lazyWithRetry } from "@/lib/lazy-with-retry";
 
@@ -74,6 +75,9 @@ const StoragePage = lazyWithRetry(() =>
 const SetupPage = lazyWithRetry(() =>
   import("@/pages/setup/setup-page").then((m) => ({ default: m.SetupPage })),
 );
+const ChangePasswordPage = lazyWithRetry(() =>
+  import("@/pages/change-password/change-password-page").then((m) => ({ default: m.ChangePasswordPage })),
+);
 const PendingMessagesPage = lazyWithRetry(() =>
   import("@/pages/pending-messages/pending-messages-page").then((m) => ({ default: m.PendingMessagesPage })),
 );
@@ -107,6 +111,18 @@ function PageLoader() {
   );
 }
 
+/** Redirects to /change-password when JWT carries must_change_password flag. */
+function RequirePasswordChanged({ children }: { children: React.ReactNode }) {
+  const mustChangePassword = useAuthStore((s) => s.mustChangePassword);
+  const location = useLocation();
+
+  if (mustChangePassword) {
+    return <Navigate to="/change-password" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
+}
+
 export function AppRoutes() {
   return (
     <ErrorBoundary>
@@ -114,23 +130,37 @@ export function AppRoutes() {
       <Routes>
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
 
-        {/* Setup wizard — standalone layout, requires auth but no sidebar */}
+        {/* Forced password change — standalone page, no sidebar */}
         <Route
-          path={ROUTES.SETUP}
+          path="/change-password"
           element={
             <RequireAuth>
-              <SetupPage />
+              <ChangePasswordPage />
             </RequireAuth>
           }
         />
 
-        {/* Main app — requires auth + setup complete */}
+        {/* Setup wizard — standalone layout, requires auth + password changed */}
+        <Route
+          path={ROUTES.SETUP}
+          element={
+            <RequireAuth>
+              <RequirePasswordChanged>
+                <SetupPage />
+              </RequirePasswordChanged>
+            </RequireAuth>
+          }
+        />
+
+        {/* Main app — requires auth + password changed + setup complete */}
         <Route
           element={
             <RequireAuth>
-              <RequireSetup>
-                <AppLayout />
-              </RequireSetup>
+              <RequirePasswordChanged>
+                <RequireSetup>
+                  <AppLayout />
+                </RequireSetup>
+              </RequirePasswordChanged>
             </RequireAuth>
           }
         >
