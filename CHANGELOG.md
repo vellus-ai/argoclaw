@@ -8,6 +8,7 @@
 ## [Unreleased]
 
 ### Fixed
+- Corrigido loop infinito de login para usuarios autenticados por email e senha — conexao WebSocket agora reconhece JWT e atribui a role correta (#44)
 - Login por email retornava 401 em endpoints autenticados (ex: /v1/providers) porque `resolveAuth()` nao reconhecia JWT como metodo de autenticacao
 - Tela de login exibia opcoes de Token e Pareamento alem do email; agora exibe apenas login por email conforme definicao de projeto
 

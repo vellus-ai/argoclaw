@@ -20,8 +20,10 @@ type Client struct {
 	server        *Server
 	authenticated bool
 	role          permissions.Role
-	userID        string // external user ID (TEXT, free-form), set during connect
-	send          chan []byte
+	userID             string // external user ID (TEXT, free-form), set during connect
+	tenantID           string // tenant UUID from JWT claims (multi-tenancy isolation)
+	mustChangePassword bool   // true if JWT claims indicate password change required
+	send               chan []byte
 
 	connectedAt time.Time // when the client connected
 	remoteAddr  string    // peer IP (extracted from proxy headers or RemoteAddr)
@@ -191,6 +193,12 @@ func (c *Client) ConnectedAt() time.Time { return c.connectedAt }
 
 // RemoteAddr returns the peer IP:port.
 func (c *Client) RemoteAddr() string { return c.remoteAddr }
+
+// TenantID returns the tenant UUID from JWT claims.
+func (c *Client) TenantID() string { return c.tenantID }
+
+// MustChangePassword returns true if the user must change their password.
+func (c *Client) MustChangePassword() bool { return c.mustChangePassword }
 
 // Close shuts down the client connection.
 func (c *Client) Close() {
