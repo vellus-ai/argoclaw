@@ -1,115 +1,213 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { useBootstrapStatus, type SetupStep } from "./hooks/use-bootstrap-status";
-import { SetupLayout } from "./setup-layout";
-import { SetupStepper } from "./setup-stepper";
-import { StepProvider } from "./step-provider";
-import { StepModel } from "./step-model";
-import { StepAgent } from "./step-agent";
-import { StepChannel } from "./step-channel";
-import { SetupCompleteModal } from "./setup-complete-modal";
+import { useOnboardingEngine } from "./hooks/use-onboarding-engine";
+import { useOnboardingApi } from "./hooks/use-onboarding-api";
+import { OnboardingChat } from "./onboarding-chat";
+import { OnboardingInput } from "./onboarding-input";
 import { ROUTES } from "@/lib/constants";
-import type { ProviderData } from "@/types/provider";
-import type { AgentData } from "@/types/agent";
+import type { ChatMessageLocal } from "./hooks/use-onboarding-engine";
 
-function PageLoader() {
+function LoadingSpinner() {
   return (
-    <div className="flex h-32 items-center justify-center">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+    <div className="flex h-dvh items-center justify-center bg-background">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+    </div>
+  );
+}
+
+function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div className="flex h-dvh flex-col items-center justify-center gap-4 bg-background px-4">
+      <p className="text-base text-destructive" role="alert">
+        {message}
+      </p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="rounded-md bg-primary px-4 py-2 text-base font-medium text-primary-foreground hover:bg-primary/90 md:text-sm"
+      >
+        Try again
+      </button>
     </div>
   );
 }
 
 export function SetupPage() {
   const navigate = useNavigate();
-  const { currentStep, loading, providers, agents } = useBootstrapStatus();
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-  const [createdProvider, setCreatedProvider] = useState<ProviderData | null>(null);
-  const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const [createdAgent, setCreatedAgent] = useState<AgentData | null>(null);
+  const api = useOnboardingApi();
+  const engine = useOnboardingEngine();
+
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
-  const [showComplete, setShowComplete] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  // Initialize step from server state (only on first load, not on refetches)
-  useEffect(() => {
-    if (loading || initialized) return;
-    if (currentStep === ("complete" as SetupStep)) {
-      navigate(ROUTES.OVERVIEW, { replace: true });
-      return;
+  const fetchStatus = useCallback(async () => {
+    try {
+      setFetchError(null);
+      const status = await api.getStatus();
+
+      if (status.onboarding_complete) {
+        navigate(ROUTES.OVERVIEW, { replace: true });
+        return;
+      }
+
+      engine.dispatch({ type: "INIT", status });
+      setInitialized(true);
+
+      // Simulate typing delay for natural feel
+      setTyping(true);
+      setTimeout(() => setTyping(false), 300);
+    } catch (err) {
+      setFetchError(err instanceof Error ? err.message : "Failed to load setup status");
     }
-    setStep(currentStep as 1 | 2 | 3 | 4);
-    setInitialized(true);
-  }, [currentStep, loading, initialized, navigate]);
+  }, [api, engine, navigate]);
 
-  if (loading || !initialized) {
-    return <SetupLayout><PageLoader /></SetupLayout>;
+  useEffect(() => {
+    if (!initialized) {
+      fetchStatus();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Navigate to dashboard on complete state
+  useEffect(() => {
+    if (engine.currentState === "complete" && engine.context.onboardingComplete) {
+      const timer = setTimeout(() => {
+        navigate(ROUTES.OVERVIEW, { replace: true });
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [engine.currentState, engine.context.onboardingComplete, navigate]);
+
+  const handleReply = useCallback(
+    async (value: string) => {
+      if (actionLoading) return;
+
+      // Show user message immediately via engine dispatch
+      engine.dispatch({ type: "REPLY", value });
+
+      // Simulate typing for next state
+      setTyping(true);
+      setTimeout(() => setTyping(false), 300);
+    },
+    [engine, actionLoading],
+  );
+
+  const handleInput = useCallback(
+    async (field: string, value: string) => {
+      if (actionLoading) return;
+
+      setActionLoading(true);
+      setTyping(true);
+
+      try {
+        // Map field to appropriate tool/action
+        const toolMap: Record<string, { tool: string; argKey: string }> = {
+          agentName: { tool: "rename_agent", argKey: "name" },
+          accountName: { tool: "configure_workspace", argKey: "account_name" },
+          primaryColor: { tool: "set_branding", argKey: "primary_color" },
+          apiKey: { tool: "create_provider", argKey: "api_key" },
+          text: { tool: "set_value", argKey: "value" },
+        };
+
+        const mapping = toolMap[field];
+
+        if (mapping) {
+          const result = await api.callTool(
+            mapping.tool,
+            { [mapping.argKey]: value },
+            engine.currentState,
+          );
+
+          if (result.ok) {
+            engine.dispatch({ type: "TOOL_SUCCESS", tool: mapping.tool });
+          } else {
+            engine.dispatch({
+              type: "TOOL_ERROR",
+              tool: mapping.tool,
+              error: result.error ?? "Unknown error",
+            });
+          }
+        }
+
+        // For fields that are pure engine transitions (no API call needed)
+        if (field === "agentName" || field === "accountName" || field === "primaryColor") {
+          engine.dispatch({ type: "INPUT", field, value });
+        }
+      } catch (err) {
+        engine.dispatch({
+          type: "TOOL_ERROR",
+          tool: field,
+          error: err instanceof Error ? err.message : "Network error",
+        });
+      } finally {
+        setActionLoading(false);
+        setTimeout(() => setTyping(false), 300);
+      }
+    },
+    [api, engine, actionLoading],
+  );
+
+  // Loading state
+  if (!initialized && !fetchError) {
+    return <LoadingSpinner />;
   }
 
-  const completedSteps: number[] = [];
-  if (step > 1) completedSteps.push(1);
-  if (step > 2) completedSteps.push(2);
-  if (step > 3) completedSteps.push(3);
-  if (showComplete) { completedSteps.push(1, 2, 3, 4); }
+  // Error state
+  if (fetchError) {
+    return <ErrorState message={fetchError} onRetry={fetchStatus} />;
+  }
 
-  // For resuming: find existing provider/agent from server data
-  const activeProvider = createdProvider ?? providers.find((p) => p.enabled &&
-    (p.api_key === "***" || p.provider_type === "claude_cli" || p.provider_type === "chatgpt_oauth")) ?? null;
-  const activeAgent = createdAgent ?? agents[0] ?? null;
-
-  const handleFinish = () => setShowComplete(true);
+  // Find the last message with quickReplies or inputField for the input area
+  const lastMessage = findLastInteractiveMessage(engine.messages);
 
   return (
-    <SetupLayout>
-      <SetupStepper currentStep={step} completedSteps={completedSteps} />
+    <div className="flex h-dvh flex-col bg-background">
+      {/* Header */}
+      <header className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 safe-top">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
+          A
+        </div>
+        <div>
+          <h1 className="text-base font-semibold text-foreground md:text-sm">
+            ARGO
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            {engine.context.agentName}
+          </p>
+        </div>
+      </header>
 
-      {step === 1 && (
-        <StepProvider
-          existingProvider={createdProvider}
-          onComplete={(provider) => {
-            setCreatedProvider(provider);
-            setStep(2);
-          }}
+      {/* Chat area */}
+      <OnboardingChat messages={engine.messages} typing={typing} />
+
+      {/* Input area */}
+      <footer className="shrink-0 border-t border-border safe-bottom">
+        <OnboardingInput
+          quickReplies={lastMessage?.quickReplies}
+          inputField={lastMessage?.inputField}
+          onReply={handleReply}
+          onInput={handleInput}
+          disabled={actionLoading}
         />
-      )}
-
-      {step === 2 && activeProvider && (
-        <StepModel
-          provider={activeProvider}
-          initialModel={selectedModel}
-          onBack={() => setStep(1)}
-          onComplete={(model) => {
-            setSelectedModel(model);
-            setStep(3);
-          }}
-        />
-      )}
-
-      {step === 3 && activeProvider && (
-        <StepAgent
-          provider={activeProvider}
-          model={selectedModel}
-          existingAgent={createdAgent}
-          onBack={() => setStep(2)}
-          onComplete={(agent) => {
-            setCreatedAgent(agent);
-            setStep(4);
-          }}
-        />
-      )}
-
-      {step === 4 && (
-        <StepChannel
-          agent={activeAgent}
-          onBack={() => setStep(3)}
-          onComplete={handleFinish}
-          onSkip={handleFinish}
-        />
-      )}
-
-      <SetupCompleteModal
-        open={showComplete}
-        onGoToDashboard={() => navigate(ROUTES.OVERVIEW, { replace: true })}
-      />
-    </SetupLayout>
+      </footer>
+    </div>
   );
+}
+
+/**
+ * Find the last message that has quickReplies or inputField.
+ * This determines what the input area shows.
+ */
+function findLastInteractiveMessage(
+  messages: ChatMessageLocal[],
+): ChatMessageLocal | undefined {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i];
+    if (msg && (msg.quickReplies || msg.inputField)) {
+      return msg;
+    }
+  }
+  return undefined;
 }

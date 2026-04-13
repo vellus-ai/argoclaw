@@ -69,6 +69,13 @@ func (m *mockOnboardingStore) CompleteOnboarding(ctx context.Context, tenantID s
 	return nil
 }
 
+func (m *mockOnboardingStore) UpdateLastCompletedState(ctx context.Context, tenantID string, state string) error {
+	if m.failOnUpdate {
+		return fmt.Errorf("store error")
+	}
+	return nil
+}
+
 // --- Helper: context with tenant ---
 
 func ctxWithTenant(tenantID uuid.UUID) context.Context {

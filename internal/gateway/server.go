@@ -70,6 +70,7 @@ type Server struct {
 	userAuthHandler    *httpapi.UserAuthHandler      // email/password auth endpoints
 	pluginHandler      *httpapi.PluginHandler      // plugin management API
 	pluginDataHandler  *httpapi.PluginDataHandler  // plugin KV data proxy API
+	onboardingHandler  *httpapi.OnboardingHandler  // onboarding HTTP API
 	agentStore         store.AgentStore             // for context injection in tools_invoke
 	msgBus             *bus.MessageBus              // for MCP bridge media delivery
 
@@ -325,6 +326,11 @@ func (s *Server) BuildMux() *http.ServeMux {
 	}
 	if s.anthropicAuthHandler != nil {
 		s.anthropicAuthHandler.RegisterRoutes(mux)
+	}
+
+	// Onboarding HTTP API (conversational onboarding flow)
+	if s.onboardingHandler != nil {
+		s.onboardingHandler.RegisterRoutes(mux)
 	}
 
 	// Plugin management + data proxy API
@@ -641,6 +647,9 @@ func (s *Server) SetDocsHandler(h *httpapi.DocsHandler) { s.docsHandler = h }
 
 // SetAgentStore sets the agent store for context injection in tools_invoke.
 func (s *Server) SetAgentStore(as store.AgentStore) { s.agentStore = as }
+
+// SetOnboardingHandler sets the onboarding HTTP API handler.
+func (s *Server) SetOnboardingHandler(h *httpapi.OnboardingHandler) { s.onboardingHandler = h }
 
 // SetPluginHandler sets the plugin management API handler.
 func (s *Server) SetPluginHandler(h *httpapi.PluginHandler) { s.pluginHandler = h }

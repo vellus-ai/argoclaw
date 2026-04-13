@@ -241,9 +241,10 @@ func setupToolRegistry(
 	return
 }
 
-// wireOnboardingTools creates the onboarding store and registers the 8 onboarding tools.
+// wireOnboardingTools creates the onboarding store, registers the 8 onboarding tools,
+// and returns the store for use by the OnboardingHandler.
 // Called after setupStoresAndTracing so that pgStores.DB is available.
-func wireOnboardingTools(reg *tools.Registry, db *sql.DB) {
+func wireOnboardingTools(reg *tools.Registry, db *sql.DB) *pg.PGOnboardingStore {
 	onbStore := pg.NewPGOnboardingStore(db)
 	onbTools := []tools.Tool{
 		tools.NewConfigureWorkspaceTool(),
@@ -265,6 +266,7 @@ func wireOnboardingTools(reg *tools.Registry, db *sql.DB) {
 	}
 	tools.RegisterToolGroup("group:onboarding", names)
 	slog.Info("onboarding tools registered", "count", len(onbTools))
+	return onbStore
 }
 
 // setupStoresAndTracing creates PG stores, tracing collector, snapshot worker, and wires cron config.

@@ -1,0 +1,165 @@
+{
+  "layout": {
+    "subtitle": "Vamos configurar seu gateway"
+  },
+  "steps": {
+    "provider": "Provedor",
+    "model": "Modelo",
+    "agent": "Agente",
+    "channel": "Canal",
+    "channelOptional": "(Opcional)"
+  },
+  "complete": {
+    "title": "Configuracao Concluida!",
+    "ready": "Seu sistema esta pronto!",
+    "description": "Provedor, agente e canal foram configurados. Voce pode gerencia-los a qualquer momento no dashboard.",
+    "goToDashboard": "Ir para o Dashboard"
+  },
+  "provider": {
+    "title": "Configurar Provedor LLM",
+    "descriptionCli": "Conecte usando sua instalacao local do Claude CLI. Nenhuma chave de API necessaria.",
+    "descriptionOauth": "Entre com sua conta ChatGPT para usar sua assinatura via OAuth. Nenhuma chave de API necessaria.",
+    "description": "Conecte-se a um provedor de IA para potencializar seus agentes. Voce precisara de uma chave de API.",
+    "providerType": "Tipo de Provedor",
+    "providerTypeHint": "O servico LLM que voce deseja conectar. OpenRouter e recomendado para acesso a multiplos modelos.",
+    "name": "Nome",
+    "nameHint": "Identificador interno para este provedor. Gerado automaticamente a partir do tipo.",
+    "apiKey": "Chave de API *",
+    "apiKeyHint": "Chave secreta do seu provedor. Criptografada no servidor e nunca exposta nas respostas da API.",
+    "apiKeyHintOAuth": "Execute 'claude setup-token' no terminal para obter o token OAuth. Token OAuth secreto do seu provedor. Criptografado no servidor.",
+    "setupToken": "Token de Configuracao",
+    "apiBase": "URL Base da API",
+    "apiBaseHint": "URL do endpoint para requisicoes. Preenchida automaticamente com base no tipo de provedor.",
+    "creating": "Criando...",
+    "create": "Criar Provedor",
+    "errors": {
+      "apiKeyRequired": "Chave de API e obrigatoria",
+      "oauthProviderNotFound": "Autenticacao OAuth bem-sucedida, mas o provedor nao foi encontrado. Tente novamente.",
+      "failedCreate": "Falha ao criar provedor"
+    }
+  },
+  "model": {
+    "title": "Selecionar e Verificar Modelo",
+    "description": "Escolha um modelo e verifique se a conexao com o provedor funciona.",
+    "provider": "Provedor:",
+    "model": "Modelo *",
+    "modelHint": "O modelo de IA a ser usado. Selecione da lista ou digite o ID do modelo manualmente.",
+    "loadingModels": "Carregando modelos...",
+    "selectModel": "Selecione ou digite um ID de modelo",
+    "noModelsHint": "Este provedor nao lista modelos — digite o ID do modelo manualmente.",
+    "verified": "Verificado",
+    "verify": "Verificar",
+    "verifying": "Verificando...",
+    "continue": "Continuar",
+    "modelVerified": "Modelo verificado",
+    "modelVerifiedDesc": "{{model}} esta funcionando corretamente",
+    "verificationFailed": "Verificacao falhou. Verifique sua chave de API e modelo."
+  },
+  "agent": {
+    "title": "Criar Seu Primeiro Agente",
+    "description": "Um agente e seu assistente de IA. Personalize seu nome e personalidade.",
+    "provider": "Provedor:",
+    "model": "Modelo:",
+    "displayName": "Nome de Exibicao",
+    "displayNameHint": "Sera gerado automaticamente durante a invocacao com base na personalidade do agente.",
+    "agentKey": "Chave do Agente",
+    "agentKeyHint": "Identificador unico do agente. Apenas letras minusculas, numeros e hifens.",
+    "agentKeyPlaceholder": "meu-agente",
+    "personality": "Personalidade do Agente",
+    "personalityHint": "Descreva o papel e comportamento do seu agente. A IA gerara arquivos de contexto a partir disso.",
+    "personalityPlaceholder": "Descreva a personalidade, proposito e comportamento do seu agente...",
+    "personalityHintBottom": "Personalize este prompt para moldar a personalidade e expertise do seu agente.",
+    "selfEvolve": "Auto-Evolucao",
+    "selfEvolveDesc": "Permitir que o agente evolua seu estilo de comunicacao ao longo do tempo via SOUL.md",
+    "creating": "Criando...",
+    "create": "Criar Agente",
+    "summoningFailed": "Invocacao falhou. Ajuste suas configuracoes e tente novamente.",
+    "errors": {
+      "noProvider": "Nenhum provedor disponivel",
+      "failedCreate": "Falha ao criar agente"
+    }
+  },
+  "channel": {
+    "title": "Conectar um Canal",
+    "description": "Conecte uma plataforma de mensagens ao seu agente. Voce pode adicionar canais depois.",
+    "skip": "Pular",
+    "skipFinish": "Pular e Finalizar",
+    "agent": "Agente:",
+    "channelType": "Tipo de Canal",
+    "channelTypeHint": "A plataforma de mensagens para conectar. Ex: Telegram, Discord, Zalo.",
+    "name": "Nome",
+    "nameHint": "Identificador interno para esta instancia de canal. Gerado automaticamente.",
+    "namePlaceholder": "meu-telegram",
+    "displayName": "Nome de Exibicao",
+    "displayNameHint": "Um nome amigavel mostrado na interface. Opcional.",
+    "displayNamePlaceholder": "Bot de Vendas",
+    "credentials": "Credenciais",
+    "credentialsHint": "Criptografadas no servidor. Nunca retornadas nas respostas da API.",
+    "creating": "Criando...",
+    "create": "Criar Canal",
+    "errors": {
+      "noAgent": "Nenhum agente disponivel",
+      "requiredFields": "Obrigatorio: {{fields}}",
+      "failedCreate": "Falha ao criar canal"
+    }
+  },
+  "common": {
+    "back": "Voltar"
+  },
+  "onboarding": {
+    "welcome": {
+      "greeting": "Ola, {{displayName}}! Sou o {{agentName}}, seu braco-direito.",
+      "intro": "Vou ajuda-lo a preparar seu ambiente. Sera rapido!",
+      "start": "Vamos comecar"
+    },
+    "naming": {
+      "question": "Meu nome padrao e {{agentName}}. Quer manter ou escolher outro?",
+      "keepDefault": "{{agentName}} esta otimo",
+      "customize": "Quero escolher outro nome",
+      "inputPlaceholder": "Digite o novo nome",
+      "confirm": "Pronto! Agora meu nome e {{agentName}}."
+    },
+    "workspace": {
+      "typeQuestion": "Uso pessoal ou empresarial?",
+      "personal": "Pessoal",
+      "business": "Empresa",
+      "nameQuestion": "Qual o nome da sua conta?",
+      "namePlaceholder": "Nome da empresa ou pessoal",
+      "confirm": "Conta '{{accountName}}' configurada."
+    },
+    "branding": {
+      "question": "Cor do tema? O padrao e azul marinho (#1E40AF).",
+      "keepDefault": "Azul esta otimo",
+      "customize": "Quero outra cor",
+      "confirm": "Tema atualizado!"
+    },
+    "provider": {
+      "question": "Vamos conectar um provedor de IA. Qual prefere?",
+      "skip": "Pular por agora",
+      "apiKeyLabel": "Cole a chave de API do {{provider}}",
+      "apiKeyPlaceholder": "sk-...",
+      "testingConnection": "Testando conexao...",
+      "confirm": "Provedor {{provider}} configurado!",
+      "skipMessage": "Sem problema! Voce pode configurar um provedor depois no dashboard."
+    },
+    "channel": {
+      "question": "O Webchat ja esta ativo. Conectar outro canal?",
+      "skip": "Nao, depois",
+      "confirm": "Veja as instrucoes de configuracao no dashboard."
+    },
+    "complete": {
+      "title": "Tudo pronto!",
+      "summary": "Seu ambiente esta configurado.",
+      "goToDashboard": "Ir para o Dashboard"
+    },
+    "error": {
+      "notUnderstood": "Nao entendi. Escolha uma das opcoes:",
+      "toolFailed": "Problema: {{error}}. Tentar novamente?",
+      "retry": "Tentar novamente"
+    },
+    "common": {
+      "skip": "Pular",
+      "typing": "Digitando..."
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "onboarding": {
+    "welcome": {
+      "greeting": "Hola, {{displayName}}! Soy {{agentName}}, tu asistente de confianza.",
+      "intro": "Te ayudare a configurar tu espacio de trabajo. Sera rapido!",
+      "start": "Empecemos"
+    },
+    "naming": {
+      "question": "Mi nombre predeterminado es {{agentName}}. Quieres mantenerlo o elegir otro?",
+      "keepDefault": "{{agentName}} esta bien",
+      "customize": "Quiero elegir otro nombre",
+      "inputPlaceholder": "Escribe el nuevo nombre",
+      "confirm": "Listo! Ahora me llamo {{agentName}}."
+    },
+    "workspace": {
+      "typeQuestion": "Uso personal o empresarial?",
+      "personal": "Personal",
+      "business": "Empresa",
+      "nameQuestion": "Cual es el nombre de tu cuenta?",
+      "namePlaceholder": "Nombre de la empresa o personal",
+      "confirm": "Cuenta '{{accountName}}' configurada."
+    },
+    "branding": {
+      "question": "Color del tema? El predeterminado es azul marino (#1E40AF).",
+      "keepDefault": "El azul esta bien",
+      "customize": "Quiero otro color",
+      "confirm": "Tema actualizado!"
+    },
+    "provider": {
+      "question": "Conectemos un proveedor de IA. Cual prefieres?",
+      "skip": "Saltar por ahora",
+      "apiKeyLabel": "Pega la clave API de {{provider}}",
+      "apiKeyPlaceholder": "sk-...",
+      "testingConnection": "Probando conexion...",
+      "confirm": "Proveedor {{provider}} configurado!",
+      "skipMessage": "Sin problema! Puedes configurar un proveedor mas tarde en el panel."
+    },
+    "channel": {
+      "question": "El Webchat ya esta activo. Conectar otro canal?",
+      "skip": "No, despues",
+      "confirm": "Consulta las instrucciones de configuracion en tu panel."
+    },
+    "complete": {
+      "title": "Todo listo!",
+      "summary": "Tu espacio de trabajo esta configurado.",
+      "goToDashboard": "Ir al Panel"
+    },
+    "error": {
+      "notUnderstood": "No entendi. Elige una de las opciones:",
+      "toolFailed": "Problema: {{error}}. Intentar de nuevo?",
+      "retry": "Intentar de nuevo"
+    },
+    "common": {
+      "skip": "Saltar",
+      "typing": "Escribiendo..."
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "onboarding": {
+    "welcome": {
+      "greeting": "Hallo, {{displayName}}! Ich bin {{agentName}}, Ihr vertrauenswuerdiger Assistent.",
+      "intro": "Ich helfe Ihnen, Ihren Arbeitsbereich einzurichten. Es geht schnell!",
+      "start": "Los geht's"
+    },
+    "naming": {
+      "question": "Mein Standardname ist {{agentName}}. Moechten Sie ihn behalten oder einen anderen waehlen?",
+      "keepDefault": "{{agentName}} ist gut",
+      "customize": "Ich moechte einen anderen Namen waehlen",
+      "inputPlaceholder": "Neuen Namen eingeben",
+      "confirm": "Fertig! Mein Name ist jetzt {{agentName}}."
+    },
+    "workspace": {
+      "typeQuestion": "Persoenliche oder geschaeftliche Nutzung?",
+      "personal": "Persoenlich",
+      "business": "Unternehmen",
+      "nameQuestion": "Wie lautet Ihr Kontoname?",
+      "namePlaceholder": "Firmen- oder persoenlicher Name",
+      "confirm": "Konto '{{accountName}}' konfiguriert."
+    },
+    "branding": {
+      "question": "Designfarbe? Standard ist Marineblau (#1E40AF).",
+      "keepDefault": "Blau ist gut",
+      "customize": "Ich moechte eine andere Farbe",
+      "confirm": "Design aktualisiert!"
+    },
+    "provider": {
+      "question": "Verbinden wir einen KI-Anbieter. Welchen bevorzugen Sie?",
+      "skip": "Vorerst ueberspringen",
+      "apiKeyLabel": "{{provider}} API-Schluessel einfuegen",
+      "apiKeyPlaceholder": "sk-...",
+      "testingConnection": "Verbindung testen...",
+      "confirm": "Anbieter {{provider}} konfiguriert!",
+      "skipMessage": "Kein Problem! Sie koennen spaeter im Dashboard einen Anbieter konfigurieren."
+    },
+    "channel": {
+      "question": "Webchat ist bereits aktiv. Einen weiteren Kanal verbinden?",
+      "skip": "Nein, spaeter",
+      "confirm": "Sehen Sie die Einrichtungsanleitung in Ihrem Dashboard."
+    },
+    "complete": {
+      "title": "Alles bereit!",
+      "summary": "Ihr Arbeitsbereich ist konfiguriert.",
+      "goToDashboard": "Zum Dashboard"
+    },
+    "error": {
+      "notUnderstood": "Ich habe das nicht verstanden. Waehlen Sie eine der Optionen:",
+      "toolFailed": "Problem: {{error}}. Erneut versuchen?",
+      "retry": "Erneut versuchen"
+    },
+    "common": {
+      "skip": "Ueberspringen",
+      "typing": "Tippt..."
+    }
+  }
+}

@@ -69,20 +69,26 @@ import viApiKeys from "./locales/vi/api-keys.json";
 import viCliCredentials from "./locales/vi/cli-credentials.json";
 import viPackages from "./locales/vi/packages.json";
 
-// --- PT namespaces (login only — fallback to EN for other namespaces) ---
+// --- PT namespaces (login + setup — fallback to EN for other namespaces) ---
 import ptLogin from "./locales/pt/login.json";
+import ptSetup from "./locales/pt/setup.json";
+import ptAgents from "./locales/pt/agents.json";
 
-// --- ES namespaces (login only — fallback to EN for other namespaces) ---
+// --- ES namespaces (login + setup — fallback to EN for other namespaces) ---
 import esLogin from "./locales/es/login.json";
+import esSetup from "./locales/es/setup.json";
 
-// --- FR namespaces (login only — fallback to EN for other namespaces) ---
+// --- FR namespaces (login + setup — fallback to EN for other namespaces) ---
 import frLogin from "./locales/fr/login.json";
+import frSetup from "./locales/fr/setup.json";
 
-// --- IT namespaces (login only — fallback to EN for other namespaces) ---
+// --- IT namespaces (login + setup — fallback to EN for other namespaces) ---
 import itLogin from "./locales/it/login.json";
+import itSetup from "./locales/it/setup.json";
 
-// --- DE namespaces (login only — fallback to EN for other namespaces) ---
+// --- DE namespaces (login + setup — fallback to EN for other namespaces) ---
 import deLogin from "./locales/de/login.json";
+import deSetup from "./locales/de/setup.json";
 
 // --- ZH namespaces ---
 import zhCommon from "./locales/zh/common.json";
@@ -184,12 +190,12 @@ i18n.use(initReactI18next).init({
       "cli-credentials": zhCliCredentials,
       packages: zhPackages,
     },
-    // ARGO product languages — login namespace only; other namespaces fall back to EN
-    pt: { login: ptLogin },
-    es: { login: esLogin },
-    fr: { login: frLogin },
-    it: { login: itLogin },
-    de: { login: deLogin },
+    // ARGO product languages — login + setup; other namespaces fall back to EN
+    pt: { login: ptLogin, setup: ptSetup, agents: ptAgents },
+    es: { login: esLogin, setup: esSetup },
+    fr: { login: frLogin, setup: frSetup },
+    it: { login: itLogin, setup: itSetup },
+    de: { login: deLogin, setup: deSetup },
   },
   ns: [...ns],
   defaultNS: "common",

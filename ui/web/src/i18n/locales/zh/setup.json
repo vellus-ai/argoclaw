@@ -105,5 +105,61 @@
   },
   "common": {
     "back": "返回"
+  },
+  "onboarding": {
+    "welcome": {
+      "greeting": "你好，{{displayName}}！我是{{agentName}}，你的得力助手。",
+      "intro": "我来帮你设置工作空间。很快就好！",
+      "start": "开始吧"
+    },
+    "naming": {
+      "question": "我的默认名称是{{agentName}}。你想保留还是选择其他名字？",
+      "keepDefault": "{{agentName}}很好",
+      "customize": "我想选择其他名字",
+      "inputPlaceholder": "输入新名称",
+      "confirm": "好了！我现在叫{{agentName}}。"
+    },
+    "workspace": {
+      "typeQuestion": "个人使用还是企业使用？",
+      "personal": "个人",
+      "business": "企业",
+      "nameQuestion": "你的账户名称是什么？",
+      "namePlaceholder": "公司或个人名称",
+      "confirm": "账户'{{accountName}}'已配置。"
+    },
+    "branding": {
+      "question": "主题颜色？默认是海军蓝(#1E40AF)。",
+      "keepDefault": "蓝色很好",
+      "customize": "我想要其他颜色",
+      "confirm": "主题已更新！"
+    },
+    "provider": {
+      "question": "让我们连接一个AI提供商。你喜欢哪个？",
+      "skip": "暂时跳过",
+      "apiKeyLabel": "粘贴{{provider}}的API密钥",
+      "apiKeyPlaceholder": "sk-...",
+      "testingConnection": "正在测试连接...",
+      "confirm": "提供商{{provider}}已配置！",
+      "skipMessage": "没问题！你可以稍后在仪表板中配置提供商。"
+    },
+    "channel": {
+      "question": "网页聊天已激活。连接其他频道吗？",
+      "skip": "不，以后再说",
+      "confirm": "请在仪表板中查看设置说明。"
+    },
+    "complete": {
+      "title": "全部完成！",
+      "summary": "你的工作空间已配置完毕。",
+      "goToDashboard": "前往仪表板"
+    },
+    "error": {
+      "notUnderstood": "我没有理解。请选择以下选项之一：",
+      "toolFailed": "问题：{{error}}。重试？",
+      "retry": "重试"
+    },
+    "common": {
+      "skip": "跳过",
+      "typing": "正在输入..."
+    }
   }
 }

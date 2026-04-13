@@ -93,14 +93,15 @@ func (s *PGOnboardingStore) UpdateTenantBranding(ctx context.Context, tenantID s
 // Joins tenants, setup_progress, and tenant_branding to build the status map.
 func (s *PGOnboardingStore) GetOnboardingStatus(ctx context.Context, tenantID string) (map[string]any, error) {
 	var (
-		settings        sql.NullString
-		accountType     sql.NullString
-		industry        sql.NullString
-		teamSize        sql.NullString
-		onbComplete     bool
-		completedAt     *time.Time
-		primaryColor    sql.NullString
-		productName     sql.NullString
+		settings           sql.NullString
+		accountType        sql.NullString
+		industry           sql.NullString
+		teamSize           sql.NullString
+		onbComplete        bool
+		completedAt        *time.Time
+		primaryColor       sql.NullString
+		productName        sql.NullString
+		lastCompletedState sql.NullString
 	)
 
 	err := s.db.QueryRowContext(ctx, `
@@ -109,7 +110,8 @@ func (s *PGOnboardingStore) GetOnboardingStatus(ctx context.Context, tenantID st
 			sp.account_type, sp.industry, sp.team_size,
 			COALESCE(sp.onboarding_complete, false),
 			sp.completed_at,
-			tb.primary_color, tb.product_name
+			tb.primary_color, tb.product_name,
+			sp.last_completed_state
 		FROM tenants t
 		LEFT JOIN setup_progress sp ON sp.tenant_id = t.id
 		LEFT JOIN tenant_branding tb ON tb.tenant_id = t.id
@@ -120,6 +122,7 @@ func (s *PGOnboardingStore) GetOnboardingStatus(ctx context.Context, tenantID st
 		&onbComplete,
 		&completedAt,
 		&primaryColor, &productName,
+		&lastCompletedState,
 	)
 	if err == sql.ErrNoRows {
 		return map[string]any{
@@ -156,8 +159,27 @@ func (s *PGOnboardingStore) GetOnboardingStatus(ctx context.Context, tenantID st
 	if completedAt != nil {
 		status["completed_at"] = completedAt.Format(time.RFC3339)
 	}
+	if lastCompletedState.Valid {
+		status["last_completed_state"] = lastCompletedState.String
+	}
 
 	return status, nil
+}
+
+// UpdateLastCompletedState records the last completed onboarding state for resume support.
+// Idempotent — uses UPSERT to create or update the setup_progress row.
+func (s *PGOnboardingStore) UpdateLastCompletedState(ctx context.Context, tenantID string, state string) error {
+	_, err := s.db.ExecContext(ctx, `
+		INSERT INTO setup_progress (tenant_id, last_completed_state, updated_at)
+		VALUES ($1, $2, NOW())
+		ON CONFLICT (tenant_id) DO UPDATE SET
+			last_completed_state = $2,
+			updated_at = NOW()`,
+		tenantID, state)
+	if err != nil {
+		return fmt.Errorf("update last_completed_state: %w", err)
+	}
+	return nil
 }
 
 // CompleteOnboarding marks the tenant's onboarding as complete.

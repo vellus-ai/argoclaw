@@ -1,0 +1,58 @@
+{
+  "onboarding": {
+    "welcome": {
+      "greeting": "Bonjour, {{displayName}} ! Je suis {{agentName}}, votre assistant de confiance.",
+      "intro": "Je vais vous aider a configurer votre espace de travail. Ce sera rapide !",
+      "start": "Commençons"
+    },
+    "naming": {
+      "question": "Mon nom par defaut est {{agentName}}. Voulez-vous le garder ou en choisir un autre ?",
+      "keepDefault": "{{agentName}} est tres bien",
+      "customize": "Je veux choisir un autre nom",
+      "inputPlaceholder": "Tapez le nouveau nom",
+      "confirm": "C'est fait ! Mon nom est maintenant {{agentName}}."
+    },
+    "workspace": {
+      "typeQuestion": "Usage personnel ou professionnel ?",
+      "personal": "Personnel",
+      "business": "Entreprise",
+      "nameQuestion": "Quel est le nom de votre compte ?",
+      "namePlaceholder": "Nom de l'entreprise ou personnel",
+      "confirm": "Compte '{{accountName}}' configure."
+    },
+    "branding": {
+      "question": "Couleur du theme ? Le defaut est bleu marine (#1E40AF).",
+      "keepDefault": "Le bleu est tres bien",
+      "customize": "Je veux une autre couleur",
+      "confirm": "Theme mis a jour !"
+    },
+    "provider": {
+      "question": "Connectons un fournisseur d'IA. Lequel preferez-vous ?",
+      "skip": "Passer pour l'instant",
+      "apiKeyLabel": "Collez la cle API de {{provider}}",
+      "apiKeyPlaceholder": "sk-...",
+      "testingConnection": "Test de connexion...",
+      "confirm": "Fournisseur {{provider}} configure !",
+      "skipMessage": "Pas de probleme ! Vous pouvez configurer un fournisseur plus tard dans le tableau de bord."
+    },
+    "channel": {
+      "question": "Le Webchat est deja actif. Connecter un autre canal ?",
+      "skip": "Non, plus tard",
+      "confirm": "Consultez les instructions dans votre tableau de bord."
+    },
+    "complete": {
+      "title": "Tout est pret !",
+      "summary": "Votre espace de travail est configure.",
+      "goToDashboard": "Aller au tableau de bord"
+    },
+    "error": {
+      "notUnderstood": "Je n'ai pas compris. Choisissez une des options :",
+      "toolFailed": "Probleme : {{error}}. Reessayer ?",
+      "retry": "Reessayer"
+    },
+    "common": {
+      "skip": "Passer",
+      "typing": "En train d'ecrire..."
+    }
+  }
+}
