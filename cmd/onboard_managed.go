@@ -53,7 +53,8 @@ func seedOnboardPlaceholders(dsn string) error {
 		return nil
 	}
 
-	return seedPlaceholdersWithStore(context.Background(), stores.Providers)
+	// appsec:cross-tenant-bypass — system bootstrapping during init container, no user context
+	return seedPlaceholdersWithStore(store.WithCrossTenant(context.Background()), stores.Providers)
 }
 
 // seedPlaceholdersWithStore seeds placeholder providers using the given ProviderStore.
