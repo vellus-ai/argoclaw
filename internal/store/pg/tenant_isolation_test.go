@@ -440,6 +440,143 @@ func TestCanary_DataExistsBothTenants_StoreFilters(t *testing.T) {
 	}
 }
 
+// ============================================================
+// PBT: Agent isolation (Task 3.7)
+// ============================================================
+
+func TestPBT_AgentList_NeverLeaksCrossTenant(t *testing.T) {
+	db := testutil.SetupDB(t)
+	tenantA, tenantB := setupTwoTenants(t, db)
+
+	as := pg.NewPGAgentStore(db)
+
+	f := func(seed [4]byte) bool {
+		suffix := uuid.Must(uuid.NewV7()).String()[:8]
+		agentKey := "pbt-agent-" + suffix
+
+		agentID := testutil.CreateAgent(t, db, tenantA, agentKey, "PBT Agent "+suffix)
+		defer db.ExecContext(context.Background(), "UPDATE agents SET deleted_at = NOW() WHERE id = $1", agentID)
+
+		// Tenant B lists agents — should never see tenant A's agent
+		ctxB := testutil.TenantCtx(tenantB)
+		agentsB, err := as.List(ctxB, "")
+		if err != nil {
+			return true // skip on error
+		}
+		for _, a := range agentsB {
+			if a.ID == agentID {
+				return false // leak detected
+			}
+		}
+		_ = seed
+		return true
+	}
+	cfg := &quick.Config{MaxCount: 50, Rand: rand.New(rand.NewSource(43))}
+	if err := quick.Check(f, cfg); err != nil {
+		t.Errorf("PBT agent list leak: %v", err)
+	}
+}
+
+// ============================================================
+// PBT: Cron isolation (Task 5.7)
+// ============================================================
+
+func TestPBT_CronJobs_NeverLeaksCrossTenant(t *testing.T) {
+	db := testutil.SetupDB(t)
+	tenantA, tenantB := setupTwoTenants(t, db)
+
+	agentA := testutil.CreateAgent(t, db, tenantA, "pbt-cron-agent-"+uuid.Must(uuid.NewV7()).String()[:8], "PBT Cron Agent")
+
+	cs := pg.NewPGCronStore(db)
+
+	f := func(seed [4]byte) bool {
+		suffix := uuid.Must(uuid.NewV7()).String()[:8]
+		jobName := "pbt-job-" + suffix
+
+		jobID := testutil.CreateCronJob(t, db, tenantA, agentA, jobName)
+		defer db.ExecContext(context.Background(), "DELETE FROM cron_jobs WHERE id = $1", jobID)
+
+		// Tenant B lists jobs — should never see tenant A's job
+		ctxB := testutil.TenantCtx(tenantB)
+		jobsB := cs.ListJobs(ctxB, true, "", "")
+		for _, j := range jobsB {
+			if j.ID == jobID.String() {
+				return false // leak detected
+			}
+		}
+		_ = seed
+		return true
+	}
+	cfg := &quick.Config{MaxCount: 50, Rand: rand.New(rand.NewSource(44))}
+	if err := quick.Check(f, cfg); err != nil {
+		t.Errorf("PBT cron job leak: %v", err)
+	}
+}
+
+// ============================================================
+// ErrTenantRequired tests (Task 12.5)
+// ============================================================
+
+func TestErrTenantRequired_AgentStore_EmptyContext(t *testing.T) {
+	db := testutil.SetupDB(t)
+	as := pg.NewPGAgentStore(db)
+	ctx := context.Background() // no tenant
+
+	_, err := as.List(ctx, "")
+	if err != store.ErrTenantRequired {
+		t.Errorf("AgentStore.List: expected ErrTenantRequired, got %v", err)
+	}
+
+	_, err = as.GetByID(ctx, uuid.New())
+	if err != store.ErrTenantRequired {
+		t.Errorf("AgentStore.GetByID: expected ErrTenantRequired, got %v", err)
+	}
+}
+
+func TestErrTenantRequired_SessionStore_EmptyContext(t *testing.T) {
+	db := testutil.SetupDB(t)
+	ss := pg.NewPGSessionStore(db)
+	ctx := context.Background() // no tenant
+
+	result := ss.ListPaged(ctx, store.SessionListOpts{Limit: 10})
+	if len(result.Sessions) != 0 || result.Total != 0 {
+		t.Errorf("SessionStore.ListPaged without tenant should return empty, got %d sessions", len(result.Sessions))
+	}
+}
+
+func TestErrTenantRequired_CronStore_EmptyContext(t *testing.T) {
+	db := testutil.SetupDB(t)
+	cs := pg.NewPGCronStore(db)
+	ctx := context.Background() // no tenant
+
+	jobs := cs.ListJobs(ctx, true, "", "")
+	if jobs != nil {
+		t.Errorf("CronStore.ListJobs without tenant should return nil, got %d jobs", len(jobs))
+	}
+}
+
+func TestErrTenantRequired_SkillStore_EmptyContext(t *testing.T) {
+	db := testutil.SetupDB(t)
+	ss := pg.NewPGSkillStore(db, t.TempDir())
+	ctx := context.Background() // no tenant
+
+	skills := ss.ListSkillsByTenant(ctx)
+	if skills != nil {
+		t.Errorf("SkillStore.ListSkillsByTenant without tenant should return nil, got %d skills", len(skills))
+	}
+}
+
+func TestErrTenantRequired_ProviderStore_EmptyContext(t *testing.T) {
+	db := testutil.SetupDB(t)
+	ps := pg.NewPGProviderStore(db, "")
+	ctx := context.Background() // no tenant
+
+	_, err := ps.ListProviders(ctx)
+	if err != store.ErrTenantRequired {
+		t.Errorf("ProviderStore.ListProviders: expected ErrTenantRequired, got %v", err)
+	}
+}
+
 // --- helpers ---
 
 func ptrInt64(v int64) *int64 { return &v }

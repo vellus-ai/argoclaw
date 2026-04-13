@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"testing/quick"
 
 	"github.com/google/uuid"
 
@@ -212,5 +213,71 @@ func TestRouter_Handle_RejectsNilUUIDTenant(t *testing.T) {
 	}
 	if resp.Error == nil || resp.Error.Code != protocol.ErrForbidden {
 		t.Errorf("expected ErrForbidden, got %+v", resp.Error)
+	}
+}
+
+// --- PBT: whitelist consistency (Task 10.4) ---
+
+func TestPBT_WhitelistMethods_NeverRejectForMissingTenant(t *testing.T) {
+	t.Parallel()
+	exemptMethods := []string{protocol.MethodConnect, protocol.MethodHealth, protocol.MethodBrowserPairingStatus}
+
+	f := func(idx uint8) bool {
+		method := exemptMethods[int(idx)%len(exemptMethods)]
+		client := testClient("", "", "en") // no tenant
+
+		handlerCalled := false
+		router := &MethodRouter{
+			handlers: map[string]MethodHandler{
+				method: func(_ context.Context, _ *Client, _ *protocol.RequestFrame) {
+					handlerCalled = true
+				},
+			},
+			server: &Server{},
+		}
+
+		req := &protocol.RequestFrame{ID: "r1", Method: method}
+		router.Handle(context.Background(), client, req)
+		return handlerCalled // exempt methods must always reach the handler
+	}
+	if err := quick.Check(f, &quick.Config{MaxCount: 50}); err != nil {
+		t.Errorf("PBT failed: exempt method rejected for missing tenant: %v", err)
+	}
+}
+
+func TestPBT_NonWhitelistMethods_AlwaysRejectEmptyTenant(t *testing.T) {
+	t.Parallel()
+	f := func(seed uint16) bool {
+		methods := []string{"agents.list", "chat.send", "sessions.list", "cron.list",
+			"skills.update", "teams.list", "config.get", "providers.list"}
+		method := methods[int(seed)%len(methods)]
+
+		client := testClient("", "user-1", "en") // no tenant
+
+		handlerCalled := false
+		router := &MethodRouter{
+			handlers: map[string]MethodHandler{
+				method: func(_ context.Context, _ *Client, _ *protocol.RequestFrame) {
+					handlerCalled = true
+				},
+			},
+			server: &Server{},
+		}
+
+		req := &protocol.RequestFrame{ID: "r1", Method: method}
+		router.Handle(context.Background(), client, req)
+
+		if handlerCalled {
+			return false // handler should NOT have been called
+		}
+		resp := <-client.send
+		var frame protocol.ResponseFrame
+		if err := json.Unmarshal(resp, &frame); err != nil {
+			return false
+		}
+		return frame.Error != nil && frame.Error.Code == protocol.ErrForbidden
+	}
+	if err := quick.Check(f, &quick.Config{MaxCount: 50}); err != nil {
+		t.Errorf("PBT failed: non-exempt method with empty tenant was not rejected: %v", err)
 	}
 }
