@@ -132,6 +132,25 @@ describe("useOnboardingStatus", () => {
     expect(result.current.status).toBeNull();
   });
 
+  it("should respect legacy setup_skipped localStorage flag", async () => {
+    localStorage.setItem("setup_skipped", "1");
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+
+    const { result } = renderHook(() => useOnboardingStatus());
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // Should NOT call the API at all
+    expect(fetchSpy).not.toHaveBeenCalled();
+    // Should report as complete
+    expect(result.current.status?.onboarding_complete).toBe(true);
+    expect(result.current.needsSetup).toBe(false);
+    expect(result.current.error).toBeNull();
+  });
+
   it("should return all status fields from API", async () => {
     mockFetchSuccess({
       onboarding_complete: false,

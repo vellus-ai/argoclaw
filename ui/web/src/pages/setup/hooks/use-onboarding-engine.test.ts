@@ -38,6 +38,7 @@ function makeState(
     context: { ...INITIAL_CONTEXT, ...overrides },
     messages: [] as ChatMessageLocal[],
     error: null,
+    _translator: mockT,
   };
 }
 
@@ -519,6 +520,58 @@ describe("onboardingReducer", () => {
       });
       expect(next.currentState).toBe("provider_config");
       expect(next.error).toBe("Invalid API key");
+    });
+  });
+
+  // ========================================================================
+  // Message accumulation in reducer (Blocker 2 fix)
+  // ========================================================================
+
+  describe("message accumulation — immutable", () => {
+    it("REPLY should add user message to state.messages immutably", () => {
+      const state = makeState("welcome");
+      const originalMessages = state.messages;
+      const next = onboardingReducer(state, {
+        type: "REPLY",
+        value: "start",
+      });
+      // Original messages array must NOT be mutated
+      expect(originalMessages).toHaveLength(0);
+      // New state should have user message + state messages
+      expect(next.messages.length).toBeGreaterThan(0);
+      expect(next.messages.some((m) => m.role === "user" && m.content === "start")).toBe(true);
+    });
+
+    it("INPUT should add user message to state.messages immutably", () => {
+      const state = makeState("naming_custom");
+      const originalMessages = state.messages;
+      const next = onboardingReducer(state, {
+        type: "INPUT",
+        field: "agentName",
+        value: "Jarvis",
+      });
+      expect(originalMessages).toHaveLength(0);
+      expect(next.messages.some((m) => m.role === "user" && m.content === "Jarvis")).toBe(true);
+    });
+
+    it("INPUT with apiKey field should NOT add user message", () => {
+      const state = makeState("provider_config", { selectedProvider: "openai" });
+      const next = onboardingReducer(state, {
+        type: "INPUT",
+        field: "apiKey",
+        value: "sk-secret-key",
+      });
+      expect(next.messages.every((m) => m.content !== "sk-secret-key")).toBe(true);
+    });
+
+    it("text rejection should still add user message", () => {
+      const state = makeState("welcome");
+      const next = onboardingReducer(state, {
+        type: "REPLY",
+        value: "random text",
+      });
+      expect(next.error).toBe("not_understood");
+      expect(next.messages.some((m) => m.role === "user" && m.content === "random text")).toBe(true);
     });
   });
 

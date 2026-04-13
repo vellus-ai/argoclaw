@@ -8,6 +8,15 @@ import (
 	"github.com/vellus-ai/argoclaw/internal/tools"
 )
 
+// validCompletedStates is the whitelist of valid values for completed_state.
+var validCompletedStates = map[string]bool{
+	"welcome": true, "naming": true, "naming_custom": true,
+	"workspace_type": true, "workspace_details": true,
+	"branding": true, "branding_custom": true,
+	"provider": true, "provider_config": true,
+	"channel": true, "complete": true,
+}
+
 // allowedOnboardingTools is the whitelist of tools callable via the onboarding endpoint.
 // Any tool not in this list is rejected with 403.
 var allowedOnboardingTools = map[string]bool{
@@ -23,19 +32,17 @@ var allowedOnboardingTools = map[string]bool{
 // OnboardingHandler provides HTTP endpoints for the conversational onboarding flow.
 // Uses HTTP (not WebSocket) to avoid dependency on WS connection during initial setup.
 type OnboardingHandler struct {
-	store     tools.OnboardingStore
-	registry  *tools.Registry
-	token     string // gateway token for auth fallback
-	jwtSecret string // JWT signing key
+	store    tools.OnboardingStore
+	registry *tools.Registry
+	token    string // gateway token for auth fallback
 }
 
 // NewOnboardingHandler creates a new onboarding HTTP handler.
-func NewOnboardingHandler(store tools.OnboardingStore, registry *tools.Registry, token, jwtSecret string) *OnboardingHandler {
+func NewOnboardingHandler(store tools.OnboardingStore, registry *tools.Registry, token string) *OnboardingHandler {
 	return &OnboardingHandler{
-		store:     store,
-		registry:  registry,
-		token:     token,
-		jwtSecret: jwtSecret,
+		store:    store,
+		registry: registry,
+		token:    token,
 	}
 }
 
@@ -83,7 +90,7 @@ func (h *OnboardingHandler) handleAction(w http.ResponseWriter, r *http.Request)
 	}
 
 	var req onboardingActionRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<16)).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON"})
 		return
 	}
@@ -108,8 +115,8 @@ func (h *OnboardingHandler) handleAction(w http.ResponseWriter, r *http.Request)
 
 	result := h.registry.Execute(r.Context(), req.Tool, args)
 
-	// Persist last completed state if provided and tool succeeded
-	if req.CompletedState != "" && !result.IsError {
+	// Persist last completed state if provided, valid, and tool succeeded
+	if req.CompletedState != "" && !result.IsError && validCompletedStates[req.CompletedState] {
 		if err := h.store.UpdateLastCompletedState(r.Context(), tenantID, req.CompletedState); err != nil {
 			slog.Error("onboarding.update_state", "error", err, "tenant_id", tenantID, "state", req.CompletedState)
 			// Non-fatal — don't fail the tool call

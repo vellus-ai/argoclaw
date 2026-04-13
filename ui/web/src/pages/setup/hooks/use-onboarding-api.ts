@@ -16,7 +16,7 @@ export interface ToolResult {
 }
 
 export interface OnboardingApi {
-  getStatus(): Promise<OnboardingStatusResponse>;
+  getStatus(signal?: AbortSignal): Promise<OnboardingStatusResponse>;
   callTool(
     tool: string,
     args: Record<string, unknown>,
@@ -47,9 +47,14 @@ async function handleAuthError(status: number): Promise<never> {
   throw new Error(`HTTP ${status}`);
 }
 
-async function getStatus(): Promise<OnboardingStatusResponse> {
+async function getStatus(signal?: AbortSignal): Promise<OnboardingStatusResponse> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  // If an external signal is provided, abort our internal controller when it fires
+  if (signal) {
+    signal.addEventListener("abort", () => controller.abort(), { once: true });
+  }
 
   try {
     const res = await fetch("/v1/onboarding/status", {

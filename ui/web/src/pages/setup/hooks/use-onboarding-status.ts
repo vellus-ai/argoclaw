@@ -14,6 +14,20 @@ export function useOnboardingStatus(): {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Respect legacy skip flag — if user previously skipped, treat as complete
+    const skipFlag =
+      typeof window !== "undefined" &&
+      localStorage.getItem("setup_skipped") === "1";
+    if (skipFlag) {
+      setStatus({
+        onboarding_complete: true,
+        workspace_configured: false,
+        branding_set: false,
+      });
+      setLoading(false);
+      return;
+    }
+
     const controller = new AbortController();
     let cancelled = false;
 
@@ -21,7 +35,7 @@ export function useOnboardingStatus(): {
       try {
         setLoading(true);
         setError(null);
-        const result = await api.getStatus();
+        const result = await api.getStatus(controller.signal);
         if (!cancelled) {
           setStatus(result);
         }

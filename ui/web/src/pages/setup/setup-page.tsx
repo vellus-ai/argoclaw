@@ -122,6 +122,11 @@ export function SetupPage() {
 
           if (result.ok) {
             engine.dispatch({ type: "TOOL_SUCCESS", tool: mapping.tool });
+
+            // Only dispatch INPUT (state transition) on API success
+            if (field === "agentName" || field === "accountName" || field === "primaryColor") {
+              engine.dispatch({ type: "INPUT", field, value });
+            }
           } else {
             engine.dispatch({
               type: "TOOL_ERROR",
@@ -129,11 +134,6 @@ export function SetupPage() {
               error: result.error ?? "Unknown error",
             });
           }
-        }
-
-        // For fields that are pure engine transitions (no API call needed)
-        if (field === "agentName" || field === "accountName" || field === "primaryColor") {
-          engine.dispatch({ type: "INPUT", field, value });
         }
       } catch (err) {
         engine.dispatch({

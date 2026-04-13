@@ -313,7 +313,7 @@ func runGateway() {
 	}
 
 	// Onboarding HTTP API (conversational onboarding — uses tools via registry)
-	server.SetOnboardingHandler(httpapi.NewOnboardingHandler(onbStore, toolsReg, cfg.Gateway.Token, cfg.Gateway.JWTSecret))
+	server.SetOnboardingHandler(httpapi.NewOnboardingHandler(onbStore, toolsReg, cfg.Gateway.Token))
 
 	// contextFileInterceptor is created inside wireExtras.
 	// Declared here so it can be passed to registerAllMethods → AgentsMethods

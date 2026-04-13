@@ -40,7 +40,8 @@ export type OnboardingAction =
   | { type: "INPUT"; field: string; value: string }
   | { type: "SKIP" }
   | { type: "TOOL_SUCCESS"; tool: string }
-  | { type: "TOOL_ERROR"; tool: string; error: string };
+  | { type: "TOOL_ERROR"; tool: string; error: string }
+  | { type: "_SET_TRANSLATOR"; _translator: TranslatorFn };
 
 export interface ChatMessageLocal {
   id: string;
@@ -72,6 +73,8 @@ export interface EngineState {
   context: OnboardingContext;
   messages: ChatMessageLocal[];
   error: string | null;
+  /** Internal: translator function injected by the hook for reducer use. */
+  _translator?: TranslatorFn;
 }
 
 // ---------------------------------------------------------------------------
@@ -417,20 +420,58 @@ export function onboardingReducer(
     }
 
     case "REPLY": {
+      // Record user message immutably
+      const userMsg = makeUser(action.value);
+      const withUserMsg = { ...state, messages: [...state.messages, userMsg] };
+
       const allowed = validReplies(state.currentState);
       if (allowed && !allowed.includes(action.value)) {
         // Text rejection — state doesn't change
         return {
-          ...state,
+          ...withUserMsg,
           error: "not_understood",
         };
       }
 
-      return handleReply(state, action.value);
+      // Snapshot current state messages into history before transition
+      const currentMsgs = getMessagesForState(
+        state.currentState,
+        state._translator!,
+        state.context,
+      );
+      const existingIds = new Set(withUserMsg.messages.map((m) => m.id));
+      const newStateMsgs = currentMsgs.filter((m) => !existingIds.has(m.id));
+
+      const stateWithHistory = {
+        ...withUserMsg,
+        messages: [...withUserMsg.messages, ...newStateMsgs],
+      };
+
+      return handleReply(stateWithHistory, action.value);
     }
 
     case "INPUT": {
-      return handleInput(state, action.field, action.value);
+      // Don't record password inputs (API keys)
+      const inputMessages =
+        action.field !== "apiKey"
+          ? [...state.messages, makeUser(action.value)]
+          : [...state.messages];
+
+      // Snapshot current state messages into history before transition
+      const currentMsgs = getMessagesForState(
+        state.currentState,
+        state._translator!,
+        state.context,
+      );
+      const existingIds = new Set(inputMessages.map((m) => m.id));
+      const newStateMsgs = currentMsgs.filter((m) => !existingIds.has(m.id));
+
+      const stateWithHistory = {
+        ...state,
+        messages: [...inputMessages, ...newStateMsgs],
+      };
+
+      return handleInput(stateWithHistory, action.field, action.value);
     }
 
     case "SKIP": {
@@ -445,6 +486,13 @@ export function onboardingReducer(
       return {
         ...state,
         error: action.error,
+      };
+    }
+
+    case "_SET_TRANSLATOR": {
+      return {
+        ...state,
+        _translator: action._translator,
       };
     }
 
@@ -647,9 +695,22 @@ export function useOnboardingEngine(
   const initial: EngineState = {
     ...INITIAL_ENGINE_STATE,
     context: { ...INITIAL_CONTEXT, ...initialContext },
+    _translator: t,
   };
 
   const [state, rawDispatch] = useReducer(onboardingReducer, initial);
+
+  // Keep the translator reference up-to-date in state for the reducer
+  // (language could change). We inject it via a wrapper dispatch.
+  const dispatch = useCallback(
+    (action: OnboardingAction) => {
+      // Inject current translator into state before dispatching.
+      // The reducer reads _translator for message generation.
+      rawDispatch({ type: "_SET_TRANSLATOR", _translator: t });
+      rawDispatch(action);
+    },
+    [rawDispatch, t],
+  );
 
   // Build messages reactively based on current state
   const stateMessages =
@@ -657,13 +718,8 @@ export function useOnboardingEngine(
       ? []
       : getMessagesForState(state.currentState, t, state.context);
 
-  // Add error message if present
-  const allMessages: ChatMessageLocal[] = [...state.messages];
-
-  // If the engine transitions, we produce new messages from the state.
-  // The existing messages in state.messages are from previous states.
-  // We append state-specific messages.
-  const displayMessages = [...allMessages, ...stateMessages];
+  // Combine history messages with current state messages
+  const displayMessages = [...state.messages, ...stateMessages];
 
   // If there's a text rejection error, append the error message
   if (state.error === "not_understood") {
@@ -678,36 +734,6 @@ export function useOnboardingEngine(
   } else if (state.error && state.error !== "not_understood") {
     displayMessages.push(toolErrorMessage(t, state.error));
   }
-
-  // Wrap dispatch to append user messages to history
-  const dispatch = useCallback(
-    (action: OnboardingAction) => {
-      // Before dispatching, record user messages in the state
-      if (action.type === "REPLY") {
-        state.messages.push(makeUser(action.value));
-      } else if (action.type === "INPUT") {
-        // Don't record password inputs (API keys)
-        if (action.field !== "apiKey") {
-          state.messages.push(makeUser(action.value));
-        }
-      }
-
-      // Append current state messages to history before transition
-      const currentMsgs = getMessagesForState(
-        state.currentState,
-        t,
-        state.context,
-      );
-      for (const msg of currentMsgs) {
-        if (!state.messages.some((m) => m.id === msg.id)) {
-          state.messages.push(msg);
-        }
-      }
-
-      rawDispatch(action);
-    },
-    [rawDispatch, state, t],
-  );
 
   return {
     messages: displayMessages,

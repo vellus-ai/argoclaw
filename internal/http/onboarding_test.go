@@ -114,7 +114,7 @@ func setupOnboardingHandler(t *testing.T, ms *mockOnbStore) *http.ServeMux {
 		reg.Register(tool)
 	}
 
-	h := NewOnboardingHandler(ms, reg, testGatewayToken, testJWTSecret)
+	h := NewOnboardingHandler(ms, reg, testGatewayToken)
 	mux := http.NewServeMux()
 
 	// Wrap with JWT middleware (same as production)
