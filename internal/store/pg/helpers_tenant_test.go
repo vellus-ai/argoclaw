@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"testing/quick"
 
@@ -34,7 +35,7 @@ func TestRequireTenantID_EmptyContext_ReturnsErrTenantRequired(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected ErrTenantRequired, got nil")
 	}
-	if err != store.ErrTenantRequired {
+	if !errors.Is(err, store.ErrTenantRequired) {
 		t.Errorf("expected ErrTenantRequired, got %v", err)
 	}
 }
@@ -47,7 +48,7 @@ func TestRequireTenantID_NilUUID_ReturnsErrTenantRequired(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected ErrTenantRequired, got nil")
 	}
-	if err != store.ErrTenantRequired {
+	if !errors.Is(err, store.ErrTenantRequired) {
 		t.Errorf("expected ErrTenantRequired, got %v", err)
 	}
 }
@@ -111,10 +112,21 @@ func TestPBT_RequireTenantID_ValidUUID_AlwaysReturned(t *testing.T) {
 
 func TestPBT_RequireTenantID_EmptyContext_AlwaysReturnsError(t *testing.T) {
 	t.Parallel()
-	f := func() bool {
+	// Vary contexts: plain, with cancel, with user_id, with locale — all lack tenant_id.
+	f := func(seed uint8) bool {
 		ctx := context.Background()
+		switch seed % 4 {
+		case 1:
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithCancel(ctx)
+			defer cancel()
+		case 2:
+			ctx = store.WithUserID(ctx, "random-user")
+		case 3:
+			ctx = store.WithLocale(ctx, "vi")
+		}
 		_, err := requireTenantID(ctx)
-		return err == store.ErrTenantRequired
+		return errors.Is(err, store.ErrTenantRequired)
 	}
 	if err := quick.Check(f, &quick.Config{MaxCount: 100}); err != nil {
 		t.Errorf("PBT failed: %v", err)

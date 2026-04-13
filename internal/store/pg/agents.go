@@ -49,7 +49,7 @@ func (s *PGAgentStore) generateAgentEmbedding(ctx context.Context, agentID uuid.
 }
 
 // BackfillAgentEmbeddings generates embeddings for all active agents that have frontmatter but no embedding.
-// appsec:cross-tenant-bypass — administrative backfill operation
+// Callers that need cross-tenant access (e.g. admin CLI) must pass store.WithCrossTenant(ctx).
 func (s *PGAgentStore) BackfillAgentEmbeddings(ctx context.Context) (int, error) {
 	if s.embProvider == nil {
 		return 0, nil

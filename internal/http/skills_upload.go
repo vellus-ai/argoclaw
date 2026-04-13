@@ -200,7 +200,7 @@ func (h *SkillsHandler) handleUpload(w http.ResponseWriter, r *http.Request) {
 		ok, missing := skills.CheckSkillDeps(manifest)
 		if !ok {
 			// Set skill to archived due to missing deps
-			_ = h.skills.UpdateSkill(id, map[string]any{"status": "archived"})
+			_ = h.skills.UpdateSkillWithCtx(r.Context(), id, map[string]any{"status": "archived"})
 			response["deps_warning"] = "missing dependencies: " + skills.FormatMissing(missing)
 		}
 	}

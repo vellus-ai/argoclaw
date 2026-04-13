@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -114,7 +115,7 @@ func (h *SkillsHandler) handleUpdate(w http.ResponseWriter, r *http.Request) {
 	delete(updates, "is_system")
 	delete(updates, "enabled")
 
-	if err := h.skills.UpdateSkill(id, updates); err != nil {
+	if err := h.skills.UpdateSkillWithCtx(r.Context(), id, updates); err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
@@ -143,7 +144,7 @@ func (h *SkillsHandler) handleDelete(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := h.skills.DeleteSkill(id); err != nil {
+	if err := h.skills.DeleteSkillWithCtx(r.Context(), id); err != nil {
 		if err.Error() == "cannot delete system skill" {
 			writeJSON(w, http.StatusForbidden, map[string]string{"error": "cannot delete system skill"})
 			return
@@ -204,7 +205,7 @@ func (h *SkillsHandler) handleInstallDeps(w http.ResponseWriter, r *http.Request
 			continue
 		}
 		if ok && sk.Status == "archived" {
-			_ = h.skills.UpdateSkill(id, map[string]any{"status": "active"})
+			_ = h.skills.UpdateSkillWithCtx(r.Context(), id, map[string]any{"status": "active"})
 			h.skills.BumpVersion()
 		}
 		status := "active"
@@ -265,7 +266,7 @@ func (h *SkillsHandler) handleInstallDep(w http.ResponseWriter, r *http.Request)
 	}
 
 	if ok {
-		h.rescanAndUpdate()
+		h.rescanAndUpdate(r.Context())
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{"ok": ok, "error": errMsg})
@@ -278,7 +279,7 @@ type depResult struct {
 }
 
 // rescanAndUpdate re-checks all skills and updates their status + missing deps in DB.
-func (h *SkillsHandler) rescanAndUpdate() (updated int, results []depResult) {
+func (h *SkillsHandler) rescanAndUpdate(ctx context.Context) (updated int, results []depResult) {
 	allSkills := h.skills.ListAllSkills()
 
 	for _, sk := range allSkills {
@@ -298,11 +299,11 @@ func (h *SkillsHandler) rescanAndUpdate() (updated int, results []depResult) {
 
 		switch {
 		case ok && sk.Status == "archived":
-			_ = h.skills.UpdateSkill(id, map[string]any{"status": "active"})
+			_ = h.skills.UpdateSkillWithCtx(ctx, id, map[string]any{"status": "active"})
 			results = append(results, depResult{Slug: sk.Slug, Status: "active"})
 			updated++
 		case !ok && sk.Status == "active":
-			_ = h.skills.UpdateSkill(id, map[string]any{"status": "archived"})
+			_ = h.skills.UpdateSkillWithCtx(ctx, id, map[string]any{"status": "archived"})
 			results = append(results, depResult{Slug: sk.Slug, Status: "archived", Missing: missing})
 			updated++
 		case !ok:
@@ -320,7 +321,7 @@ func (h *SkillsHandler) rescanAndUpdate() (updated int, results []depResult) {
 
 // handleRescanDeps re-checks dependencies for all skills (including archived) and updates their status.
 func (h *SkillsHandler) handleRescanDeps(w http.ResponseWriter, r *http.Request) {
-	updated, results := h.rescanAndUpdate()
+	updated, results := h.rescanAndUpdate(r.Context())
 	writeJSON(w, http.StatusOK, map[string]any{
 		"updated": updated,
 		"results": results,
@@ -374,7 +375,7 @@ func (h *SkillsHandler) handleToggle(w http.ResponseWriter, r *http.Request) {
 			} else {
 				newStatus = "active"
 			}
-			_ = h.skills.UpdateSkill(id, map[string]any{"status": newStatus})
+			_ = h.skills.UpdateSkillWithCtx(r.Context(), id, map[string]any{"status": newStatus})
 		}
 	}
 
