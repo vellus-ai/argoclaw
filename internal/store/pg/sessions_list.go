@@ -56,9 +56,11 @@ func buildSessionFilter(opts store.SessionListOpts, tableAlias string, tid uuid.
 }
 
 func (s *PGSessionStore) List(ctx context.Context, agentID string) []store.SessionInfo {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil
+	}
 	var rows *sql.Rows
-	var err error
 
 	q := "SELECT session_key, messages, created_at, updated_at, label, channel, user_id, COALESCE(metadata, '{}') FROM sessions WHERE 1=1"
 	var args []any
@@ -113,7 +115,10 @@ func (s *PGSessionStore) List(ctx context.Context, agentID string) []store.Sessi
 }
 
 func (s *PGSessionStore) ListPaged(ctx context.Context, opts store.SessionListOpts) store.SessionListResult {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return store.SessionListResult{Sessions: []store.SessionInfo{}, Total: 0}
+	}
 	limit := opts.Limit
 	if limit <= 0 {
 		limit = 20
@@ -174,7 +179,10 @@ func (s *PGSessionStore) ListPaged(ctx context.Context, opts store.SessionListOp
 
 // ListPagedRich returns enriched session info for API responses (includes model, tokens, agent name).
 func (s *PGSessionStore) ListPagedRich(ctx context.Context, opts store.SessionListOpts) store.SessionListRichResult {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return store.SessionListRichResult{Sessions: []store.SessionInfoRich{}, Total: 0}
+	}
 	limit := opts.Limit
 	if limit <= 0 {
 		limit = 20
@@ -278,7 +286,10 @@ func (s *PGSessionStore) Save(ctx context.Context, key string) error {
 		metaJSON, _ = json.Marshal(snapshot.Metadata)
 	}
 
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
 	q := `UPDATE sessions SET
 			messages = $1, summary = $2, model = $3, provider = $4, channel = $5,
 			input_tokens = $6, output_tokens = $7, compaction_count = $8,
@@ -300,12 +311,15 @@ func (s *PGSessionStore) Save(ctx context.Context, key string) error {
 		q += " AND tenant_id = $20"
 		args = append(args, tid)
 	}
-	_, err := s.db.ExecContext(ctx, q, args...)
+	_, err = s.db.ExecContext(ctx, q, args...)
 	return err
 }
 
 func (s *PGSessionStore) LastUsedChannel(ctx context.Context, agentID string) (string, string) {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return "", ""
+	}
 	prefix := "agent:" + agentID + ":%"
 	q := `SELECT session_key FROM sessions
 		 WHERE session_key LIKE $1

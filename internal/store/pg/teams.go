@@ -48,8 +48,11 @@ func (s *PGTeamStore) CreateTeam(ctx context.Context, team *store.TeamData) erro
 		settings = json.RawMessage(`{}`)
 	}
 
-	tid := tenantIDFromCtx(ctx)
-	_, err := s.db.ExecContext(ctx,
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.ExecContext(ctx,
 		`INSERT INTO agent_teams (id, tenant_id, name, lead_agent_id, description, status, settings, created_by, created_at, updated_at)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
 		team.ID, nilUUID(&tid), team.Name, team.LeadAgentID, team.Description,
@@ -59,9 +62,13 @@ func (s *PGTeamStore) CreateTeam(ctx context.Context, team *store.TeamData) erro
 }
 
 func (s *PGTeamStore) GetTeam(ctx context.Context, teamID uuid.UUID) (*store.TeamData, error) {
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	q := `SELECT ` + teamSelectCols + ` FROM agent_teams WHERE id = $1`
 	args := []any{teamID}
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	if tid != uuid.Nil {
 		q += ` AND tenant_id = $2`
 		args = append(args, tid)
 	}
@@ -74,13 +81,17 @@ func (s *PGTeamStore) UpdateTeam(ctx context.Context, teamID uuid.UUID, updates 
 }
 
 func (s *PGTeamStore) DeleteTeam(ctx context.Context, teamID uuid.UUID) error {
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
 	q := `DELETE FROM agent_teams WHERE id = $1`
 	args := []any{teamID}
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	if tid != uuid.Nil {
 		q += ` AND tenant_id = $2`
 		args = append(args, tid)
 	}
-	_, err := s.db.ExecContext(ctx, q, args...)
+	_, err = s.db.ExecContext(ctx, q, args...)
 	return err
 }
 
@@ -90,8 +101,12 @@ func (s *PGTeamStore) ListTeams(ctx context.Context) ([]store.TeamData, error) {
 		 COALESCE(a.display_name, '') AS lead_display_name
 		 FROM agent_teams t
 		 LEFT JOIN agents a ON a.id = t.lead_agent_id`
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var args []any
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	if tid != uuid.Nil {
 		q += ` WHERE t.tenant_id = $1`
 		args = append(args, tid)
 	}

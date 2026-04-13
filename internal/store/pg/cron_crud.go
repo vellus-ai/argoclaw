@@ -65,13 +65,16 @@ func (s *PGCronStore) AddJob(ctx context.Context, name string, schedule store.Cr
 
 	nextRun := computeNextRun(&schedule, now, s.defaultTZ)
 
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var tenantIDPtr *uuid.UUID
 	if tid != uuid.Nil {
 		tenantIDPtr = &tid
 	}
 
-	_, err := s.db.ExecContext(ctx,
+	_, err = s.db.ExecContext(ctx,
 		`INSERT INTO cron_jobs (id, agent_id, user_id, name, enabled, schedule_kind, cron_expression, run_at, timezone,
 		 interval_ms, payload, delete_after_run, next_run_at, created_at, updated_at, tenant_id)
 		 VALUES ($1, $2, $3, $4, true, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
@@ -93,7 +96,10 @@ func (s *PGCronStore) GetJob(ctx context.Context, jobID string) (*store.CronJob,
 	if err != nil {
 		return nil, false
 	}
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, false
+	}
 	job, err := s.scanJobTenant(ctx, id, tid)
 	if err != nil {
 		return nil, false
@@ -102,7 +108,10 @@ func (s *PGCronStore) GetJob(ctx context.Context, jobID string) (*store.CronJob,
 }
 
 func (s *PGCronStore) ListJobs(ctx context.Context, includeDisabled bool, agentID, userID string) []store.CronJob {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil
+	}
 	q := `SELECT id, agent_id, user_id, name, enabled, schedule_kind, cron_expression, run_at, timezone,
 		 interval_ms, payload, delete_after_run, next_run_at, last_run_at, last_status, last_error,
 		 created_at, updated_at FROM cron_jobs WHERE 1=1`
@@ -157,7 +166,10 @@ func (s *PGCronStore) RemoveJob(ctx context.Context, jobID string) error {
 	if err != nil {
 		return fmt.Errorf("invalid job ID: %s", jobID)
 	}
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
 	q := "DELETE FROM cron_jobs WHERE id = $1"
 	args := []any{id}
 	if tid != uuid.Nil {
@@ -182,7 +194,10 @@ func (s *PGCronStore) EnableJob(ctx context.Context, jobID string, enabled bool)
 	if err != nil {
 		return fmt.Errorf("invalid job ID: %s", jobID)
 	}
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
 	q := "UPDATE cron_jobs SET enabled = $1, updated_at = $2 WHERE id = $3"
 	args := []any{enabled, time.Now(), id}
 	if tid != uuid.Nil {

@@ -15,4 +15,5 @@ const (
 	ErrResourceExhausted  = "RESOURCE_EXHAUSTED"
 	ErrFailedPrecondition = "FAILED_PRECONDITION"
 	ErrInternal           = "INTERNAL"
+	ErrForbidden          = "FORBIDDEN"
 )

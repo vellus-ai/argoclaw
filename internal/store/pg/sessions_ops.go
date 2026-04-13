@@ -45,7 +45,10 @@ func (s *PGSessionStore) Delete(ctx context.Context, key string) error {
 	// DB DELETE first — verify tenant owns session before any side effects.
 	// Evicting cache and cleaning up media files before the DB check would leave
 	// inconsistent state if the session belongs to a different tenant.
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
 	q := "DELETE FROM sessions WHERE session_key = $1"
 	args := []any{key}
 	if tid != uuid.Nil {

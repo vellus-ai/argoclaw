@@ -178,7 +178,10 @@ func (s *PGCronStore) UpdateJob(ctx context.Context, jobID string, patch store.C
 
 	updates["updated_at"] = time.Now()
 
-	tid := tenantIDFromCtx(ctx)
+	tid, tidErr := requireTenantID(ctx)
+	if tidErr != nil {
+		return nil, tidErr
+	}
 	if tid != uuid.Nil {
 		if err := execMapUpdateTenant(ctx, s.db, "cron_jobs", id, updates); err != nil {
 			return nil, err

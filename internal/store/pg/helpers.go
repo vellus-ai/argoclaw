@@ -252,6 +252,21 @@ func tenantIDFromCtx(ctx context.Context) uuid.UUID {
 	return store.TenantIDFromContext(ctx)
 }
 
+// requireTenantID enforces tenant_id presence in context (fail-closed).
+// Returns (uuid.Nil, nil) if WithCrossTenant is set (intentional bypass).
+// Returns (uuid.Nil, ErrTenantRequired) if tenant_id is missing or Nil.
+// Returns (tenantID, nil) otherwise.
+func requireTenantID(ctx context.Context) (uuid.UUID, error) {
+	if store.IsCrossTenant(ctx) {
+		return uuid.Nil, nil
+	}
+	tid := tenantIDFromCtx(ctx)
+	if tid == uuid.Nil {
+		return uuid.Nil, store.ErrTenantRequired
+	}
+	return tid, nil
+}
+
 // execMapUpdateTenant is like execMapUpdate but adds AND tenant_id = $N to the WHERE clause
 // when a tenant_id is present in context. This prevents cross-tenant data modification.
 func execMapUpdateTenant(ctx context.Context, db *sql.DB, table string, id uuid.UUID, updates map[string]any) error {
@@ -283,7 +298,10 @@ func execMapUpdateTenant(ctx context.Context, db *sql.DB, table string, id uuid.
 	where := fmt.Sprintf("id = $%d", i)
 	i++
 
-	tid := tenantIDFromCtx(ctx)
+	tid, tidErr := requireTenantID(ctx)
+	if tidErr != nil {
+		return tidErr
+	}
 	if tid != uuid.Nil {
 		args = append(args, tid)
 		where += fmt.Sprintf(" AND tenant_id = $%d", i)

@@ -41,13 +41,16 @@ func (s *PGSkillStore) CreateSkill(name, slug string, description *string, owner
 
 // CreateSkillWithCtx is like CreateSkill but accepts context for tenant isolation.
 func (s *PGSkillStore) CreateSkillWithCtx(ctx context.Context, name, slug string, description *string, ownerID, visibility string, version int, filePath string, fileSize int64, fileHash *string) error {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
 	id := store.GenNewID()
 	var tenantIDPtr *uuid.UUID
 	if tid != uuid.Nil {
 		tenantIDPtr = &tid
 	}
-	_, err := s.db.ExecContext(ctx,
+	_, err = s.db.ExecContext(ctx,
 		`INSERT INTO skills (id, name, slug, description, owner_id, visibility, version, status, file_path, file_size, file_hash, tenant_id, created_at, updated_at)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7, 'active', $8, $9, $10, $11, NOW(), NOW())`,
 		id, name, slug, description, ownerID, visibility, version, filePath, fileSize, fileHash, tenantIDPtr,
@@ -59,7 +62,8 @@ func (s *PGSkillStore) CreateSkillWithCtx(ctx context.Context, name, slug string
 }
 
 func (s *PGSkillStore) UpdateSkill(id uuid.UUID, updates map[string]any) error {
-	if err := execMapUpdate(context.Background(), s.db, "skills", id, updates); err != nil {
+	// appsec:cross-tenant-bypass — legacy wrapper without context (used by system skill management)
+	if err := execMapUpdate(store.WithCrossTenant(context.Background()), s.db, "skills", id, updates); err != nil {
 		return err
 	}
 	s.BumpVersion()
@@ -68,7 +72,10 @@ func (s *PGSkillStore) UpdateSkill(id uuid.UUID, updates map[string]any) error {
 
 // UpdateSkillWithCtx is like UpdateSkill but uses context for tenant isolation.
 func (s *PGSkillStore) UpdateSkillWithCtx(ctx context.Context, id uuid.UUID, updates map[string]any) error {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
 	if tid != uuid.Nil {
 		if err := execMapUpdateTenant(ctx, s.db, "skills", id, updates); err != nil {
 			return err
@@ -83,12 +90,16 @@ func (s *PGSkillStore) UpdateSkillWithCtx(ctx context.Context, id uuid.UUID, upd
 }
 
 func (s *PGSkillStore) DeleteSkill(id uuid.UUID) error {
-	return s.DeleteSkillWithCtx(context.Background(), id)
+	// appsec:cross-tenant-bypass — legacy wrapper without context (used by system skill management)
+	return s.DeleteSkillWithCtx(store.WithCrossTenant(context.Background()), id)
 }
 
 // DeleteSkillWithCtx is like DeleteSkill but uses context for tenant isolation.
 func (s *PGSkillStore) DeleteSkillWithCtx(ctx context.Context, id uuid.UUID) error {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
 
 	// Reject deletion of system skills.
 	// Include tenant filter when present to avoid cross-tenant info leakage.
@@ -195,7 +206,11 @@ func (s *PGSkillStore) CreateSkillManaged(ctx context.Context, p SkillCreatePara
 		return uuid.Nil, fmt.Errorf("get next version: %w", err)
 	}
 
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		tx.Rollback()
+		return uuid.Nil, err
+	}
 	var tenantIDPtr *uuid.UUID
 	if tid != uuid.Nil {
 		tenantIDPtr = &tid
@@ -291,14 +306,17 @@ func (s *PGSkillStore) ToggleSkill(id uuid.UUID, enabled bool) error {
 
 // ToggleSkillWithCtx is like ToggleSkill but uses context for tenant isolation.
 func (s *PGSkillStore) ToggleSkillWithCtx(ctx context.Context, id uuid.UUID, enabled bool) error {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
 	q := `UPDATE skills SET enabled = $1, updated_at = NOW() WHERE id = $2`
 	args := []any{enabled, id}
 	if tid != uuid.Nil {
 		q += " AND tenant_id = $3"
 		args = append(args, tid)
 	}
-	_, err := s.db.ExecContext(ctx, q, args...)
+	_, err = s.db.ExecContext(ctx, q, args...)
 	if err == nil {
 		s.BumpVersion()
 	}

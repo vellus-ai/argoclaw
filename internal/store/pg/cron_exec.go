@@ -51,7 +51,10 @@ func (s *PGCronStore) GetRunLog(ctx context.Context, jobID string, limit, offset
 		offset = 0
 	}
 
-	tid := tenantIDFromCtx(ctx)
+	tid, tidErr := requireTenantID(ctx)
+	if tidErr != nil {
+		return nil, 0
+	}
 	const cols = "r.job_id, r.status, r.error, r.summary, r.ran_at, COALESCE(r.duration_ms, 0), COALESCE(r.input_tokens, 0), COALESCE(r.output_tokens, 0)"
 
 	var total int

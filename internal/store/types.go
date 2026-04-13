@@ -1,10 +1,16 @@
 package store
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+// ErrTenantRequired is returned when a store operation is called without
+// tenant_id in the context and the operation is not marked as cross-tenant.
+// This is the fail-closed default: queries never run without tenant scoping.
+var ErrTenantRequired = errors.New("tenant_id required in context")
 
 // BaseModel provides common fields for all database models.
 type BaseModel struct {
