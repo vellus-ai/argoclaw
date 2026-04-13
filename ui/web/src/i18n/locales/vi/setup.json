@@ -105,5 +105,61 @@
   },
   "common": {
     "back": "Quay lại"
+  },
+  "onboarding": {
+    "welcome": {
+      "greeting": "Xin chào, {{displayName}}! Tôi là {{agentName}}, trợ lý đắc lực của bạn.",
+      "intro": "Tôi sẽ giúp bạn thiết lập không gian làm việc. Sẽ rất nhanh thôi!",
+      "start": "Bắt đầu nào"
+    },
+    "naming": {
+      "question": "Tên mặc định của tôi là {{agentName}}. Bạn muốn giữ hay chọn tên khác?",
+      "keepDefault": "{{agentName}} rất tốt",
+      "customize": "Tôi muốn chọn tên khác",
+      "inputPlaceholder": "Nhập tên mới",
+      "confirm": "Xong! Bây giờ tên tôi là {{agentName}}."
+    },
+    "workspace": {
+      "typeQuestion": "Sử dụng cá nhân hay doanh nghiệp?",
+      "personal": "Cá nhân",
+      "business": "Doanh nghiệp",
+      "nameQuestion": "Tên tài khoản của bạn là gì?",
+      "namePlaceholder": "Tên công ty hoặc cá nhân",
+      "confirm": "Tài khoản '{{accountName}}' đã được cấu hình."
+    },
+    "branding": {
+      "question": "Màu chủ đề? Mặc định là xanh navy (#1E40AF).",
+      "keepDefault": "Xanh rất đẹp",
+      "customize": "Tôi muốn màu khác",
+      "confirm": "Chủ đề đã cập nhật!"
+    },
+    "provider": {
+      "question": "Hãy kết nối nhà cung cấp AI. Bạn thích cái nào?",
+      "skip": "Bỏ qua",
+      "apiKeyLabel": "Dán API key của {{provider}}",
+      "apiKeyPlaceholder": "sk-...",
+      "testingConnection": "Đang kiểm tra kết nối...",
+      "confirm": "Nhà cung cấp {{provider}} đã được cấu hình!",
+      "skipMessage": "Không sao! Bạn có thể cấu hình nhà cung cấp sau trong dashboard."
+    },
+    "channel": {
+      "question": "Webchat đã hoạt động. Kết nối kênh khác?",
+      "skip": "Không, để sau",
+      "confirm": "Xem hướng dẫn cài đặt trong dashboard."
+    },
+    "complete": {
+      "title": "Tất cả đã sẵn sàng!",
+      "summary": "Không gian làm việc của bạn đã được cấu hình.",
+      "goToDashboard": "Đi đến Dashboard"
+    },
+    "error": {
+      "notUnderstood": "Tôi không hiểu. Chọn một trong các tùy chọn:",
+      "toolFailed": "Sự cố: {{error}}. Thử lại?",
+      "retry": "Thử lại"
+    },
+    "common": {
+      "skip": "Bỏ qua",
+      "typing": "Đang gõ..."
+    }
   }
 }

@@ -20,6 +20,7 @@ type OnboardingStore interface {
 	UpdateTenantBranding(ctx context.Context, tenantID string, primaryColor, productName string) error
 	GetOnboardingStatus(ctx context.Context, tenantID string) (map[string]any, error)
 	CompleteOnboarding(ctx context.Context, tenantID string) error
+	UpdateLastCompletedState(ctx context.Context, tenantID string, state string) error
 }
 
 // OnboardingStoreAware tools receive an OnboardingStore for tenant configuration.

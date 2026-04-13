@@ -118,7 +118,7 @@ func runGateway() {
 	pgStores, traceCollector, snapshotWorker := setupStoresAndTracing(cfg, dataDir, msgBus)
 
 	// Onboarding tools (Imediato chat-first setup) — wired after stores are ready
-	wireOnboardingTools(toolsReg, pgStores.DB)
+	onbStore := wireOnboardingTools(toolsReg, pgStores.DB)
 
 	if traceCollector != nil {
 		defer traceCollector.Stop()
@@ -311,6 +311,9 @@ func runGateway() {
 		server.SetUserAuthHandler(httpapi.NewUserAuthHandler(pgStores.Users, cfg.Gateway.JWTSecret, httpapi.WithRateLimiter(authRL)))
 		slog.Info("user_auth: email/password endpoints enabled at /v1/auth/*")
 	}
+
+	// Onboarding HTTP API (conversational onboarding — uses tools via registry)
+	server.SetOnboardingHandler(httpapi.NewOnboardingHandler(onbStore, toolsReg, cfg.Gateway.Token))
 
 	// contextFileInterceptor is created inside wireExtras.
 	// Declared here so it can be passed to registerAllMethods → AgentsMethods

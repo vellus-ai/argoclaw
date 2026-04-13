@@ -105,5 +105,61 @@
   },
   "common": {
     "back": "Back"
+  },
+  "onboarding": {
+    "welcome": {
+      "greeting": "Hello, {{displayName}}! I'm {{agentName}}, your right-hand assistant.",
+      "intro": "I'll help you set up your workspace. It'll be quick!",
+      "start": "Let's get started"
+    },
+    "naming": {
+      "question": "My default name is {{agentName}}. Would you like to keep it or choose another?",
+      "keepDefault": "{{agentName}} is great",
+      "customize": "I want to choose another name",
+      "inputPlaceholder": "Type the new name",
+      "confirm": "Done! My name is now {{agentName}}."
+    },
+    "workspace": {
+      "typeQuestion": "Personal or business use?",
+      "personal": "Personal",
+      "business": "Business",
+      "nameQuestion": "What's your account name?",
+      "namePlaceholder": "Your company or personal name",
+      "confirm": "Account '{{accountName}}' configured."
+    },
+    "branding": {
+      "question": "Theme color? The default is navy blue (#1E40AF).",
+      "keepDefault": "Blue is great",
+      "customize": "I want another color",
+      "confirm": "Theme updated!"
+    },
+    "provider": {
+      "question": "Let's connect an AI provider. Which do you prefer?",
+      "skip": "Skip for now",
+      "apiKeyLabel": "Paste the {{provider}} API key",
+      "apiKeyPlaceholder": "sk-...",
+      "testingConnection": "Testing connection...",
+      "confirm": "Provider {{provider}} configured!",
+      "skipMessage": "No problem! You can configure a provider later in the dashboard."
+    },
+    "channel": {
+      "question": "Webchat is already active. Connect another channel?",
+      "skip": "No, later",
+      "confirm": "Check the setup instructions in your dashboard."
+    },
+    "complete": {
+      "title": "All set!",
+      "summary": "Your workspace is configured.",
+      "goToDashboard": "Go to Dashboard"
+    },
+    "error": {
+      "notUnderstood": "I didn't understand. Choose one of the options:",
+      "toolFailed": "Problem: {{error}}. Try again?",
+      "retry": "Try again"
+    },
+    "common": {
+      "skip": "Skip",
+      "typing": "Typing..."
+    }
   }
 }

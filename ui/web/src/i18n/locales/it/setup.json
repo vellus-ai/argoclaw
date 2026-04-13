@@ -1,0 +1,58 @@
+{
+  "onboarding": {
+    "welcome": {
+      "greeting": "Ciao, {{displayName}}! Sono {{agentName}}, il tuo assistente di fiducia.",
+      "intro": "Ti aiutero a configurare il tuo spazio di lavoro. Sara veloce!",
+      "start": "Iniziamo"
+    },
+    "naming": {
+      "question": "Il mio nome predefinito e {{agentName}}. Vuoi mantenerlo o sceglierne un altro?",
+      "keepDefault": "{{agentName}} va bene",
+      "customize": "Voglio scegliere un altro nome",
+      "inputPlaceholder": "Digita il nuovo nome",
+      "confirm": "Fatto! Ora mi chiamo {{agentName}}."
+    },
+    "workspace": {
+      "typeQuestion": "Uso personale o aziendale?",
+      "personal": "Personale",
+      "business": "Azienda",
+      "nameQuestion": "Qual e il nome del tuo account?",
+      "namePlaceholder": "Nome dell'azienda o personale",
+      "confirm": "Account '{{accountName}}' configurato."
+    },
+    "branding": {
+      "question": "Colore del tema? Il predefinito e blu navy (#1E40AF).",
+      "keepDefault": "Il blu va bene",
+      "customize": "Voglio un altro colore",
+      "confirm": "Tema aggiornato!"
+    },
+    "provider": {
+      "question": "Colleghiamo un fornitore di IA. Quale preferisci?",
+      "skip": "Salta per ora",
+      "apiKeyLabel": "Incolla la chiave API di {{provider}}",
+      "apiKeyPlaceholder": "sk-...",
+      "testingConnection": "Test della connessione...",
+      "confirm": "Fornitore {{provider}} configurato!",
+      "skipMessage": "Nessun problema! Puoi configurare un fornitore piu tardi nella dashboard."
+    },
+    "channel": {
+      "question": "Il Webchat e gia attivo. Collegare un altro canale?",
+      "skip": "No, dopo",
+      "confirm": "Consulta le istruzioni di configurazione nella dashboard."
+    },
+    "complete": {
+      "title": "Tutto pronto!",
+      "summary": "Il tuo spazio di lavoro e configurato.",
+      "goToDashboard": "Vai alla Dashboard"
+    },
+    "error": {
+      "notUnderstood": "Non ho capito. Scegli una delle opzioni:",
+      "toolFailed": "Problema: {{error}}. Riprovare?",
+      "retry": "Riprova"
+    },
+    "common": {
+      "skip": "Salta",
+      "typing": "Sta scrivendo..."
+    }
+  }
+}
