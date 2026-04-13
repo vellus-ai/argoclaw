@@ -5,6 +5,7 @@ package pg_test
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"math/rand"
 	"testing"
 	"testing/quick"
@@ -451,7 +452,8 @@ func TestPBT_AgentList_NeverLeaksCrossTenant(t *testing.T) {
 	as := pg.NewPGAgentStore(db)
 
 	f := func(seed [4]byte) bool {
-		suffix := uuid.Must(uuid.NewV7()).String()[:8]
+		// Derive deterministic suffix from seed for reproducibility
+		suffix := fmt.Sprintf("%02x%02x%02x%02x", seed[0], seed[1], seed[2], seed[3])
 		agentKey := "pbt-agent-" + suffix
 
 		agentID := testutil.CreateAgent(t, db, tenantA, agentKey, "PBT Agent "+suffix)
@@ -468,7 +470,6 @@ func TestPBT_AgentList_NeverLeaksCrossTenant(t *testing.T) {
 				return false // leak detected
 			}
 		}
-		_ = seed
 		return true
 	}
 	cfg := &quick.Config{MaxCount: 50, Rand: rand.New(rand.NewSource(43))}
@@ -490,7 +491,8 @@ func TestPBT_CronJobs_NeverLeaksCrossTenant(t *testing.T) {
 	cs := pg.NewPGCronStore(db)
 
 	f := func(seed [4]byte) bool {
-		suffix := uuid.Must(uuid.NewV7()).String()[:8]
+		// Derive deterministic suffix from seed for reproducibility
+		suffix := fmt.Sprintf("%02x%02x%02x%02x", seed[0], seed[1], seed[2], seed[3])
 		jobName := "pbt-job-" + suffix
 
 		jobID := testutil.CreateCronJob(t, db, tenantA, agentA, jobName)
@@ -504,7 +506,6 @@ func TestPBT_CronJobs_NeverLeaksCrossTenant(t *testing.T) {
 				return false // leak detected
 			}
 		}
-		_ = seed
 		return true
 	}
 	cfg := &quick.Config{MaxCount: 50, Rand: rand.New(rand.NewSource(44))}
@@ -514,9 +515,10 @@ func TestPBT_CronJobs_NeverLeaksCrossTenant(t *testing.T) {
 }
 
 // ============================================================
-// ErrTenantRequired tests (Task 12.5)
+// Fail-closed: stores reject or return empty on missing tenant (Task 12.5)
 // ============================================================
 
+// Stores that return error on missing tenant_id.
 func TestErrTenantRequired_AgentStore_EmptyContext(t *testing.T) {
 	db := testutil.SetupDB(t)
 	as := pg.NewPGAgentStore(db)
@@ -533,7 +535,21 @@ func TestErrTenantRequired_AgentStore_EmptyContext(t *testing.T) {
 	}
 }
 
-func TestErrTenantRequired_SessionStore_EmptyContext(t *testing.T) {
+func TestErrTenantRequired_ProviderStore_EmptyContext(t *testing.T) {
+	db := testutil.SetupDB(t)
+	ps := pg.NewPGProviderStore(db, "")
+	ctx := context.Background() // no tenant
+
+	_, err := ps.ListProviders(ctx)
+	if err != store.ErrTenantRequired {
+		t.Errorf("ProviderStore.ListProviders: expected ErrTenantRequired, got %v", err)
+	}
+}
+
+// Stores that return empty results (nil/zero) on missing tenant_id.
+// These stores don't expose the error directly — they fail-closed by
+// returning no data instead of an explicit error.
+func TestFailClosed_SessionStore_ReturnsEmpty_WithoutTenant(t *testing.T) {
 	db := testutil.SetupDB(t)
 	ss := pg.NewPGSessionStore(db)
 	ctx := context.Background() // no tenant
@@ -544,7 +560,7 @@ func TestErrTenantRequired_SessionStore_EmptyContext(t *testing.T) {
 	}
 }
 
-func TestErrTenantRequired_CronStore_EmptyContext(t *testing.T) {
+func TestFailClosed_CronStore_ReturnsNil_WithoutTenant(t *testing.T) {
 	db := testutil.SetupDB(t)
 	cs := pg.NewPGCronStore(db)
 	ctx := context.Background() // no tenant
@@ -555,7 +571,7 @@ func TestErrTenantRequired_CronStore_EmptyContext(t *testing.T) {
 	}
 }
 
-func TestErrTenantRequired_SkillStore_EmptyContext(t *testing.T) {
+func TestFailClosed_SkillStore_ReturnsNil_WithoutTenant(t *testing.T) {
 	db := testutil.SetupDB(t)
 	ss := pg.NewPGSkillStore(db, t.TempDir())
 	ctx := context.Background() // no tenant
@@ -563,17 +579,6 @@ func TestErrTenantRequired_SkillStore_EmptyContext(t *testing.T) {
 	skills := ss.ListSkillsByTenant(ctx)
 	if skills != nil {
 		t.Errorf("SkillStore.ListSkillsByTenant without tenant should return nil, got %d skills", len(skills))
-	}
-}
-
-func TestErrTenantRequired_ProviderStore_EmptyContext(t *testing.T) {
-	db := testutil.SetupDB(t)
-	ps := pg.NewPGProviderStore(db, "")
-	ctx := context.Background() // no tenant
-
-	_, err := ps.ListProviders(ctx)
-	if err != store.ErrTenantRequired {
-		t.Errorf("ProviderStore.ListProviders: expected ErrTenantRequired, got %v", err)
 	}
 }
 
