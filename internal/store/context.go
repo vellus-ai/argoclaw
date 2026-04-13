@@ -31,6 +31,8 @@ const (
 	ShellDenyGroupsKey contextKey = "argoclaw_shell_deny_groups"
 	// TenantIDKey is the context key for the tenant UUID (multi-tenancy isolation).
 	TenantIDKey contextKey = "argoclaw_tenant_id"
+	// CrossTenantKey marks a context as intentionally cross-tenant (admin/scheduler ops).
+	CrossTenantKey contextKey = "argoclaw_cross_tenant"
 )
 
 // WithShellDenyGroups returns a new context with shell deny group overrides.
@@ -173,4 +175,16 @@ func LocaleFromContext(ctx context.Context) string {
 		return v
 	}
 	return "en"
+}
+
+// WithCrossTenant returns a context marked for intentional cross-tenant access.
+// Usage must be documented with: // appsec:cross-tenant-bypass — <justification>
+func WithCrossTenant(ctx context.Context) context.Context {
+	return context.WithValue(ctx, CrossTenantKey, true)
+}
+
+// IsCrossTenant returns true if the context allows cross-tenant access.
+func IsCrossTenant(ctx context.Context) bool {
+	v, _ := ctx.Value(CrossTenantKey).(bool)
+	return v
 }

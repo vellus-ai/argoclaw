@@ -43,13 +43,16 @@ func (s *PGMCPServerStore) CreateServer(ctx context.Context, srv *store.MCPServe
 		apiKey = encrypted
 	}
 
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
 	now := time.Now()
 	srv.CreatedAt = now
 	srv.UpdatedAt = now
 	encHeaders := s.encryptJSONB(jsonOrEmpty(srv.Headers))
 	encEnv := s.encryptJSONB(jsonOrEmpty(srv.Env))
-	_, err := s.db.ExecContext(ctx,
+	_, err = s.db.ExecContext(ctx,
 		`INSERT INTO mcp_servers (id, tenant_id, name, display_name, transport, command, args, url, headers, env,
 		 api_key, tool_prefix, timeout_sec, settings, enabled, created_by, created_at, updated_at)
 		 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
@@ -65,9 +68,13 @@ func (s *PGMCPServerStore) GetServer(ctx context.Context, id uuid.UUID) (*store.
 	q := `SELECT id, name, display_name, transport, command, args, url, headers, env,
 		 api_key, tool_prefix, timeout_sec, settings, enabled, created_by, created_at, updated_at
 		 FROM mcp_servers WHERE id = $1`
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	args := []any{id}
 
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	if tid != uuid.Nil {
 		q += ` AND tenant_id = $2`
 		args = append(args, tid)
 	}
@@ -79,9 +86,13 @@ func (s *PGMCPServerStore) GetServerByName(ctx context.Context, name string) (*s
 	q := `SELECT id, name, display_name, transport, command, args, url, headers, env,
 		 api_key, tool_prefix, timeout_sec, settings, enabled, created_by, created_at, updated_at
 		 FROM mcp_servers WHERE name = $1`
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	args := []any{name}
 
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	if tid != uuid.Nil {
 		q += ` AND tenant_id = $2`
 		args = append(args, tid)
 	}
@@ -126,9 +137,13 @@ func (s *PGMCPServerStore) ListServers(ctx context.Context) ([]store.MCPServerDa
 	q := `SELECT id, name, display_name, transport, command, args, url, headers, env,
 		 api_key, tool_prefix, timeout_sec, settings, enabled, created_by, created_at, updated_at
 		 FROM mcp_servers`
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var args []any
 
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	if tid != uuid.Nil {
 		q += ` WHERE tenant_id = $1`
 		args = append(args, tid)
 	}
@@ -205,15 +220,19 @@ func (s *PGMCPServerStore) UpdateServer(ctx context.Context, id uuid.UUID, updat
 }
 
 func (s *PGMCPServerStore) DeleteServer(ctx context.Context, id uuid.UUID) error {
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
 	q := "DELETE FROM mcp_servers WHERE id = $1"
 	args := []any{id}
 
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	if tid != uuid.Nil {
 		q += " AND tenant_id = $2"
 		args = append(args, tid)
 	}
 
-	_, err := s.db.ExecContext(ctx, q, args...)
+	_, err = s.db.ExecContext(ctx, q, args...)
 	return err
 }
 

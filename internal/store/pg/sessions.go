@@ -68,7 +68,16 @@ func (s *PGSessionStore) GetOrCreate(ctx context.Context, key string) *store.Ses
 		return cached
 	}
 
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		slog.Warn("sessions.GetOrCreate: tenant_id required", "key", key, "error", err)
+		return &store.SessionData{
+			Key:      key,
+			Messages: []providers.Message{},
+			Created:  time.Now(),
+			Updated:  time.Now(),
+		}
+	}
 	data := s.loadFromDB(key, tid)
 	if data != nil {
 		s.cache[key] = data
@@ -95,10 +104,7 @@ func (s *PGSessionStore) GetOrCreate(ctx context.Context, key string) *store.Ses
 	s.cache[key] = data
 
 	msgsJSON, _ := json.Marshal([]providers.Message{})
-	var tenantIDPtr *uuid.UUID
-	if tid != uuid.Nil {
-		tenantIDPtr = &tid
-	}
+	tenantIDPtr := nilSessionUUID(tid)
 	s.db.ExecContext(ctx,
 		`INSERT INTO sessions (id, session_key, messages, created_at, updated_at, team_id, tenant_id)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (session_key) DO NOTHING`,

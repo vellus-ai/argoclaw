@@ -149,7 +149,10 @@ func (s *PGSkillStore) ListAllSkills() []store.SkillInfo {
 
 // ListSkillsByTenant returns active skills scoped to the tenant in ctx.
 func (s *PGSkillStore) ListSkillsByTenant(ctx context.Context) []store.SkillInfo {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil
+	}
 	q := `SELECT id, name, slug, description, visibility, tags, version, is_system, status, enabled, deps, file_path
 		  FROM skills WHERE status != 'deleted'`
 	var args []any

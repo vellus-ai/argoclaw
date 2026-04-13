@@ -50,12 +50,15 @@ func (s *PGChannelInstanceStore) Create(ctx context.Context, inst *store.Channel
 		credsBytes = inst.Credentials
 	}
 
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
 	now := time.Now()
 	inst.CreatedAt = now
 	inst.UpdatedAt = now
 
-	_, err := s.db.ExecContext(ctx,
+	_, err = s.db.ExecContext(ctx,
 		`INSERT INTO channel_instances (id, tenant_id, name, display_name, channel_type, agent_id,
 		 credentials, config, enabled, created_by, created_at, updated_at)
 		 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
@@ -67,10 +70,14 @@ func (s *PGChannelInstanceStore) Create(ctx context.Context, inst *store.Channel
 }
 
 func (s *PGChannelInstanceStore) Get(ctx context.Context, id uuid.UUID) (*store.ChannelInstanceData, error) {
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	q := `SELECT ` + channelInstanceSelectCols + ` FROM channel_instances WHERE id = $1`
 	args := []any{id}
 
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	if tid != uuid.Nil {
 		q += ` AND tenant_id = $2`
 		args = append(args, tid)
 	}
@@ -80,10 +87,14 @@ func (s *PGChannelInstanceStore) Get(ctx context.Context, id uuid.UUID) (*store.
 }
 
 func (s *PGChannelInstanceStore) GetByName(ctx context.Context, name string) (*store.ChannelInstanceData, error) {
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	q := `SELECT ` + channelInstanceSelectCols + ` FROM channel_instances WHERE name = $1`
 	args := []any{name}
 
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	if tid != uuid.Nil {
 		q += ` AND tenant_id = $2`
 		args = append(args, tid)
 	}
@@ -219,13 +230,17 @@ func (s *PGChannelInstanceStore) loadExistingCreds(ctx context.Context, id uuid.
 	q := "SELECT credentials FROM channel_instances WHERE id = $1"
 	args := []any{id}
 
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if tid != uuid.Nil {
 		q += " AND tenant_id = $2"
 		args = append(args, tid)
 	}
 
 	var raw []byte
-	err := s.db.QueryRowContext(ctx, q, args...).Scan(&raw)
+	err = s.db.QueryRowContext(ctx, q, args...).Scan(&raw)
 	if errors.Is(err, sql.ErrNoRows) || len(raw) == 0 {
 		return make(map[string]any), nil
 	}
@@ -245,23 +260,31 @@ func (s *PGChannelInstanceStore) loadExistingCreds(ctx context.Context, id uuid.
 }
 
 func (s *PGChannelInstanceStore) Delete(ctx context.Context, id uuid.UUID) error {
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
 	q := "DELETE FROM channel_instances WHERE id = $1"
 	args := []any{id}
 
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	if tid != uuid.Nil {
 		q += " AND tenant_id = $2"
 		args = append(args, tid)
 	}
 
-	_, err := s.db.ExecContext(ctx, q, args...)
+	_, err = s.db.ExecContext(ctx, q, args...)
 	return err
 }
 
 func (s *PGChannelInstanceStore) ListEnabled(ctx context.Context) ([]store.ChannelInstanceData, error) {
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	q := `SELECT ` + channelInstanceSelectCols + ` FROM channel_instances WHERE enabled = true`
 	var args []any
 
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	if tid != uuid.Nil {
 		q += ` AND tenant_id = $1`
 		args = append(args, tid)
 	}
@@ -275,10 +298,14 @@ func (s *PGChannelInstanceStore) ListEnabled(ctx context.Context) ([]store.Chann
 }
 
 func (s *PGChannelInstanceStore) ListAll(ctx context.Context) ([]store.ChannelInstanceData, error) {
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	q := `SELECT ` + channelInstanceSelectCols + ` FROM channel_instances`
 	var args []any
 
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	if tid != uuid.Nil {
 		q += ` WHERE tenant_id = $1`
 		args = append(args, tid)
 	}
@@ -291,12 +318,16 @@ func (s *PGChannelInstanceStore) ListAll(ctx context.Context) ([]store.ChannelIn
 	return s.scanInstances(rows)
 }
 
-func buildChannelInstanceWhere(ctx context.Context, opts store.ChannelInstanceListOpts) (string, []any) {
+func buildChannelInstanceWhere(ctx context.Context, opts store.ChannelInstanceListOpts) (string, []any, error) {
 	var conditions []string
 	var args []any
 	argIdx := 1
 
-	if tid := tenantIDFromCtx(ctx); tid != uuid.Nil {
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return "", nil, err
+	}
+	if tid != uuid.Nil {
 		conditions = append(conditions, fmt.Sprintf("tenant_id = $%d", argIdx))
 		args = append(args, tid)
 		argIdx++
@@ -312,11 +343,14 @@ func buildChannelInstanceWhere(ctx context.Context, opts store.ChannelInstanceLi
 	if len(conditions) > 0 {
 		where = " WHERE " + strings.Join(conditions, " AND ")
 	}
-	return where, args
+	return where, args, nil
 }
 
 func (s *PGChannelInstanceStore) ListPaged(ctx context.Context, opts store.ChannelInstanceListOpts) ([]store.ChannelInstanceData, error) {
-	where, args := buildChannelInstanceWhere(ctx, opts)
+	where, args, err := buildChannelInstanceWhere(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
 	limit := opts.Limit
 	if limit <= 0 {
 		limit = 50
@@ -332,8 +366,11 @@ func (s *PGChannelInstanceStore) ListPaged(ctx context.Context, opts store.Chann
 }
 
 func (s *PGChannelInstanceStore) CountInstances(ctx context.Context, opts store.ChannelInstanceListOpts) (int, error) {
-	where, args := buildChannelInstanceWhere(ctx, opts)
+	where, args, err := buildChannelInstanceWhere(ctx, opts)
+	if err != nil {
+		return 0, err
+	}
 	var count int
-	err := s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM channel_instances"+where, args...).Scan(&count)
+	err = s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM channel_instances"+where, args...).Scan(&count)
 	return count, err
 }

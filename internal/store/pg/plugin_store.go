@@ -63,7 +63,10 @@ func (s *PGPluginStore) UpsertCatalogEntry(ctx context.Context, e *store.PluginC
 }
 
 func (s *PGPluginStore) GetCatalogEntry(ctx context.Context, id uuid.UUID) (*store.PluginCatalogEntry, error) {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	row := s.db.QueryRowContext(ctx, `
 		SELECT id, tenant_id, name, version, display_name, description, author,
 		       manifest, source, min_plan, checksum, tags, created_at, updated_at
@@ -76,7 +79,10 @@ func (s *PGPluginStore) GetCatalogEntry(ctx context.Context, id uuid.UUID) (*sto
 }
 
 func (s *PGPluginStore) GetCatalogEntryByName(ctx context.Context, name string) (*store.PluginCatalogEntry, error) {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	row := s.db.QueryRowContext(ctx, `
 		SELECT id, tenant_id, name, version, display_name, description, author,
 		       manifest, source, min_plan, checksum, tags, created_at, updated_at
@@ -91,7 +97,10 @@ func (s *PGPluginStore) GetCatalogEntryByName(ctx context.Context, name string) 
 }
 
 func (s *PGPluginStore) ListCatalog(ctx context.Context) ([]store.PluginCatalogEntry, error) {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, tenant_id, name, version, display_name, description, author,
 		       manifest, source, min_plan, checksum, tags, created_at, updated_at
@@ -165,9 +174,9 @@ func (s *PGPluginStore) InstallPlugin(ctx context.Context, tp *store.TenantPlugi
 	if tp.ID == uuid.Nil {
 		tp.ID = store.GenNewID()
 	}
-	tid := tenantIDFromCtx(ctx)
-	if tid == uuid.Nil {
-		return fmt.Errorf("tenant context required for InstallPlugin")
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
 	}
 	tp.TenantID = tid
 	now := time.Now().UTC()
@@ -207,9 +216,9 @@ func (s *PGPluginStore) InstallPlugin(ctx context.Context, tp *store.TenantPlugi
 }
 
 func (s *PGPluginStore) EnablePlugin(ctx context.Context, pluginName string, actorID *uuid.UUID) error {
-	tid := tenantIDFromCtx(ctx)
-	if tid == uuid.Nil {
-		return fmt.Errorf("tenant context required")
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
 	}
 	now := time.Now().UTC()
 
@@ -239,9 +248,9 @@ func (s *PGPluginStore) EnablePlugin(ctx context.Context, pluginName string, act
 }
 
 func (s *PGPluginStore) DisablePlugin(ctx context.Context, pluginName string, actorID *uuid.UUID) error {
-	tid := tenantIDFromCtx(ctx)
-	if tid == uuid.Nil {
-		return fmt.Errorf("tenant context required")
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
 	}
 	now := time.Now().UTC()
 
@@ -271,9 +280,9 @@ func (s *PGPluginStore) DisablePlugin(ctx context.Context, pluginName string, ac
 }
 
 func (s *PGPluginStore) UninstallPlugin(ctx context.Context, pluginName string, actorID *uuid.UUID) error {
-	tid := tenantIDFromCtx(ctx)
-	if tid == uuid.Nil {
-		return fmt.Errorf("tenant context required")
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
 	}
 
 	tx, err := s.db.BeginTx(ctx, nil)
@@ -317,7 +326,10 @@ func (s *PGPluginStore) UninstallPlugin(ctx context.Context, pluginName string, 
 }
 
 func (s *PGPluginStore) GetTenantPlugin(ctx context.Context, pluginName string) (*store.TenantPlugin, error) {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	row := s.db.QueryRowContext(ctx, `
 		SELECT id, tenant_id, plugin_name, plugin_version, state,
 		       config, permissions, error_message, installed_by, enabled_at,
@@ -330,7 +342,10 @@ func (s *PGPluginStore) GetTenantPlugin(ctx context.Context, pluginName string) 
 }
 
 func (s *PGPluginStore) ListTenantPlugins(ctx context.Context) ([]store.TenantPlugin, error) {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, tenant_id, plugin_name, plugin_version, state,
 		       config, permissions, error_message, installed_by, enabled_at,
@@ -357,9 +372,9 @@ func (s *PGPluginStore) ListTenantPlugins(ctx context.Context) ([]store.TenantPl
 }
 
 func (s *PGPluginStore) UpdatePluginConfig(ctx context.Context, pluginName string, config json.RawMessage, actorID *uuid.UUID) error {
-	tid := tenantIDFromCtx(ctx)
-	if tid == uuid.Nil {
-		return fmt.Errorf("tenant context required")
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
 	}
 	now := time.Now().UTC()
 
@@ -390,8 +405,11 @@ func (s *PGPluginStore) UpdatePluginConfig(ctx context.Context, pluginName strin
 }
 
 func (s *PGPluginStore) SetPluginError(ctx context.Context, pluginName, errMsg string) error {
-	tid := tenantIDFromCtx(ctx)
-	_, err := s.db.ExecContext(ctx, `
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.ExecContext(ctx, `
 		UPDATE tenant_plugins
 		SET state = $1, error_message = $2, updated_at = $3
 		WHERE tenant_id = $4 AND plugin_name = $5`,
@@ -434,15 +452,15 @@ func (s *PGPluginStore) SetAgentPlugin(ctx context.Context, ap *store.AgentPlugi
 	if ap.ID == uuid.Nil {
 		ap.ID = store.GenNewID()
 	}
-	tid := tenantIDFromCtx(ctx)
-	if tid == uuid.Nil {
-		return fmt.Errorf("tenant context required")
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
 	}
 	ap.TenantID = tid
 	now := time.Now().UTC()
 
 	override := jsonOrEmpty(ap.ConfigOverride)
-	_, err := s.db.ExecContext(ctx, `
+	_, err = s.db.ExecContext(ctx, `
 		INSERT INTO agent_plugins
 			(id, tenant_id, agent_id, plugin_name, enabled, config_override, created_at, updated_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
@@ -456,7 +474,10 @@ func (s *PGPluginStore) SetAgentPlugin(ctx context.Context, ap *store.AgentPlugi
 }
 
 func (s *PGPluginStore) GetAgentPlugin(ctx context.Context, agentID uuid.UUID, pluginName string) (*store.AgentPlugin, error) {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	row := s.db.QueryRowContext(ctx, `
 		SELECT id, tenant_id, agent_id, plugin_name, enabled, config_override, created_at, updated_at
 		FROM agent_plugins
@@ -467,7 +488,10 @@ func (s *PGPluginStore) GetAgentPlugin(ctx context.Context, agentID uuid.UUID, p
 }
 
 func (s *PGPluginStore) ListAgentPlugins(ctx context.Context, agentID uuid.UUID) ([]store.AgentPlugin, error) {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, tenant_id, agent_id, plugin_name, enabled, config_override, created_at, updated_at
 		FROM agent_plugins
@@ -492,11 +516,14 @@ func (s *PGPluginStore) ListAgentPlugins(ctx context.Context, agentID uuid.UUID)
 }
 
 func (s *PGPluginStore) IsPluginEnabledForAgent(ctx context.Context, agentID uuid.UUID, pluginName string) (bool, error) {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return false, err
+	}
 
 	// Check tenant-level first.
 	var tenantState string
-	err := s.db.QueryRowContext(ctx, `
+	err = s.db.QueryRowContext(ctx, `
 		SELECT state FROM tenant_plugins
 		WHERE tenant_id = $1 AND plugin_name = $2`,
 		tid, pluginName,
@@ -550,14 +577,14 @@ func (s *PGPluginStore) scanAgentPlugin(row scanner) (*store.AgentPlugin, error)
 // ─────────────────────────────────────────────────────────────────────────────
 
 func (s *PGPluginStore) PutData(ctx context.Context, pluginName, collection, key string, value json.RawMessage, expiresAt *time.Time) error {
-	tid := tenantIDFromCtx(ctx)
-	if tid == uuid.Nil {
-		return fmt.Errorf("tenant context required")
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
 	}
 	now := time.Now().UTC()
 	id := store.GenNewID()
 
-	_, err := s.db.ExecContext(ctx, `
+	_, err = s.db.ExecContext(ctx, `
 		INSERT INTO plugin_data
 			(id, tenant_id, plugin_name, collection, key, value, expires_at, created_at, updated_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
@@ -572,12 +599,15 @@ func (s *PGPluginStore) PutData(ctx context.Context, pluginName, collection, key
 }
 
 func (s *PGPluginStore) GetData(ctx context.Context, pluginName, collection, key string) (*store.PluginDataEntry, error) {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var e store.PluginDataEntry
 	var value []byte
 	var expiresAt *time.Time
 
-	err := s.db.QueryRowContext(ctx, `
+	err = s.db.QueryRowContext(ctx, `
 		SELECT id, tenant_id, plugin_name, collection, key, value, expires_at, created_at, updated_at
 		FROM plugin_data
 		WHERE tenant_id = $1 AND plugin_name = $2 AND collection = $3 AND key = $4
@@ -599,7 +629,10 @@ func (s *PGPluginStore) GetData(ctx context.Context, pluginName, collection, key
 }
 
 func (s *PGPluginStore) ListDataKeys(ctx context.Context, pluginName, collection, prefix string, limit, offset int) ([]string, error) {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if limit <= 0 || limit > 500 {
 		limit = 100
 	}
@@ -636,8 +669,11 @@ func (s *PGPluginStore) ListDataKeys(ctx context.Context, pluginName, collection
 }
 
 func (s *PGPluginStore) DeleteData(ctx context.Context, pluginName, collection, key string) error {
-	tid := tenantIDFromCtx(ctx)
-	_, err := s.db.ExecContext(ctx, `
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.ExecContext(ctx, `
 		DELETE FROM plugin_data
 		WHERE tenant_id = $1 AND plugin_name = $2 AND collection = $3 AND key = $4`,
 		tid, pluginName, collection, key,
@@ -646,8 +682,11 @@ func (s *PGPluginStore) DeleteData(ctx context.Context, pluginName, collection, 
 }
 
 func (s *PGPluginStore) DeleteCollectionData(ctx context.Context, pluginName, collection string) error {
-	tid := tenantIDFromCtx(ctx)
-	_, err := s.db.ExecContext(ctx, `
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.ExecContext(ctx, `
 		DELETE FROM plugin_data
 		WHERE tenant_id = $1 AND plugin_name = $2 AND collection = $3`,
 		tid, pluginName, collection,
@@ -677,7 +716,10 @@ func (s *PGPluginStore) LogAudit(ctx context.Context, entry *store.PluginAuditEn
 }
 
 func (s *PGPluginStore) ListAuditLog(ctx context.Context, pluginName string, limit int) ([]store.PluginAuditEntry, error) {
-	tid := tenantIDFromCtx(ctx)
+	tid, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if limit <= 0 || limit > 100 {
 		limit = 50
 	}

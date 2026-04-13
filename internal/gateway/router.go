@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/vellus-ai/argoclaw/internal/auth"
 	httpapi "github.com/vellus-ai/argoclaw/internal/http"
 	"github.com/vellus-ai/argoclaw/internal/i18n"
@@ -15,6 +16,14 @@ import (
 	"github.com/vellus-ai/argoclaw/internal/store"
 	"github.com/vellus-ai/argoclaw/pkg/protocol"
 )
+
+// methodsExemptFromAuth lists methods that skip both permission
+// and tenant checks (pre-authentication or unauthenticated flows).
+var methodsExemptFromAuth = map[string]bool{
+	protocol.MethodConnect:              true,
+	protocol.MethodHealth:               true,
+	protocol.MethodBrowserPairingStatus: true,
+}
 
 // MethodHandler processes a single RPC method request.
 type MethodHandler func(ctx context.Context, client *Client, req *protocol.RequestFrame)
@@ -53,8 +62,10 @@ func (r *MethodRouter) Handle(ctx context.Context, client *Client, req *protocol
 		return
 	}
 
-	// Permission check: skip for connect, health, and browser pairing status (used by unauthenticated clients)
-	if req.Method != protocol.MethodConnect && req.Method != protocol.MethodHealth && req.Method != protocol.MethodBrowserPairingStatus {
+	exempt := methodsExemptFromAuth[req.Method]
+
+	// Permission check: skip for exempt methods (pre-auth / unauthenticated)
+	if !exempt {
 		if pe := r.server.policyEngine; pe != nil {
 			if !pe.CanAccess(client.role, req.Method) {
 				slog.Warn("permission denied", "method", req.Method, "role", client.role, "client", client.id)
@@ -69,8 +80,34 @@ func (r *MethodRouter) Handle(ctx context.Context, client *Client, req *protocol
 		}
 	}
 
-	// Inject locale into context for i18n support
+	// Inject locale into context (always)
 	ctx = store.WithLocale(ctx, i18n.Normalize(client.locale))
+
+	// Tenant + User isolation: skip for exempt methods
+	if !exempt {
+		tid, err := uuid.Parse(client.tenantID)
+		if err != nil || tid == uuid.Nil {
+			if client.tenantID != "" && client.tenantID != uuid.Nil.String() {
+				slog.Warn("security.invalid_tenant_id_ws",
+					"method", req.Method,
+					"client", client.id,
+					"tenant_id", client.tenantID,
+					"remote_addr", client.remoteAddr,
+				)
+			}
+			locale := i18n.Normalize(client.locale)
+			client.SendResponse(protocol.NewErrorResponse(
+				req.ID,
+				protocol.ErrForbidden,
+				i18n.T(locale, i18n.MsgPermissionDenied, req.Method),
+			))
+			return
+		}
+		ctx = store.WithTenantID(ctx, tid)
+		if client.userID != "" {
+			ctx = store.WithUserID(ctx, client.userID)
+		}
+	}
 
 	slog.Debug("handling method", "method", req.Method, "client", client.id, "req_id", req.ID)
 	handler(ctx, client, req)

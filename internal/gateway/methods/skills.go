@@ -116,7 +116,7 @@ func (m *SkillsMethods) handleGet(ctx context.Context, client *gateway.Client, r
 
 // skillUpdater is an optional interface for stores that support skill updates (e.g. PGSkillStore).
 type skillUpdater interface {
-	UpdateSkill(id uuid.UUID, updates map[string]any) error
+	UpdateSkillWithCtx(ctx context.Context, id uuid.UUID, updates map[string]any) error
 }
 
 func (m *SkillsMethods) handleUpdate(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
@@ -182,7 +182,7 @@ func (m *SkillsMethods) handleUpdate(ctx context.Context, client *gateway.Client
 		}
 	}
 
-	if err := updater.UpdateSkill(skillID, params.Updates); err != nil {
+	if err := updater.UpdateSkillWithCtx(ctx, skillID, params.Updates); err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal, err.Error()))
 		return
 	}
