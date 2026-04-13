@@ -19,7 +19,7 @@ openclaw-go
 app
 browser-poc
 openclaw-go
-goclaw
+argoclaw
 /config.json
 prompt.md
 *.bk.*

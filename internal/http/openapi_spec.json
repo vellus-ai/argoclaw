@@ -1,12 +1,12 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "GoClaw Gateway API",
+    "title": "ArgoClaw Gateway API",
     "description": "PostgreSQL multi-tenant AI agent gateway with WebSocket RPC + HTTP API.\n\n## Authentication\n\nAll endpoints require a Bearer token in the `Authorization` header:\n\n```\nAuthorization: Bearer <gateway-token-or-api-key>\n```\n\nYou can use either the **gateway token** (grants admin access) or an **API key** created via the API Keys endpoints (grants scoped access).\n\nIf no token is configured on the server, authentication is disabled (backward compatibility).\n\n## Common Headers\n\n| Header | Description |\n|--------|-------------|\n| `X-ArgoClaw-User-Id` | External user ID for multi-tenant context |\n| `X-ArgoClaw-Agent-Id` | Target agent ID (alternative to model prefix) |\n| `Accept-Language` | Locale for error messages (`en`, `vi`, `zh`) |\n\n## WebSocket Protocol\n\nConnect via `POST /ws` (upgrade). Protocol v3 uses frame types: `req`, `res`, `event`.\nFirst request must be `connect` with `{\"token\": \"...\", \"user_id\": \"...\", \"locale\": \"en\"}`.",
     "version": "0.2.0",
     "contact": {
-      "name": "GoClaw",
-      "url": "https://github.com/nextlevelbuilder/goclaw"
+      "name": "ArgoClaw",
+      "url": "https://github.com/vellus-ai/argoclaw"
     }
   },
   "servers": [
@@ -66,7 +66,7 @@
       "post": {
         "tags": ["Chat"],
         "summary": "OpenAI-compatible chat completions",
-        "description": "Send messages to an agent and get a response. Compatible with OpenAI's chat completions API.\n\nUse the `model` field to target a specific agent: `goclaw:<agent-id>` or `agent:<agent-id>`.",
+        "description": "Send messages to an agent and get a response. Compatible with OpenAI's chat completions API.\n\nUse the `model` field to target a specific agent: `argoclaw:<agent-id>` or `agent:<agent-id>`.",
         "requestBody": {
           "required": true,
           "content": {
@@ -77,8 +77,8 @@
                 "properties": {
                   "model": {
                     "type": "string",
-                    "description": "Agent targeting: `goclaw:<id>` or `agent:<id>`. Defaults to `default`.",
-                    "example": "goclaw:default"
+                    "description": "Agent targeting: `argoclaw:<id>` or `agent:<id>`. Defaults to `default`.",
+                    "example": "argoclaw:default"
                   },
                   "messages": {
                     "type": "array",
@@ -163,8 +163,8 @@
                   "properties": {
                     "id": { "type": "string", "format": "uuid" },
                     "name": { "type": "string" },
-                    "prefix": { "type": "string", "example": "goclaw_a" },
-                    "key": { "type": "string", "description": "Raw API key (shown once)", "example": "goclaw_a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4" },
+                    "prefix": { "type": "string", "example": "argoclaw_a" },
+                    "key": { "type": "string", "description": "Raw API key (shown once)", "example": "argoclaw_a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4" },
                     "scopes": { "type": "array", "items": { "type": "string" } },
                     "expires_at": { "type": "string", "format": "date-time", "nullable": true },
                     "created_at": { "type": "string", "format": "date-time" }
