@@ -52,6 +52,7 @@ describe("LoadingSpinner", () => {
   it("passes accessibility check (vitest-axe)", async () => {
     const { container } = render(<LoadingSpinner />);
     const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (expect(results) as any).toHaveNoViolations();
   });
 });

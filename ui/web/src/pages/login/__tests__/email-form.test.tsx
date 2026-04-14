@@ -16,7 +16,7 @@ vi.mock("@/api/auth-client", () => ({
   register: vi.fn(),
   AuthApiError: class extends Error {
     status: number;
-    constructor(status: number, message = "auth error", code?: string) {
+    constructor(status: number, message = "auth error", _code?: string) {
       super(message);
       this.name = "AuthApiError";
       this.status = status;

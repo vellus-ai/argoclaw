@@ -60,6 +60,7 @@ describe("Input", () => {
       </div>
     );
     const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (expect(results) as any).toHaveNoViolations();
   });
 });
