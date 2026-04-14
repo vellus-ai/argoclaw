@@ -39,7 +39,7 @@ function ErrorState({ message, onRetry, className }: ErrorStateProps) {
       </div>
       {onRetry && (
         <Button variant="outline" size="sm" onClick={onRetry}>
-          {t("error.retry")}
+          {t("retry")}
         </Button>
       )}
     </div>

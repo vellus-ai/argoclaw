@@ -8,7 +8,7 @@ vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
-        "error.retry": "Retry",
+        "retry": "Retry",
       };
       return translations[key] ?? key;
     },
