@@ -123,9 +123,10 @@ export function ChatInput({ onSend, onAbort, isBusy, disabled, files, onFilesCha
           onKeyDown={handleKeyDown}
           onInput={handleInput}
           placeholder={t("sendMessage")}
+          aria-label={t("sendMessage")}
           disabled={disabled}
           rows={1}
-          className="flex-1 resize-none rounded-lg border bg-background px-4 py-2.5 text-base md:text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+          className="flex-1 resize-none rounded-lg border bg-background px-4 py-2.5 text-base md:text-sm min-h-[44px] placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
         />
         {isBusy ? (
           <div className="flex gap-1">
