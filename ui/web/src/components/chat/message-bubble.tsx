@@ -49,10 +49,10 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         </div>
       ) : (
         /* Normal message bubble — assistant uses full width, user capped at 85% */
-        <div className={`rounded-lg px-4 py-2 ${
+        <div className={`px-4 py-2 ${
           isUser
-            ? "max-w-[85%] bg-primary text-primary-foreground"
-            : "flex-1 min-w-0 bg-card text-card-foreground border border-border shadow-sm"
+            ? "rounded-2xl rounded-br-sm max-w-[85%] bg-primary text-primary-foreground"
+            : "rounded-2xl rounded-bl-sm flex-1 min-w-0 bg-card text-card-foreground border border-border"
         }`}>
           {hasThinking && (
             <div className="mb-2">
