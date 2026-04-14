@@ -22,6 +22,8 @@ interface ChatThreadProps {
   isBusy: boolean;
   loading?: boolean;
   scrollTrigger?: number;
+  /** Operation mode — controls empty state. @default "chat" */
+  mode?: "chat" | "onboarding";
 }
 
 /** Check if a message is tool-only (no user-visible text content) */
@@ -38,7 +40,7 @@ type DisplayItem =
   | { kind: "merged-tools"; msgs: ChatMessage[]; idx: number };
 
 /** Merge consecutive tool-only assistant messages into single groups */
-function buildDisplayItems(messages: ChatMessage[]): DisplayItem[] {
+export function buildDisplayItems(messages: ChatMessage[]): DisplayItem[] {
   const filtered = messages.filter(
     (msg) => !(msg.role === "user" && typeof msg.content === "string" && msg.content.startsWith("[System]")),
   );
@@ -74,6 +76,7 @@ function buildDisplayItems(messages: ChatMessage[]): DisplayItem[] {
 export const ChatThread = memo(function ChatThread({
   messages, streamText, thinkingText, toolStream, blockReplies,
   activity, teamTasks, isRunning, isBusy, loading, scrollTrigger = 0,
+  mode = "chat",
 }: ChatThreadProps) {
   const { t } = useTranslation("chat");
   const { ref, onScroll } = useAutoScroll<HTMLDivElement>(
@@ -92,6 +95,14 @@ export const ChatThread = memo(function ChatThread({
         </div>
       );
     }
+    if (mode === "onboarding") {
+      return (
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground">
+          <p className="text-lg font-medium">{t("onboarding.welcome.title")}</p>
+          <p className="text-sm">{t("onboarding.welcome.description")}</p>
+        </div>
+      );
+    }
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground">
         <p className="text-lg font-medium">{t("empty.title")}</p>
@@ -104,11 +115,9 @@ export const ChatThread = memo(function ChatThread({
     <div
       ref={ref}
       onScroll={onScroll}
-      className="flex-1 overflow-y-auto overscroll-contain px-4 py-4"
-      style={{
-        backgroundImage: "radial-gradient(circle, var(--color-border) 1px, transparent 1px)",
-        backgroundSize: "24px 24px",
-      }}
+      role="log"
+      aria-live="polite"
+      className="flex-1 overflow-y-auto overscroll-contain bg-background px-4 py-4"
     >
       <div className="mx-auto max-w-3xl space-y-3">
         {displayItems.map((item) => {
