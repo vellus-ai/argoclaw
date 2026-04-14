@@ -5,32 +5,9 @@ import { useOnboardingApi } from "./hooks/use-onboarding-api";
 import { OnboardingChat } from "./onboarding-chat";
 import { OnboardingInput } from "./onboarding-input";
 import { ROUTES } from "@/lib/constants";
+import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { ErrorState } from "@/components/shared/error-state";
 import type { ChatMessageLocal } from "./hooks/use-onboarding-engine";
-
-function LoadingSpinner() {
-  return (
-    <div className="flex h-dvh items-center justify-center bg-background">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
-    </div>
-  );
-}
-
-function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="flex h-dvh flex-col items-center justify-center gap-4 bg-background px-4">
-      <p className="text-base text-destructive" role="alert">
-        {message}
-      </p>
-      <button
-        type="button"
-        onClick={onRetry}
-        className="rounded-md bg-primary px-4 py-2 text-base font-medium text-primary-foreground hover:bg-primary/90 md:text-sm"
-      >
-        Try again
-      </button>
-    </div>
-  );
-}
 
 export function SetupPage() {
   const navigate = useNavigate();
@@ -151,12 +128,12 @@ export function SetupPage() {
 
   // Loading state
   if (!initialized && !fetchError) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner size="lg" className="h-dvh bg-background" />;
   }
 
   // Error state
   if (fetchError) {
-    return <ErrorState message={fetchError} onRetry={fetchStatus} />;
+    return <ErrorState message={fetchError} onRetry={fetchStatus} className="h-dvh bg-background" />;
   }
 
   // Find the last message with quickReplies or inputField for the input area

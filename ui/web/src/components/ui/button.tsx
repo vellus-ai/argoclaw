@@ -38,6 +38,18 @@ const buttonVariants = cva(
   }
 )
 
+/**
+ * Botao interativo da Camada_Base com variantes CVA.
+ *
+ * Variantes: `default` | `destructive` | `outline` | `secondary` | `ghost` | `link`
+ * Tamanhos: `default` | `xs` | `sm` | `lg` | `icon` | `icon-xs` | `icon-sm` | `icon-lg`
+ *
+ * Suporta composicao via `asChild` usando `Slot.Root` do Radix UI.
+ *
+ * @example
+ * <Button variant="destructive" size="sm">Delete</Button>
+ * <Button asChild><a href="/docs">Docs</a></Button>
+ */
 function Button({
   className,
   variant = "default",
@@ -60,5 +72,10 @@ function Button({
     />
   )
 }
+
+export type ButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+  }
 
 export { Button, buttonVariants }

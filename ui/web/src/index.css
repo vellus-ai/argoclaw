@@ -138,6 +138,29 @@
   }
 }
 
+/* ── Autofill override — WCAG 2.1 AA contrast compliance ── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--foreground) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--background) inset !important;
+  box-shadow: 0 0 0 1000px var(--background) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: var(--foreground);
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--foreground) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--background) inset !important;
+  box-shadow: 0 0 0 1000px var(--background) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: var(--foreground);
+}
+
 /* ── Mobile UX utilities ── */
 
 /* Safe area padding for notched devices (requires viewport-fit=cover) */

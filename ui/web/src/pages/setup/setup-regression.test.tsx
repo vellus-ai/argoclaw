@@ -140,12 +140,12 @@ describe("Setup regression tests", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText(/connection refused/i)).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent(/connection refused/i);
     });
 
-    // Retry button should be present
+    // Retry button should be present (label is i18n key "error.retry")
     expect(
-      screen.getByRole("button", { name: /try again/i }),
+      screen.getByRole("button", { name: /retry/i }),
     ).toBeInTheDocument();
   });
 

@@ -103,7 +103,7 @@ describe("SetupPage", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText(/error|failed|network/i)).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent(/error|failed|network/i);
     });
   });
 

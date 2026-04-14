@@ -2,15 +2,12 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { AlertCircle, Check, X, ShieldAlert } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/stores/use-auth-store";
 import { changePassword, AuthApiError } from "@/api/auth-client";
 import { ROUTES } from "@/lib/constants";
-
-const INPUT_CLASS =
-  "flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base md:text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
-
-const BUTTON_CLASS =
-  "inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50";
 
 interface PasswordRequirement {
   key: string;
@@ -108,16 +105,15 @@ export function ChangePasswordPage() {
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="cp-current" className="text-sm font-medium">
+              <Label htmlFor="cp-current">
                 {t("changePassword.currentPassword")}
-              </label>
-              <input
+              </Label>
+              <Input
                 id="cp-current"
                 type="password"
                 value={currentPassword}
                 onChange={(e) => { setCurrentPassword(e.target.value); clearError(); }}
                 placeholder={t("changePassword.currentPasswordPlaceholder")}
-                className={INPUT_CLASS}
                 autoComplete="current-password"
                 autoFocus
                 disabled={loading}
@@ -125,32 +121,30 @@ export function ChangePasswordPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="cp-new" className="text-sm font-medium">
+              <Label htmlFor="cp-new">
                 {t("changePassword.newPassword")}
-              </label>
-              <input
+              </Label>
+              <Input
                 id="cp-new"
                 type="password"
                 value={newPassword}
                 onChange={(e) => { setNewPassword(e.target.value); clearError(); }}
                 placeholder={t("changePassword.newPasswordPlaceholder")}
-                className={INPUT_CLASS}
                 autoComplete="new-password"
                 disabled={loading}
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="cp-confirm" className="text-sm font-medium">
+              <Label htmlFor="cp-confirm">
                 {t("changePassword.confirmPassword")}
-              </label>
-              <input
+              </Label>
+              <Input
                 id="cp-confirm"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => { setConfirmPassword(e.target.value); clearError(); }}
                 placeholder={t("changePassword.confirmPasswordPlaceholder")}
-                className={INPUT_CLASS}
                 autoComplete="new-password"
                 disabled={loading}
               />
@@ -161,13 +155,13 @@ export function ChangePasswordPage() {
                 {PASSWORD_REQUIREMENTS.map((req) => {
                   const pass = req.test(newPassword);
                   return (
-                    <li key={req.key} className={`flex items-center gap-1.5 ${pass ? "text-green-600" : "text-muted-foreground"}`}>
+                    <li key={req.key} className={`flex items-center gap-1.5 ${pass ? "text-success" : "text-muted-foreground"}`}>
                       {pass ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                       {t(`email.${req.key}`)}
                     </li>
                   );
                 })}
-                <li className={`flex items-center gap-1.5 ${confirmPassword.length > 0 && passwordsMatch ? "text-green-600" : "text-muted-foreground"}`}>
+                <li className={`flex items-center gap-1.5 ${confirmPassword.length > 0 && passwordsMatch ? "text-success" : "text-muted-foreground"}`}>
                   {confirmPassword.length > 0 && passwordsMatch
                     ? <Check className="h-3 w-3" />
                     : <X className="h-3 w-3" />}
@@ -183,9 +177,9 @@ export function ChangePasswordPage() {
               </div>
             )}
 
-            <button type="submit" disabled={!canSubmit || loading} className={BUTTON_CLASS}>
+            <Button type="submit" className="w-full" disabled={!canSubmit || loading}>
               {loading ? t("changePassword.submitting") : t("changePassword.submit")}
-            </button>
+            </Button>
           </form>
         </div>
       </div>

@@ -2,6 +2,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Methods, PROTOCOL_VERSION } from "@/api/protocol";
 import { generateId } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 type PairingStatus = "idle" | "connecting" | "pending" | "approved";
 
@@ -146,7 +149,7 @@ export function PairingForm({ onApproved }: PairingFormProps) {
   // Approved
   if (status === "approved") {
     return (
-      <p className="text-center text-sm text-green-600">
+      <p className="text-center text-sm text-success">
         {t("pairing.approved")}
       </p>
     );
@@ -160,16 +163,15 @@ export function PairingForm({ onApproved }: PairingFormProps) {
       )}
 
       <div className="space-y-2">
-        <label htmlFor="pairingUserId" className="text-sm font-medium">
+        <Label htmlFor="pairingUserId">
           {t("pairing.userId")}
-        </label>
-        <input
+        </Label>
+        <Input
           id="pairingUserId"
           type="text"
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
           placeholder={t("pairing.userIdPlaceholder")}
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base md:text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           autoFocus
         />
       </div>
@@ -178,13 +180,13 @@ export function PairingForm({ onApproved }: PairingFormProps) {
         {t("pairing.noTokenNeeded")}
       </p>
 
-      <button
+      <Button
         type="submit"
+        className="w-full"
         disabled={!userId.trim() || status === "connecting"}
-        className="inline-flex h-9 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
       >
         {status === "connecting" ? t("pairing.connecting") : t("pairing.requestAccess")}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -226,13 +228,9 @@ function PairingCodeDisplay({
         {t("pairing.waitingForApproval")}
       </div>
 
-      <button
-        type="button"
-        onClick={onCancel}
-        className="inline-flex h-9 w-full items-center justify-center rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
-      >
+      <Button variant="outline" className="w-full" type="button" onClick={onCancel}>
         {t("pairing.cancel")}
-      </button>
+      </Button>
     </div>
   );
 }
