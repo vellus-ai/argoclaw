@@ -3,7 +3,9 @@ import { useTranslation } from "react-i18next";
 import { AlertCircle, Check, X } from "lucide-react";
 import { login, register, AuthApiError } from "@/api/auth-client";
 import type { AuthResponse } from "@/api/auth-client";
-import { INPUT_CLASS, BUTTON_CLASS } from "./form-styles";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 interface EmailFormProps {
   onSuccess: (accessToken: string, refreshToken: string, userId: string) => void;
@@ -96,32 +98,30 @@ export function EmailForm({ onSuccess }: EmailFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       {isSignUp && (
         <div className="space-y-2">
-          <label htmlFor="displayName" className="text-sm font-medium">
+          <Label htmlFor="displayName">
             {t("email.displayName")}
-          </label>
-          <input
+          </Label>
+          <Input
             id="displayName"
             type="text"
             value={displayName}
             onChange={(e) => { setDisplayName(e.target.value); clearError(); }}
             placeholder={t("email.displayNamePlaceholder")}
-            className={INPUT_CLASS}
             disabled={loading}
           />
         </div>
       )}
 
       <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium">
+        <Label htmlFor="email">
           {t("email.email")}
-        </label>
-        <input
+        </Label>
+        <Input
           id="email"
           type="email"
           value={email}
           onChange={(e) => { setEmail(e.target.value); clearError(); }}
           placeholder={t("email.emailPlaceholder")}
-          className={INPUT_CLASS}
           autoFocus
           autoComplete="email"
           disabled={loading}
@@ -129,16 +129,15 @@ export function EmailForm({ onSuccess }: EmailFormProps) {
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium">
+        <Label htmlFor="password">
           {t("email.password")}
-        </label>
-        <input
+        </Label>
+        <Input
           id="password"
           type="password"
           value={password}
           onChange={(e) => { setPassword(e.target.value); clearError(); }}
           placeholder={t("email.passwordPlaceholder")}
-          className={INPUT_CLASS}
           autoComplete={isSignUp ? "new-password" : "current-password"}
           disabled={loading}
         />
@@ -147,16 +146,15 @@ export function EmailForm({ onSuccess }: EmailFormProps) {
       {isSignUp && (
         <>
           <div className="space-y-2">
-            <label htmlFor="confirmPassword" className="text-sm font-medium">
+            <Label htmlFor="confirmPassword">
               {t("email.confirmPassword")}
-            </label>
-            <input
+            </Label>
+            <Input
               id="confirmPassword"
               type="password"
               value={confirmPassword}
               onChange={(e) => { setConfirmPassword(e.target.value); clearError(); }}
               placeholder={t("email.confirmPasswordPlaceholder")}
-              className={INPUT_CLASS}
               autoComplete="new-password"
               disabled={loading}
             />
@@ -167,7 +165,7 @@ export function EmailForm({ onSuccess }: EmailFormProps) {
               {PASSWORD_REQUIREMENTS.map((req) => {
                 const pass = req.test(password, email);
                 return (
-                  <li key={req.key} className={`flex items-center gap-1.5 ${pass ? "text-green-600" : "text-muted-foreground"}`}>
+                  <li key={req.key} className={`flex items-center gap-1.5 ${pass ? "text-success" : "text-muted-foreground"}`}>
                     {pass ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                     {t(`email.${req.key}`)}
                   </li>
@@ -185,13 +183,13 @@ export function EmailForm({ onSuccess }: EmailFormProps) {
         </div>
       )}
 
-      <button type="submit" disabled={!canSubmit || loading} className={BUTTON_CLASS}>
+      <Button type="submit" className="w-full" disabled={!canSubmit || loading}>
         {loading
           ? t("email.submitting")
           : isSignUp
             ? t("email.signUp")
             : t("email.signIn")}
-      </button>
+      </Button>
 
     </form>
   );

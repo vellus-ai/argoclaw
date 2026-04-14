@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertCircle } from "lucide-react";
-import { INPUT_CLASS, BUTTON_CLASS } from "./form-styles";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 interface TokenFormProps {
   onSubmit: (userId: string, token: string) => void;
@@ -51,32 +53,30 @@ export function TokenForm({ onSubmit }: TokenFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <label htmlFor="userId" className="text-sm font-medium">
+        <Label htmlFor="userId">
           {t("token.userId")}
-        </label>
-        <input
+        </Label>
+        <Input
           id="userId"
           type="text"
           value={userId}
           onChange={(e) => { setUserId(e.target.value); setError(null); }}
           placeholder={t("token.userIdPlaceholder")}
-          className={INPUT_CLASS}
           autoFocus
           disabled={connecting}
         />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="token" className="text-sm font-medium">
+        <Label htmlFor="token">
           {t("token.gatewayToken")}
-        </label>
-        <input
+        </Label>
+        <Input
           id="token"
           type="password"
           value={token}
           onChange={(e) => { setToken(e.target.value); setError(null); }}
           placeholder={t("token.tokenPlaceholder")}
-          className={INPUT_CLASS}
           disabled={connecting}
         />
       </div>
@@ -88,13 +88,13 @@ export function TokenForm({ onSubmit }: TokenFormProps) {
         </div>
       )}
 
-      <button
+      <Button
         type="submit"
+        className="w-full"
         disabled={!token.trim() || !userId.trim() || connecting}
-        className={BUTTON_CLASS}
       >
         {connecting ? t("token.connecting") : t("token.connect")}
-      </button>
+      </Button>
     </form>
   );
 }

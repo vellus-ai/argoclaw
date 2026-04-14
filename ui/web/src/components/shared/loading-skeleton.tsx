@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingSpinner } from "@/components/shared/loading-spinner";
 
 export function CardSkeleton() {
   return (
@@ -68,7 +69,14 @@ export function DetailPageSkeleton({ tabs = 4 }: { tabs?: number }) {
   );
 }
 
-/** Spinner that only appears after a delay (default 500ms) to avoid flicker on fast loads. */
+/**
+ * Spinner that only appears after a delay (default 500ms) to avoid flicker on fast loads.
+ *
+ * Composes `<LoadingSpinner>` internally for consistent styling and accessibility.
+ *
+ * @example
+ * <DeferredSpinner delay={300} />
+ */
 export function DeferredSpinner({ delay = 500 }: { delay?: number }) {
   const [show, setShow] = useState(false);
 
@@ -79,9 +87,5 @@ export function DeferredSpinner({ delay = 500 }: { delay?: number }) {
 
   if (!show) return null;
 
-  return (
-    <div className="flex items-center justify-center py-12">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
-    </div>
-  );
+  return <LoadingSpinner size="md" className="py-12" />;
 }
