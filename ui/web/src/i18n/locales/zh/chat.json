@@ -3,6 +3,12 @@
     "description": "发送消息开始与Agent对话。",
     "title": "开始对话"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "欢迎来到 ARGO！",
+      "description": "我是大副，您的舵手。让我们来配置您的团队吧。"
+    }
+  },
   "forwardedFrom": "转发自",
   "media": {
     "animation": "动画",

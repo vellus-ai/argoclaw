@@ -8,6 +8,12 @@
     "title": "Start a conversation",
     "description": "Send a message to begin chatting with the agent."
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to ARGO!",
+      "description": "I'm the First Mate, your helmsman. Let's set up your crew."
+    }
+  },
   "media": {
     "image": "Image",
     "video": "Video",

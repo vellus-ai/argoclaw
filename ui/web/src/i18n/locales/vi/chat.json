@@ -3,6 +3,12 @@
     "description": "Gửi tin nhắn để bắt đầu trò chuyện với agent.",
     "title": "Bắt đầu cuộc trò chuyện"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Chào mừng đến với ARGO!",
+      "description": "Tôi là Phó thuyền trưởng, người lái tàu của bạn. Hãy thiết lập đội ngũ của bạn."
+    }
+  },
   "forwardedFrom": "Chuyển tiếp từ",
   "media": {
     "animation": "Hoạt ảnh",
