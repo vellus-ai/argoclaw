@@ -11,6 +11,8 @@ interface ChatTopBarProps {
   isBusy: boolean;
   activity: RunActivity | null;
   teamTasks: ActiveTeamTask[];
+  /** Operation mode — shows onboarding badge. @default "chat" */
+  mode?: "chat" | "onboarding";
 }
 
 const phaseLabels: Record<RunActivity["phase"], string> = {
@@ -22,7 +24,7 @@ const phaseLabels: Record<RunActivity["phase"], string> = {
   leader_processing: "Processing team results…",
 };
 
-export function ChatTopBar({ agentId, isRunning, isBusy, activity, teamTasks }: ChatTopBarProps) {
+export function ChatTopBar({ agentId, isRunning, isBusy, activity, teamTasks, mode = "chat" }: ChatTopBarProps) {
   const http = useHttp();
   const connected = useAuthStore((s) => s.connected);
   const [agent, setAgent] = useState<{ name: string; emoji?: string } | null>(null);
@@ -57,6 +59,11 @@ export function ChatTopBar({ agentId, isRunning, isBusy, activity, teamTasks }: 
           <Bot className="h-4 w-4 text-muted-foreground" />
         )}
         <span className="text-sm font-semibold">{displayName}</span>
+        {mode === "onboarding" && (
+          <span className="rounded-sm bg-accent px-2 py-0.5 text-xs text-accent-foreground">
+            Configuração Inicial
+          </span>
+        )}
       </div>
 
       {isRunning ? (
