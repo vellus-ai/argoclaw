@@ -179,7 +179,6 @@ type TenantUsage struct {
 	Period       string `json:"period"`
 	AgentCount   int    `json:"agent_count"`
 	SessionCount int    `json:"session_count"`
-	MessageCount int    `json:"message_count"`
 	TraceCount   int    `json:"trace_count"`
 }
 
@@ -258,6 +257,9 @@ func (h *OperatorHandler) queryAgents(ctx context.Context, tenantID uuid.UUID, l
 		return []map[string]any{}, 0, nil
 	}
 
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
 	rows, err := h.db.QueryContext(ctx, `
 		SELECT id, agent_key, display_name, status, created_at,
 		       COUNT(*) OVER() AS total_count
@@ -297,6 +299,9 @@ func (h *OperatorHandler) querySessions(ctx context.Context, tenantID uuid.UUID,
 	if h.db == nil {
 		return []map[string]any{}, 0, nil
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
 
 	rows, err := h.db.QueryContext(ctx, `
 		SELECT id, agent_id, user_id, label, channel, created_at,
@@ -338,6 +343,9 @@ func (h *OperatorHandler) queryUsage(ctx context.Context, tenantID uuid.UUID, pe
 	if h.db == nil {
 		return usage
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
 
 	since := time.Now().UTC().AddDate(0, 0, -days)
 
