@@ -154,7 +154,7 @@ func (ts *testServer) seed(ctx context.Context) error {
 	_, err = ts.db.ExecContext(ctx,
 		`INSERT INTO tenants (id, slug, name, plan, status, operator_level, created_at, updated_at)
 		 VALUES ($1, $2, 'E2E Customer Tenant', 'starter', 'active', 0, NOW(), NOW())
-		 ON CONFLICT (slug) DO NOTHING`,
+		 ON CONFLICT (slug) DO UPDATE SET operator_level = 0, status = 'active'`,
 		custID, customerSlug,
 	)
 	if err != nil {
