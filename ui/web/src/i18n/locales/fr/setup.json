@@ -55,6 +55,18 @@
       "summary": "Votre espace de travail est configure.",
       "goToDashboard": "Aller au tableau de bord"
     },
+    "agentIdentity": {
+      "question": "Comment dois-je m'identifier aupres de vous ?",
+      "male": "Masculin",
+      "maleDesc": "Votre assistant utilisera un langage masculin",
+      "female": "Feminin",
+      "femaleDesc": "Votre assistant utilisera un langage feminin",
+      "other": "Peu importe",
+      "otherDesc": "Langage neutre",
+      "customize": "Je veux choisir un nom",
+      "customizeDesc": "Vous definissez le nom de votre assistant",
+      "namePlaceholder": "Saisissez le nom de l'assistant"
+    },
     "error": {
       "notUnderstood": "Je n'ai pas compris. Choisissez une des options :",
       "toolFailed": "Probleme : {{error}}. Reessayer ?",

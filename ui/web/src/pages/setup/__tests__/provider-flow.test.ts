@@ -18,6 +18,8 @@ const INITIAL_CONTEXT: OnboardingContext = {
   displayName: "Milton",
   agentName: "Imediato",
   agentId: "agent-001",
+  gender: null,
+  agentGender: null,
   workspaceType: "",
   accountName: "",
   primaryColor: "#1E40AF",
@@ -26,7 +28,6 @@ const INITIAL_CONTEXT: OnboardingContext = {
   workspaceConfigured: false,
   brandingSet: false,
   onboardingComplete: false,
-  gender: null,
 };
 
 const mockT: TranslatorFn = (key, opts) => {

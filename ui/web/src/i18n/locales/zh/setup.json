@@ -162,6 +162,18 @@
       "summary": "你的工作空间已配置完毕。",
       "goToDashboard": "前往仪表板"
     },
+    "agentIdentity": {
+      "question": "我应该如何向你介绍自己？",
+      "male": "男性",
+      "maleDesc": "你的助手将使用男性语言",
+      "female": "女性",
+      "femaleDesc": "你的助手将使用女性语言",
+      "other": "无所谓",
+      "otherDesc": "性别中立语言",
+      "customize": "我想选择一个名字",
+      "customizeDesc": "你来定义助手的名字",
+      "namePlaceholder": "输入助手的名字"
+    },
     "error": {
       "notUnderstood": "我没有理解。请选择以下选项之一：",
       "toolFailed": "问题：{{error}}。重试？",

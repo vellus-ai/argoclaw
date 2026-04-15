@@ -11,6 +11,8 @@ export type OnboardingState =
   | "welcome"
   | "naming"
   | "naming_custom"
+  | "agent_identity"
+  | "agent_identity_custom"
   | "workspace_type"
   | "workspace_details"
   | "branding"
@@ -27,6 +29,7 @@ export interface OnboardingContext {
   agentName: string;
   agentId: string;
   gender: Gender;
+  agentGender: "male" | "female" | "other" | null; // Imediato's gender identity
   workspaceType: string;
   accountName: string;
   primaryColor: string;
@@ -120,11 +123,54 @@ function makeUser(content: string): ChatMessageLocal {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Nautical name lists for Imediato identity generation
+// ---------------------------------------------------------------------------
+
+export const NAUTICAL_NAMES_MALE = [
+  "Netuno",
+  "Tritão",
+  "Atlântico",
+  "Alcione",
+  "Náutilo",
+  "Boreal",
+  "Zéfiro",
+  "Levante",
+  "Ponente",
+  "Siroco",
+];
+
+export const NAUTICAL_NAMES_FEMALE = [
+  "Aurora",
+  "Ondina",
+  "Marina",
+  "Coral",
+  "Brisa",
+  "Sereia",
+  "Tempestade",
+  "Perla",
+  "Mira",
+  "Vênus",
+];
+
+const NAUTICAL_NAMES_NEUTRAL = [...NAUTICAL_NAMES_MALE, ...NAUTICAL_NAMES_FEMALE];
+
+function generateAgentName(gender: "male" | "female" | "other"): string {
+  const list =
+    gender === "male"
+      ? NAUTICAL_NAMES_MALE
+      : gender === "female"
+        ? NAUTICAL_NAMES_FEMALE
+        : NAUTICAL_NAMES_NEUTRAL;
+  return list[Math.floor(Math.random() * list.length)]!;
+}
+
 const INITIAL_CONTEXT: OnboardingContext = {
   displayName: "",
   agentName: "Imediato",
   agentId: "",
   gender: null,
+  agentGender: null,
   workspaceType: "",
   accountName: "",
   primaryColor: "#1E40AF",
@@ -203,6 +249,45 @@ export function namingCustomMessages(
     makeAssistant(undefined as unknown as string, undefined, {
       type: "text",
       placeholder: t("onboarding.naming.inputPlaceholder"),
+      validation: (v: string) =>
+        v.trim().length === 0 ? t("onboarding.error.notUnderstood") : null,
+    }),
+  ];
+}
+
+export function agentIdentityMessages(t: TranslatorFn): ChatMessageLocal[] {
+  return [
+    makeAssistant(t("onboarding.agentIdentity.question"), [
+      {
+        label: t("onboarding.agentIdentity.male"),
+        value: "agent_male",
+        description: t("onboarding.agentIdentity.maleDesc"),
+      },
+      {
+        label: t("onboarding.agentIdentity.female"),
+        value: "agent_female",
+        description: t("onboarding.agentIdentity.femaleDesc"),
+      },
+      {
+        label: t("onboarding.agentIdentity.other"),
+        value: "agent_other",
+        description: t("onboarding.agentIdentity.otherDesc"),
+      },
+      {
+        label: t("onboarding.agentIdentity.customize"),
+        value: "customize",
+        variant: "skip",
+        description: t("onboarding.agentIdentity.customizeDesc"),
+      },
+    ]),
+  ];
+}
+
+export function agentIdentityCustomMessages(t: TranslatorFn): ChatMessageLocal[] {
+  return [
+    makeAssistant(undefined as unknown as string, undefined, {
+      type: "text",
+      placeholder: t("onboarding.agentIdentity.namePlaceholder"),
       validation: (v: string) =>
         v.trim().length === 0 ? t("onboarding.error.notUnderstood") : null,
     }),
@@ -369,6 +454,10 @@ export function getMessagesForState(
       return namingMessages(t, ctx);
     case "naming_custom":
       return namingCustomMessages(t);
+    case "agent_identity":
+      return agentIdentityMessages(t);
+    case "agent_identity_custom":
+      return agentIdentityCustomMessages(t);
     case "workspace_type":
       return workspaceTypeMessages(t);
     case "workspace_details":
@@ -400,6 +489,8 @@ function validReplies(state: OnboardingState): string[] | null {
       return ["start"];
     case "naming":
       return ["keep", "customize"];
+    case "agent_identity":
+      return ["agent_male", "agent_female", "agent_other", "customize"];
     case "workspace_type":
       return ["personal", "business"];
     case "branding":
@@ -425,6 +516,8 @@ function resumeState(status: OnboardingStatusResponse): OnboardingState {
       "welcome",
       "naming",
       "naming_custom",
+      "agent_identity",
+      "agent_identity_custom",
       "workspace_type",
       "workspace_details",
       "branding",
@@ -560,7 +653,37 @@ function handleReply(state: EngineState, value: string): EngineState {
   switch (currentState) {
     case "welcome":
       if (value === "start") {
-        return { ...state, currentState: "naming", error: null };
+        return { ...state, currentState: "agent_identity", error: null };
+      }
+      return state;
+
+    case "agent_identity":
+      if (value === "agent_male") {
+        return {
+          ...state,
+          currentState: "workspace_type",
+          context: { ...context, agentGender: "male", agentName: generateAgentName("male") },
+          error: null,
+        };
+      }
+      if (value === "agent_female") {
+        return {
+          ...state,
+          currentState: "workspace_type",
+          context: { ...context, agentGender: "female", agentName: generateAgentName("female") },
+          error: null,
+        };
+      }
+      if (value === "agent_other") {
+        return {
+          ...state,
+          currentState: "workspace_type",
+          context: { ...context, agentGender: "other", agentName: generateAgentName("other") },
+          error: null,
+        };
+      }
+      if (value === "customize") {
+        return { ...state, currentState: "agent_identity_custom", error: null };
       }
       return state;
 
@@ -648,6 +771,17 @@ function handleInput(
 
   switch (currentState) {
     case "naming_custom":
+      if (field === "agentName") {
+        return {
+          ...state,
+          currentState: "workspace_type",
+          context: { ...context, agentName: value },
+          error: null,
+        };
+      }
+      return state;
+
+    case "agent_identity_custom":
       if (field === "agentName") {
         return {
           ...state,

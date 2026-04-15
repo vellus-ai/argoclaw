@@ -162,6 +162,18 @@
       "summary": "Your workspace is configured.",
       "goToDashboard": "Go to Dashboard"
     },
+    "agentIdentity": {
+      "question": "How should I identify myself with you?",
+      "male": "Male",
+      "maleDesc": "Your assistant will use masculine language",
+      "female": "Female",
+      "femaleDesc": "Your assistant will use feminine language",
+      "other": "Either way",
+      "otherDesc": "Gender-neutral language",
+      "customize": "I want to choose a name",
+      "customizeDesc": "You define your assistant's name",
+      "namePlaceholder": "Enter the assistant's name"
+    },
     "error": {
       "notUnderstood": "I didn't understand. Choose one of the options:",
       "toolFailed": "Problem: {{error}}. Try again?",
