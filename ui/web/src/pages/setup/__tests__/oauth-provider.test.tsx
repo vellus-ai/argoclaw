@@ -48,6 +48,7 @@ const INITIAL_CONTEXT: OnboardingContext = {
   brandingSet: false,
   onboardingComplete: false,
   gender: null,
+  agentGender: null,
 };
 
 const mockT: TranslatorFn = (key, opts) => {
