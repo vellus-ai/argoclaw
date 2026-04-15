@@ -61,14 +61,27 @@ export function SetupPage() {
     async (value: string) => {
       if (actionLoading) return;
 
+      const prevState = engine.currentState;
+
       // Show user message immediately via engine dispatch
       engine.dispatch({ type: "REPLY", value });
+
+      // Persist completion when leaving the channel step (last step before complete).
+      // Without this API call, refreshing the page loops back to provider/channel
+      // because onboarding_complete is never set in the database.
+      if (prevState === "channel") {
+        try {
+          await api.callTool("complete_onboarding", {}, "channel");
+        } catch {
+          // Best-effort — frontend already transitioned to complete
+        }
+      }
 
       // Simulate typing for next state
       setTyping(true);
       setTimeout(() => setTyping(false), 300);
     },
-    [engine, actionLoading],
+    [engine, actionLoading, api],
   );
 
   const handleInput = useCallback(

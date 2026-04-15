@@ -136,6 +136,10 @@
     "provider": {
       "question": "Hãy kết nối nhà cung cấp AI. Bạn thích cái nào?",
       "skip": "Bỏ qua",
+      "openrouterDesc": "Truy cập 100+ mô hình — được khuyến nghị",
+      "anthropicDesc": "Claude — lý tưởng cho các tác vụ phức tạp",
+      "openaiDesc": "GPT-4o, o1 và nhiều hơn",
+      "skipDesc": "Cấu hình sau trong Cài đặt",
       "apiKeyLabel": "Dán API key của {{provider}}",
       "apiKeyPlaceholder": "sk-...",
       "testingConnection": "Đang kiểm tra kết nối...",
@@ -144,7 +148,10 @@
     },
     "channel": {
       "question": "Webchat đã hoạt động. Kết nối kênh khác?",
-      "skip": "Không, để sau",
+      "skip": "Chỉ WebChat hiện tại",
+      "telegramDesc": "Kết nối bot để trò chuyện từ mọi nơi",
+      "discordDesc": "Thêm ARGO vào máy chủ của bạn",
+      "skipDesc": "Sử dụng chat ARGO trong trình duyệt",
       "confirm": "Xem hướng dẫn cài đặt trong dashboard."
     },
     "complete": {

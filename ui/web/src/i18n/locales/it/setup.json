@@ -29,6 +29,10 @@
     "provider": {
       "question": "Colleghiamo un fornitore di IA. Quale preferisci?",
       "skip": "Salta per ora",
+      "openrouterDesc": "Accesso a 100+ modelli — consigliato",
+      "anthropicDesc": "Claude — ideale per compiti complessi",
+      "openaiDesc": "GPT-4o, o1 e altro",
+      "skipDesc": "Configura dopo nelle Impostazioni",
       "apiKeyLabel": "Incolla la chiave API di {{provider}}",
       "apiKeyPlaceholder": "sk-...",
       "testingConnection": "Test della connessione...",
@@ -37,7 +41,10 @@
     },
     "channel": {
       "question": "Il Webchat e gia attivo. Collegare un altro canale?",
-      "skip": "No, dopo",
+      "skip": "Solo WebChat per ora",
+      "telegramDesc": "Collega il tuo bot per chattare ovunque",
+      "discordDesc": "Aggiungi ARGO al tuo server",
+      "skipDesc": "Usa la chat di ARGO nel browser",
       "confirm": "Consulta le istruzioni di configurazione nella dashboard."
     },
     "complete": {

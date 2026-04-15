@@ -136,6 +136,10 @@
     "provider": {
       "question": "让我们连接一个AI提供商。你喜欢哪个？",
       "skip": "暂时跳过",
+      "openrouterDesc": "访问100+模型 — 推荐",
+      "anthropicDesc": "Claude — 适合复杂任务",
+      "openaiDesc": "GPT-4o、o1等",
+      "skipDesc": "稍后在设置中配置",
       "apiKeyLabel": "粘贴{{provider}}的API密钥",
       "apiKeyPlaceholder": "sk-...",
       "testingConnection": "正在测试连接...",
@@ -144,7 +148,10 @@
     },
     "channel": {
       "question": "网页聊天已激活。连接其他频道吗？",
-      "skip": "不，以后再说",
+      "skip": "暂时只用网页聊天",
+      "telegramDesc": "连接你的机器人，随时随地聊天",
+      "discordDesc": "将ARGO添加到你的服务器",
+      "skipDesc": "在浏览器中使用ARGO聊天",
       "confirm": "请在仪表板中查看设置说明。"
     },
     "complete": {

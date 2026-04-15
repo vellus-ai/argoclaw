@@ -136,6 +136,10 @@
     "provider": {
       "question": "Let's connect an AI provider. Which do you prefer?",
       "skip": "Skip for now",
+      "openrouterDesc": "Access to 100+ models — recommended",
+      "anthropicDesc": "Claude — ideal for complex tasks",
+      "openaiDesc": "GPT-4o, o1, and more",
+      "skipDesc": "Configure later in Settings",
       "apiKeyLabel": "Paste the {{provider}} API key",
       "apiKeyPlaceholder": "sk-...",
       "testingConnection": "Testing connection...",
@@ -144,7 +148,10 @@
     },
     "channel": {
       "question": "Webchat is already active. Connect another channel?",
-      "skip": "No, later",
+      "skip": "Just WebChat for now",
+      "telegramDesc": "Connect your bot to chat from anywhere",
+      "discordDesc": "Add ARGO to your server",
+      "skipDesc": "Use ARGO's chat in the browser",
       "confirm": "Check the setup instructions in your dashboard."
     },
     "complete": {
