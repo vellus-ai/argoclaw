@@ -36,6 +36,11 @@ type Client struct {
 	pairingPending  bool   // true while waiting for admin approval
 	pairedSenderID  string // senderID used for browser pairing auth (for revocation lookup)
 	pairedChannel   string // channel used for pairing auth (e.g., "browser")
+
+	// Operator Mode: set to tenant.OperatorLevel when the authenticated tenant has
+	// operator_level >= 1. Never derived from JWT claims — always from DB lookup.
+	// appsec: used to gate cross-tenant WS methods.
+	operatorLevel int
 }
 
 func NewClient(conn *websocket.Conn, server *Server, remoteIP string) *Client {

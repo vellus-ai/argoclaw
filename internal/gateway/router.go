@@ -107,6 +107,12 @@ func (r *MethodRouter) Handle(ctx context.Context, client *Client, req *protocol
 		if client.userID != "" {
 			ctx = store.WithUserID(ctx, client.userID)
 		}
+		// Propagate Operator Mode when the client is an authenticated operator tenant.
+		// appsec:cross-tenant-bypass — gated on operatorLevel set during JWT connect
+		if client.operatorLevel >= 1 {
+			ctx = store.WithCrossTenant(ctx)
+			ctx = store.WithOperatorMode(ctx, tid)
+		}
 	}
 
 	slog.Debug("handling method", "method", req.Method, "client", client.id, "req_id", req.ID)
@@ -193,6 +199,32 @@ func (r *MethodRouter) handleConnect(ctx context.Context, client *Client, req *p
 				"tenant_id", claims.TenantID,
 				"role", claims.Role,
 				"remote_addr", client.remoteAddr)
+
+			// Operator Mode: check operator_level from DB — NEVER from JWT claims.
+			// appsec: operator_level is write-protected and never exposed in JWT claims.
+			if r.server.tenants != nil && claims.TenantID != "" {
+				if tid, err := uuid.Parse(claims.TenantID); err == nil {
+					// appsec:cross-tenant-bypass — load tenant to check operator_level
+					lookupCtx := store.WithCrossTenant(ctx)
+					if tenant, err := r.server.tenants.GetByID(lookupCtx, tid); err != nil {
+						slog.Warn("security.ws_operator_level_lookup_failed",
+							"client", client.id,
+							"tenant_id", claims.TenantID,
+							"error", err,
+						)
+						// Non-fatal: continue without operator mode
+					} else if tenant != nil && tenant.OperatorLevel >= 1 {
+						// appsec:cross-tenant-bypass — tenant with operator_level >= 1 authenticated via JWT WS
+						client.operatorLevel = tenant.OperatorLevel
+						slog.Info("security.operator_mode_activated_ws",
+							"client", client.id,
+							"tenant_id", claims.TenantID,
+							"operator_level", tenant.OperatorLevel,
+						)
+					}
+				}
+			}
+
 			r.sendConnectResponse(client, req.ID)
 			return
 		}

@@ -20,6 +20,8 @@ func NewTenantMiddleware(tenants store.TenantStore) *TenantMiddleware {
 }
 
 // Wrap extracts tenant_id from JWT claims and validates membership.
+// When the tenant has operator_level >= 1, also sets WithCrossTenant and WithOperatorMode
+// so that downstream handlers can call operator endpoints.
 func (m *TenantMiddleware) Wrap(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		claims := UserClaimsFromContext(r.Context())
@@ -38,6 +40,29 @@ func (m *TenantMiddleware) Wrap(next http.Handler) http.Handler {
 
 		// Inject tenant_id into context via store package — available to all store queries
 		ctx := store.WithTenantID(r.Context(), tenantID)
+
+		// Operator Mode: load tenant from DB to check operator_level.
+		// Only performed when a TenantStore is configured (not in gateway-token-only mode).
+		if m.tenants != nil {
+			// appsec:cross-tenant-bypass — tenants.GetByID lookup to check operator_level
+			lookupCtx := store.WithCrossTenant(ctx)
+			if tenant, err := m.tenants.GetByID(lookupCtx, tenantID); err != nil {
+				slog.Warn("security.tenant_lookup_failed",
+					"tenant_id", tenantID,
+					"error", err,
+				)
+				// Non-fatal: continue without operator mode; tenant_id is still set
+			} else if tenant != nil && tenant.OperatorLevel >= 1 {
+				// appsec:cross-tenant-bypass — tenant with operator_level >= 1 authenticated via JWT HTTP
+				ctx = store.WithCrossTenant(ctx)
+				ctx = store.WithOperatorMode(ctx, tenantID)
+				slog.Info("security.operator_mode_activated_http",
+					"tenant_id", tenantID,
+					"operator_level", tenant.OperatorLevel,
+				)
+			}
+		}
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

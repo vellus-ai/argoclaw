@@ -188,3 +188,28 @@ func IsCrossTenant(ctx context.Context) bool {
 	v, _ := ctx.Value(CrossTenantKey).(bool)
 	return v
 }
+
+// OperatorModeKey is the context key for the operator tenant UUID.
+// Active when a tenant with operator_level >= 1 is authenticated.
+const OperatorModeKey contextKey = "argoclaw_operator_mode"
+
+// WithOperatorMode stores the operator tenant UUID in ctx for audit tracing.
+// appsec: MUST be used alongside WithCrossTenant, never alone. The operator
+// tenant UUID identifies which Vellus operator account initiated the request.
+func WithOperatorMode(ctx context.Context, operatorTenantID uuid.UUID) context.Context {
+	return context.WithValue(ctx, OperatorModeKey, operatorTenantID)
+}
+
+// OperatorModeFromContext returns uuid.Nil when Operator Mode is not active.
+func OperatorModeFromContext(ctx context.Context) uuid.UUID {
+	if v, ok := ctx.Value(OperatorModeKey).(uuid.UUID); ok {
+		return v
+	}
+	return uuid.Nil
+}
+
+// IsOperatorMode returns true if Operator Mode is active in this context.
+// Operator Mode requires a non-nil operator tenant UUID — uuid.Nil is never active.
+func IsOperatorMode(ctx context.Context) bool {
+	return OperatorModeFromContext(ctx) != uuid.Nil
+}

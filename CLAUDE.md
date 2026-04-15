@@ -65,12 +65,14 @@ ui/web/                       React SPA (pnpm, Vite, Tailwind, Radix UI)
 - **Context files:** `agent_context_files` (agent-level) + `user_context_files` (per-user), routed via `ContextFileInterceptor`
 - **Providers:** Anthropic (native HTTP+SSE), OpenAI-compat (HTTP+SSE), DashScope (Alibaba Qwen), Claude CLI (stdio+MCP bridge), ACP (Anthropic Console Proxy), Codex (OpenAI). All use `RetryDo()` for retries. Loads from `llm_providers` table with encrypted API keys
 - **Agent loop:** `RunRequest` → think→act→observe → `RunResult`. Events: `run.started`, `run.completed`, `chunk`, `tool.call`, `tool.result`. Auto-summarization at >75% context
-- **Context propagation:** `store.WithAgentType(ctx)`, `store.WithUserID(ctx)`, `store.WithAgentID(ctx)`, `store.WithLocale(ctx)`
+- **Context propagation:** `store.WithAgentType(ctx)`, `store.WithUserID(ctx)`, `store.WithAgentID(ctx)`, `store.WithLocale(ctx)`, `store.WithTenantID(ctx)`
+- **Multi-tenancy (fail-closed):** All PG stores use `requireTenantID(ctx)` — returns `ErrTenantRequired` if `tenant_id` absent. System operations without user context (onboard seeder, skill seeder, cron scheduler, backfill) MUST use `store.WithCrossTenant(ctx)` with comment `// appsec:cross-tenant-bypass — <justification>`. WS RPC: `MethodRouter.Handle()` injects tenant_id automatically; exempt methods: `connect`, `health`, `browser_pairing_status`
+- **Skill store wrappers:** `UpdateSkill(id, updates)` and `DeleteSkill(id)` are legacy wrappers with `WithCrossTenant` — used ONLY by system skill seeder. WS/HTTP handlers MUST use `UpdateSkillWithCtx(ctx, id, updates)` / `DeleteSkillWithCtx(ctx, id)` for tenant isolation
 - **WebSocket protocol (v3):** Frame types `req`/`res`/`event`. First request must be `connect`
 - **Config:** JSON5 at `ARGOCLAW_CONFIG` env. Secrets in `.env.local` or env vars, never in config.json
 - **Security:** Rate limiting, input guard (detection-only), CORS, shell deny patterns, SSRF protection, path traversal prevention, AES-256-GCM encryption. All security logs: `slog.Warn("security.*")`
 - **Telegram formatting:** LLM output → `SanitizeAssistantContent()` → `markdownToTelegramHTML()` → `chunkHTML()` → `sendHTML()`. Tables rendered as ASCII in `<pre>` tags
-- **i18n:** Web UI uses `i18next` with namespace-split locale files in `ui/web/src/i18n/locales/{lang}/`. Backend uses `internal/i18n` message catalog with `i18n.T(locale, key, args...)`. Locale propagated via `store.WithLocale(ctx)` — WS `connect` param `locale`, HTTP `Accept-Language` header. Supported: en (default), vi, zh. New user-facing strings: add key to `internal/i18n/keys.go`, add translations to all 3 catalog files. New UI strings: add key to all 3 locale dirs. Bootstrap templates (SOUL.md, etc.) stay English-only (LLM consumption).
+- **i18n:** Web UI uses `i18next` with namespace-split locale files in `ui/web/src/i18n/locales/{lang}/`. Backend uses `internal/i18n` message catalog with `i18n.T(locale, key, args...)`. Locale propagated via `store.WithLocale(ctx)` — WS `connect` param `locale`, HTTP `Accept-Language` header. Supported: en (default), vi, zh, pt, es, fr, it, de. New user-facing strings: add key to `internal/i18n/keys.go`, add translations to all 3 backend catalog files. New UI strings: add key to all 8 locale dirs (`ui/web/src/i18n/locales/{en,vi,zh,pt,es,fr,it,de}/`). Bootstrap templates (SOUL.md, etc.) stay English-only (LLM consumption).
 
 ## Running
 
@@ -83,6 +85,44 @@ cd ui/web && pnpm install && pnpm dev   # Web dashboard (dev)
 ```
 
 - **Web UI Docker build**: Arquivos `.test.tsx` são incluídos no `tsc -b` quando `ENABLE_WEB_UI=true`. Imports não usados ou erros de tipo em testes quebram o Docker build. Sempre rodar `cd ui/web && pnpm exec tsc -b` antes de push.
+- **Contexto em testes**: Quando um campo obrigatório é adicionado a uma interface de contexto (ex: `OnboardingContext`), TODOS os objetos `INITIAL_CONTEXT` em TODOS os arquivos de teste devem ser atualizados. Campo ausente em qualquer teste quebra o `tsc -b` no Cloud Build.
+
+## GKE Deploy
+
+```bash
+# Docker build via Cloud Build — OBRIGATÓRIO usar cloudbuild.yaml para passar ENABLE_WEB_UI=true
+# `--tag` puro não aceita --build-arg; sem ENABLE_WEB_UI=true a UI não é embutida (gateway retorna 404)
+gcloud builds submit . --config=cloudbuild.yaml --substitutions="_IMAGE=us-central1-docker.pkg.dev/vellus-ai-agent-platform/argoclaw/argoclaw:<TAG>" --project=vellus-ai-agent-platform
+
+# CRÍTICO: kubectl só funciona via endpoint privado. SEMPRE usar --internal-ip ao gerar kubeconfig:
+gcloud container clusters get-credentials argoclaw-cluster --zone=us-central1-a --internal-ip
+# Sem --internal-ip: timeout em 34.59.181.103:443 (privateEndpointEnforcementEnabled=true — público inacessível)
+
+# IMPORTANTE: atualizar AMBOS os containers (main + init)
+# Se apenas o container principal for atualizado, o init container `onboard`
+# continua com a tag antiga e pode falhar (migration mismatch, ErrTenantRequired)
+kubectl -n control-plane set image deployment/argoclaw-vellus argoclaw=<registry>:<TAG> onboard=<registry>:<TAG>
+
+# SSH workaround para Windows (gcloud ssh -- "cmd" dá Bad port error):
+# 1. SCP script para VM:
+#    gcloud compute scp script.sh argoclaw-admin:/tmp/ --zone=us-central1-a --tunnel-through-iap
+# 2. Tunnel + ssh direto:
+#    gcloud compute start-iap-tunnel argoclaw-admin 22 --zone=us-central1-a --local-host-port=localhost:2299
+#    ssh -o ProxyCommand=none -p 2299 -i ~/.ssh/google_compute_engine milton_vellus_tech@localhost "bash /tmp/script.sh"
+```
+
+**IMPORTANTE**: Sempre usar o Dockerfile do projeto com `--build-arg ENABLE_WEB_UI=true`. Dockerfile minimo (sem web UI) causa 404 em producao — `UIDistFS()` retorna nil.
+
+```bash
+# Build CORRETO para GKE (na VM argoclaw-admin):
+git clone --depth 1 --branch main https://github.com/vellus-ai/argoclaw.git /tmp/argoclaw-build
+cd /tmp/argoclaw-build
+sudo docker build --no-cache --build-arg ENABLE_WEB_UI=true --build-arg VERSION=<tag> -t us-central1-docker.pkg.dev/vellus-ai-agent-platform/argoclaw/argoclaw:<tag> .
+sudo docker push us-central1-docker.pkg.dev/vellus-ai-agent-platform/argoclaw/argoclaw:<tag>
+kubectl -n control-plane set image deployment/argoclaw-vellus argoclaw=us-central1-docker.pkg.dev/vellus-ai-agent-platform/argoclaw/argoclaw:<tag> onboard=us-central1-docker.pkg.dev/vellus-ai-agent-platform/argoclaw/argoclaw:<tag>
+kubectl -n control-plane rollout status deployment/argoclaw-vellus --timeout=5m
+rm -rf /tmp/argoclaw-build
+```
 
 ## Post-Implementation Checklist
 
@@ -125,3 +165,55 @@ When implementing or modifying web UI components, follow these rules to ensure m
 - **Timezone:** User timezone stored in Zustand (`useUiStore`). Charts use `formatBucketTz()` from `lib/format.ts` with native `Intl.DateTimeFormat` — no date-fns-tz dependency
 - **ErrorBoundary key:** `AppLayout` uses `<ErrorBoundary key={stableErrorBoundaryKey(pathname)}>` which strips dynamic segments (`/chat/session-A` → `/chat`). NEVER use `key={location.pathname}` on ErrorBoundary/Suspense wrapping `<Outlet>` — it causes full page remount on param changes. Pages with sub-navigation (chat sessions, detail pages) must share a stable key
 - **Route params as source of truth:** For pages with URL params (e.g. `/chat/:sessionKey`), derive state from `useParams()` — do NOT duplicate into `useState`. Dual state causes race conditions between `setState` and `navigate()` leading to UI flash (state bounces: B→A→B). Use optional params (`/chat/:sessionKey?`) instead of two separate routes
+
+## Ponte de Comando Central — DESIGN APROVADO (2026-04-15)
+
+Design completo: `argo/docs/architecture/central-command-bridge-design.md`
+
+### Dual Deployment
+
+O ArgoClaw opera com dois deployments K8s independentes:
+- **`argoclaw-central`** → Vellus (`vellus-argo.consilium.tec.br`) — canary, node pool dedicado (tainted `vellus.ai/tier=control`)
+- **`argoclaw-customers`** → Clientes (`{slug}-argo.consilium.tec.br`) — stable, node pool padrão
+
+CI deploya automaticamente no Central. Promoção para Customers via `./promote.sh <tag>` (script em `argo/infra/terraform/k8s/scripts/`).
+
+### Super Admin / Operator Mode
+
+**Migration:** `operator_level INT NOT NULL DEFAULT 0` na tabela `tenants`
+
+**Padrão no código:**
+```go
+// internal/gateway/router.go — handleConnect
+if tenant.OperatorLevel >= 1 {
+    ctx = store.WithCrossTenant(ctx)   // padrão existente (seeder/cron)
+    ctx = store.WithOperatorMode(ctx, tenant.TenantID)
+}
+```
+
+**Endpoints operator** (protegidos por `requireOperatorRole`):
+- `GET /v1/operator/tenants` — lista todos os tenants
+- `GET /v1/operator/tenants/{id}/sessions`
+- `GET /v1/operator/tenants/{id}/agents`
+- `GET /v1/operator/tenants/{id}/usage`
+
+**Regra crítica:** `operator_level` é write-protected em todos os handlers públicos. Nunca expor no request body de criação/update de tenant.
+
+### Pendências de Implementação
+
+1. Migration `0000XX_operator_level.up.sql` + bump `RequiredSchemaVersion`
+2. `store.WithOperatorMode(ctx, tenantID)` — novo helper de contexto
+3. Middleware `requireOperatorRole` em `internal/http/`
+4. Endpoints `/v1/operator/*` em `internal/http/operator.go`
+5. K8s manifests: `argoclaw-central/` + `argoclaw-customers/` (forks do atual `argoclaw-vellus/`)
+6. Terraform: node pool `argoclaw-control-pool` com taint
+7. `cloudbuild.yaml`: step deploy aponta para `argoclaw-central`
+
+## Onboarding Conversacional — CONCLUIDO
+
+PR #53 mergeado. Motor deterministico (12 estados, zero LLM). Arquivos-chave:
+- Backend: `internal/http/onboarding.go` (GET /v1/onboarding/status, POST /v1/onboarding/action)
+- Engine: `ui/web/src/pages/setup/hooks/use-onboarding-engine.ts` (state machine)
+- Migration: 000033 (`last_completed_state` em `setup_progress`)
+- i18n: secao `onboarding` em `setup.json` de cada locale (8 idiomas)
+- Wizard legado removido: step-provider/model/agent/channel/stepper
