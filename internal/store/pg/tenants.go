@@ -37,10 +37,10 @@ func (s *PGTenantStore) GetByID(ctx context.Context, id uuid.UUID) (*store.Tenan
 	var t store.Tenant
 	var settings sql.NullString
 	err := s.db.QueryRowContext(ctx, `
-		SELECT id, slug, name, plan, status, trial_ends_at, settings, stripe_customer_id, created_at, updated_at
+		SELECT id, slug, name, plan, status, trial_ends_at, settings, stripe_customer_id, operator_level, created_at, updated_at
 		FROM tenants WHERE id = $1`, id).Scan(
 		&t.ID, &t.Slug, &t.Name, &t.Plan, &t.Status,
-		&t.TrialEndsAt, &settings, &t.StripeCustomerID, &t.CreatedAt, &t.UpdatedAt)
+		&t.TrialEndsAt, &settings, &t.StripeCustomerID, &t.OperatorLevel, &t.CreatedAt, &t.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -57,10 +57,10 @@ func (s *PGTenantStore) GetBySlug(ctx context.Context, slug string) (*store.Tena
 	var t store.Tenant
 	var settings sql.NullString
 	err := s.db.QueryRowContext(ctx, `
-		SELECT id, slug, name, plan, status, trial_ends_at, settings, stripe_customer_id, created_at, updated_at
+		SELECT id, slug, name, plan, status, trial_ends_at, settings, stripe_customer_id, operator_level, created_at, updated_at
 		FROM tenants WHERE slug = $1`, slug).Scan(
 		&t.ID, &t.Slug, &t.Name, &t.Plan, &t.Status,
-		&t.TrialEndsAt, &settings, &t.StripeCustomerID, &t.CreatedAt, &t.UpdatedAt)
+		&t.TrialEndsAt, &settings, &t.StripeCustomerID, &t.OperatorLevel, &t.CreatedAt, &t.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -75,7 +75,7 @@ func (s *PGTenantStore) GetBySlug(ctx context.Context, slug string) (*store.Tena
 
 func (s *PGTenantStore) ListTenants(ctx context.Context) ([]store.Tenant, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT id, slug, name, plan, status, trial_ends_at, stripe_customer_id, created_at, updated_at
+		SELECT id, slug, name, plan, status, trial_ends_at, stripe_customer_id, operator_level, created_at, updated_at
 		FROM tenants ORDER BY created_at DESC`)
 	if err != nil {
 		return nil, err
@@ -85,12 +85,47 @@ func (s *PGTenantStore) ListTenants(ctx context.Context) ([]store.Tenant, error)
 	for rows.Next() {
 		var t store.Tenant
 		if err := rows.Scan(&t.ID, &t.Slug, &t.Name, &t.Plan, &t.Status,
-			&t.TrialEndsAt, &t.StripeCustomerID, &t.CreatedAt, &t.UpdatedAt); err != nil {
+			&t.TrialEndsAt, &t.StripeCustomerID, &t.OperatorLevel, &t.CreatedAt, &t.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result = append(result, t)
 	}
 	return result, rows.Err()
+}
+
+// ListAllTenantsForOperator returns all tenants without tenant_id filter, paginated.
+// Requires IsCrossTenant(ctx) == true.
+// appsec:cross-tenant-bypass — called only via OperatorHandler protected by requireOperatorRole.
+func (s *PGTenantStore) ListAllTenantsForOperator(ctx context.Context, limit, offset int) ([]store.Tenant, int, error) {
+	if !store.IsCrossTenant(ctx) {
+		return nil, 0, store.ErrTenantRequired
+	}
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT id, slug, name, plan, status, trial_ends_at, stripe_customer_id, operator_level,
+		       created_at, updated_at, COUNT(*) OVER() AS total_count
+		FROM tenants
+		ORDER BY created_at DESC
+		LIMIT $1 OFFSET $2`, limit, offset)
+	if err != nil {
+		return nil, 0, fmt.Errorf("list all tenants for operator: %w", err)
+	}
+	defer rows.Close()
+
+	var result []store.Tenant
+	var total int
+	for rows.Next() {
+		var t store.Tenant
+		if err := rows.Scan(&t.ID, &t.Slug, &t.Name, &t.Plan, &t.Status,
+			&t.TrialEndsAt, &t.StripeCustomerID, &t.OperatorLevel,
+			&t.CreatedAt, &t.UpdatedAt, &total); err != nil {
+			return nil, 0, fmt.Errorf("scan tenant row: %w", err)
+		}
+		result = append(result, t)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
+	}
+	return result, total, nil
 }
 
 func (s *PGTenantStore) UpdateTenant(ctx context.Context, id uuid.UUID, updates map[string]any) error {

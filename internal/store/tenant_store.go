@@ -12,13 +12,19 @@ type Tenant struct {
 	ID               uuid.UUID  `json:"id"`
 	Slug             string     `json:"slug"`
 	Name             string     `json:"name"`
-	Plan             string     `json:"plan"`   // trial, starter, pro, enterprise
+	Plan             string     `json:"plan"`   // trial, starter, pro, enterprise, internal
 	Status           string     `json:"status"` // active, suspended, cancelled
 	TrialEndsAt      *time.Time `json:"trial_ends_at,omitempty"`
 	Settings         string     `json:"settings,omitempty"` // JSON
 	StripeCustomerID *string    `json:"stripe_customer_id,omitempty"`
-	CreatedAt        time.Time  `json:"created_at"`
-	UpdatedAt        time.Time  `json:"updated_at"`
+	// OperatorLevel controls cross-tenant access:
+	//   0 = regular tenant (default)
+	//   1 = Vellus operator (cross-tenant read via Ponte de Comando Central)
+	//   2 = super-admin (reserved, cross-tenant write — not yet implemented)
+	// appsec: NEVER allow OperatorLevel to be set via public API — migration/admin only.
+	OperatorLevel int       `json:"operator_level"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 // TenantUser links a user to a tenant with a role.
@@ -56,6 +62,11 @@ type TenantStore interface {
 
 	// ListTenants returns all tenants (admin only).
 	ListTenants(ctx context.Context) ([]Tenant, error)
+
+	// ListAllTenantsForOperator returns all tenants without tenant_id filter, paginated.
+	// Requires IsCrossTenant(ctx) == true.
+	// appsec:cross-tenant-bypass — used only by OperatorHandler with requireOperatorRole.
+	ListAllTenantsForOperator(ctx context.Context, limit, offset int) ([]Tenant, int, error)
 
 	// UpdateTenant updates tenant fields.
 	UpdateTenant(ctx context.Context, id uuid.UUID, updates map[string]any) error

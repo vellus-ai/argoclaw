@@ -71,7 +71,9 @@ type Server struct {
 	pluginHandler      *httpapi.PluginHandler      // plugin management API
 	pluginDataHandler  *httpapi.PluginDataHandler  // plugin KV data proxy API
 	onboardingHandler  *httpapi.OnboardingHandler  // onboarding HTTP API
+	operatorHandler    *httpapi.OperatorHandler    // Ponte de Comando Central — cross-tenant operator API
 	agentStore         store.AgentStore             // for context injection in tools_invoke
+	tenants            store.TenantStore            // for operator_level checks in handleConnect
 	msgBus             *bus.MessageBus              // for MCP bridge media delivery
 
 	upgrader    websocket.Upgrader
@@ -331,6 +333,12 @@ func (s *Server) BuildMux() *http.ServeMux {
 	// Onboarding HTTP API (conversational onboarding flow)
 	if s.onboardingHandler != nil {
 		s.onboardingHandler.RegisterRoutes(mux)
+	}
+
+	// Ponte de Comando Central — cross-tenant operator API
+	// appsec: routes protected by requireOperatorRole (operator_level >= 1 + role >= Operator)
+	if s.operatorHandler != nil {
+		s.operatorHandler.RegisterRoutes(mux, httpapi.RequireOperatorRole)
 	}
 
 	// Plugin management + data proxy API
@@ -647,6 +655,12 @@ func (s *Server) SetDocsHandler(h *httpapi.DocsHandler) { s.docsHandler = h }
 
 // SetAgentStore sets the agent store for context injection in tools_invoke.
 func (s *Server) SetAgentStore(as store.AgentStore) { s.agentStore = as }
+
+// SetTenantStore sets the tenant store for operator_level checks during WS connect.
+func (s *Server) SetTenantStore(ts store.TenantStore) { s.tenants = ts }
+
+// SetOperatorHandler sets the Ponte de Comando Central operator API handler.
+func (s *Server) SetOperatorHandler(h *httpapi.OperatorHandler) { s.operatorHandler = h }
 
 // SetOnboardingHandler sets the onboarding HTTP API handler.
 func (s *Server) SetOnboardingHandler(h *httpapi.OnboardingHandler) { s.onboardingHandler = h }
