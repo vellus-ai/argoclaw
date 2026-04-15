@@ -109,6 +109,9 @@
   "onboarding": {
     "welcome": {
       "greeting": "Ola, {{displayName}}! Sou o {{agentName}}, seu braco-direito.",
+      "greetingMale": "Bem-vindo a bordo, Capitao {{displayName}}! Sou o {{agentName}}, seu braco-direito.",
+      "greetingFemale": "Bem-vinda a bordo, Capita {{displayName}}! Sou o {{agentName}}, seu braco-direito.",
+      "greetingNeutral": "Boas-vindas a bordo, {{displayName}}! Sou o {{agentName}}, seu braco-direito.",
       "intro": "Vou ajuda-lo a preparar seu ambiente. Sera rapido!",
       "start": "Vamos comecar"
     },
