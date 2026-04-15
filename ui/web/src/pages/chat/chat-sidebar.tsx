@@ -30,13 +30,20 @@ export const ChatSidebar = memo(function ChatSidebar({
   const { t } = useTranslation("chat");
   return (
     <div className="flex h-full w-72 max-w-[85vw] flex-col border-r bg-background">
+      {/* Branding */}
+      <div className="border-b p-3">
+        <span className="text-lg font-bold tracking-tight">ARGO</span>
+      </div>
+
       {/* Agent selector */}
       <div className="border-b p-3">
-        <AgentSelector value={agentId} onChange={onAgentChange} />
+        <div className="rounded-lg border bg-card p-2">
+          <AgentSelector value={agentId} onChange={onAgentChange} />
+        </div>
       </div>
 
       {/* New chat button */}
-      <div className="p-3">
+      <div className="border-b p-3">
         <Button
           variant="outline"
           className="w-full justify-start gap-2"
