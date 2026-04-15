@@ -59,6 +59,7 @@ export interface QuickReply {
   label: string;
   value: string;
   variant?: "default" | "skip";
+  description?: string;
 }
 
 export interface InputFieldSpec {
@@ -258,10 +259,27 @@ export function providerMessages(
 ): ChatMessageLocal[] {
   return [
     makeAssistant(t("onboarding.provider.question"), [
-      { label: "OpenRouter", value: "openrouter" },
-      { label: "Anthropic", value: "anthropic" },
-      { label: "OpenAI", value: "openai" },
-      { label: t("onboarding.provider.skip"), value: "skip", variant: "skip" },
+      {
+        label: "OpenRouter",
+        value: "openrouter",
+        description: t("onboarding.provider.openrouterDesc"),
+      },
+      {
+        label: "Anthropic",
+        value: "anthropic",
+        description: t("onboarding.provider.anthropicDesc"),
+      },
+      {
+        label: "OpenAI",
+        value: "openai",
+        description: t("onboarding.provider.openaiDesc"),
+      },
+      {
+        label: t("onboarding.provider.skip"),
+        value: "skip",
+        variant: "skip",
+        description: t("onboarding.provider.skipDesc"),
+      },
     ]),
   ];
 }
@@ -289,9 +307,22 @@ export function channelMessages(
 ): ChatMessageLocal[] {
   return [
     makeAssistant(t("onboarding.channel.question"), [
-      { label: "Telegram", value: "telegram" },
-      { label: "Discord", value: "discord" },
-      { label: t("onboarding.channel.skip"), value: "skip", variant: "skip" },
+      {
+        label: "Telegram",
+        value: "telegram",
+        description: t("onboarding.channel.telegramDesc"),
+      },
+      {
+        label: "Discord",
+        value: "discord",
+        description: t("onboarding.channel.discordDesc"),
+      },
+      {
+        label: t("onboarding.channel.skip"),
+        value: "skip",
+        variant: "skip",
+        description: t("onboarding.channel.skipDesc"),
+      },
     ]),
   ];
 }
