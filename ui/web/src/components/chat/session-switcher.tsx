@@ -81,7 +81,7 @@ export const SessionSwitcher = memo(function SessionSwitcher({ sessions, activeK
               type="button"
               onClick={() => onSelect(session.key)}
               className={`group relative flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                isActive ? "bg-accent text-accent-foreground" : "hover:bg-muted"
+                isActive ? "border-l-3 border-l-primary bg-accent text-accent-foreground" : "hover:bg-muted"
               }`}
             >
               <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
