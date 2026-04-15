@@ -109,6 +109,9 @@
   "onboarding": {
     "welcome": {
       "greeting": "Hello, {{displayName}}! I'm {{agentName}}, your right-hand assistant.",
+      "greetingMale": "Welcome aboard, Captain {{displayName}}! I'm {{agentName}}, your right-hand assistant.",
+      "greetingFemale": "Welcome aboard, Captain {{displayName}}! I'm {{agentName}}, your right-hand assistant.",
+      "greetingNeutral": "Welcome aboard, {{displayName}}! I'm {{agentName}}, your right-hand assistant.",
       "intro": "I'll help you set up your workspace. It'll be quick!",
       "start": "Let's get started"
     },

@@ -2,6 +2,9 @@
   "onboarding": {
     "welcome": {
       "greeting": "Bonjour, {{displayName}} ! Je suis {{agentName}}, votre assistant de confiance.",
+      "greetingMale": "Bienvenue a bord, Capitaine {{displayName}} ! Je suis {{agentName}}, votre assistant de confiance.",
+      "greetingFemale": "Bienvenue a bord, Capitaine {{displayName}} ! Je suis {{agentName}}, votre assistante de confiance.",
+      "greetingNeutral": "Bienvenue a bord, {{displayName}} ! Je suis {{agentName}}, votre assistant de confiance.",
       "intro": "Je vais vous aider a configurer votre espace de travail. Ce sera rapide !",
       "start": "Commençons"
     },

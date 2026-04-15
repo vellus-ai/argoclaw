@@ -3,6 +3,8 @@ import {
   onboardingReducer,
   _resetMessageCounter,
   getMessagesForState,
+  greetingKeyForGender,
+  type Gender,
   type OnboardingContext,
   type OnboardingState,
   type TranslatorFn,
@@ -19,6 +21,7 @@ const INITIAL_CONTEXT: OnboardingContext = {
   displayName: "Milton",
   agentName: "Imediato",
   agentId: "agent-001",
+  gender: null,
   workspaceType: "",
   accountName: "",
   primaryColor: "#1E40AF",
@@ -689,13 +692,33 @@ describe("getMessagesForState", () => {
     _resetMessageCounter();
   });
 
-  it("should return welcome messages with displayName and agentName", () => {
+  it("should return welcome messages with displayName and agentName (neutral gender)", () => {
     const msgs = getMessagesForState("welcome", mockT, INITIAL_CONTEXT);
     expect(msgs).toHaveLength(2);
     expect(msgs[0]!.role).toBe("assistant");
-    expect(msgs[0]!.content).toContain("onboarding.welcome.greeting");
+    expect(msgs[0]!.content).toContain("onboarding.welcome.greetingNeutral");
     expect(msgs[0]!.content).toContain("Milton");
     expect(msgs[0]!.content).toContain("Imediato");
+  });
+
+  it("should return welcome messages with male greeting when gender is male", () => {
+    const ctx = { ...INITIAL_CONTEXT, gender: "male" as Gender };
+    const msgs = getMessagesForState("welcome", mockT, ctx);
+    expect(msgs[0]!.content).toContain("onboarding.welcome.greetingMale");
+    expect(msgs[0]!.content).toContain("Milton");
+  });
+
+  it("should return welcome messages with female greeting when gender is female", () => {
+    const ctx = { ...INITIAL_CONTEXT, gender: "female" as Gender };
+    const msgs = getMessagesForState("welcome", mockT, ctx);
+    expect(msgs[0]!.content).toContain("onboarding.welcome.greetingFemale");
+    expect(msgs[0]!.content).toContain("Milton");
+  });
+
+  it("should return welcome messages with neutral greeting when gender is other", () => {
+    const ctx = { ...INITIAL_CONTEXT, gender: "other" as Gender };
+    const msgs = getMessagesForState("welcome", mockT, ctx);
+    expect(msgs[0]!.content).toContain("onboarding.welcome.greetingNeutral");
   });
 
   it("should return naming messages with quick replies", () => {
@@ -785,5 +808,27 @@ describe("getMessagesForState", () => {
     const msgs = getMessagesForState("welcome", mockT, INITIAL_CONTEXT);
     const ids = msgs.map((m) => m.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// greetingKeyForGender
+// ---------------------------------------------------------------------------
+
+describe("greetingKeyForGender", () => {
+  it("returns greetingMale for male", () => {
+    expect(greetingKeyForGender("male")).toBe("onboarding.welcome.greetingMale");
+  });
+
+  it("returns greetingFemale for female", () => {
+    expect(greetingKeyForGender("female")).toBe("onboarding.welcome.greetingFemale");
+  });
+
+  it("returns greetingNeutral for other", () => {
+    expect(greetingKeyForGender("other")).toBe("onboarding.welcome.greetingNeutral");
+  });
+
+  it("returns greetingNeutral for null", () => {
+    expect(greetingKeyForGender(null)).toBe("onboarding.welcome.greetingNeutral");
   });
 });

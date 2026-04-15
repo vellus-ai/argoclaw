@@ -109,6 +109,9 @@
   "onboarding": {
     "welcome": {
       "greeting": "Xin chào, {{displayName}}! Tôi là {{agentName}}, trợ lý đắc lực của bạn.",
+      "greetingMale": "Chào mừng lên tàu, Thuyền trưởng {{displayName}}! Tôi là {{agentName}}, trợ lý đắc lực của bạn.",
+      "greetingFemale": "Chào mừng lên tàu, Thuyền trưởng {{displayName}}! Tôi là {{agentName}}, trợ lý đắc lực của bạn.",
+      "greetingNeutral": "Chào mừng lên tàu, {{displayName}}! Tôi là {{agentName}}, trợ lý đắc lực của bạn.",
       "intro": "Tôi sẽ giúp bạn thiết lập không gian làm việc. Sẽ rất nhanh thôi!",
       "start": "Bắt đầu nào"
     },

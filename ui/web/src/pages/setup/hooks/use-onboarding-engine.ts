@@ -20,10 +20,13 @@ export type OnboardingState =
   | "channel"
   | "complete";
 
+export type Gender = "male" | "female" | "other" | null;
+
 export interface OnboardingContext {
   displayName: string;
   agentName: string;
   agentId: string;
+  gender: Gender;
   workspaceType: string;
   accountName: string;
   primaryColor: string;
@@ -120,6 +123,7 @@ const INITIAL_CONTEXT: OnboardingContext = {
   displayName: "",
   agentName: "Imediato",
   agentId: "",
+  gender: null,
   workspaceType: "",
   accountName: "",
   primaryColor: "#1E40AF",
@@ -138,13 +142,31 @@ const INITIAL_CONTEXT: OnboardingContext = {
 
 export type TranslatorFn = (key: string, opts?: Record<string, unknown>) => string;
 
+/**
+ * Returns the i18n greeting key based on gender.
+ * - "male"   → "onboarding.welcome.greetingMale"
+ * - "female" → "onboarding.welcome.greetingFemale"
+ * - "other" / null → "onboarding.welcome.greetingNeutral"
+ */
+export function greetingKeyForGender(gender: Gender): string {
+  switch (gender) {
+    case "male":
+      return "onboarding.welcome.greetingMale";
+    case "female":
+      return "onboarding.welcome.greetingFemale";
+    default:
+      return "onboarding.welcome.greetingNeutral";
+  }
+}
+
 export function welcomeMessages(
   t: TranslatorFn,
   ctx: OnboardingContext,
 ): ChatMessageLocal[] {
+  const greetingKey = greetingKeyForGender(ctx.gender);
   return [
     makeAssistant(
-      t("onboarding.welcome.greeting", {
+      t(greetingKey, {
         displayName: ctx.displayName,
         agentName: ctx.agentName,
       }),

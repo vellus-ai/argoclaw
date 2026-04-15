@@ -109,6 +109,9 @@
   "onboarding": {
     "welcome": {
       "greeting": "你好，{{displayName}}！我是{{agentName}}，你的得力助手。",
+      "greetingMale": "欢迎登船，船长{{displayName}}！我是{{agentName}}，你的得力助手。",
+      "greetingFemale": "欢迎登船，船长{{displayName}}！我是{{agentName}}，你的得力助手。",
+      "greetingNeutral": "欢迎登船，{{displayName}}！我是{{agentName}}，你的得力助手。",
       "intro": "我来帮你设置工作空间。很快就好！",
       "start": "开始吧"
     },
