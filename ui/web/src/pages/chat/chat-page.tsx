@@ -17,7 +17,9 @@ import { isOwnSession, parseSessionKey } from "@/lib/session-key";
 import { useVirtualKeyboard } from "@/hooks/use-virtual-keyboard";
 import { generateId } from "@/lib/utils";
 
-export function ChatPage() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function ChatPage(props: any) {
+  const mode: "chat" | "onboarding" = props?.mode ?? "chat";
   const { t } = useTranslation("chat");
   const { sessionKey: urlSessionKey } = useParams<{ sessionKey: string }>();
   const navigate = useNavigate();
@@ -160,8 +162,8 @@ export function ChatPage() {
 
   return (
     <div className="relative flex h-full overflow-hidden">
-      {/* Chat Sidebar */}
-      {isMobile ? (
+      {/* Chat Sidebar — hidden in onboarding mode */}
+      {mode !== "onboarding" && (isMobile ? (
         <>
           {chatSidebarOpen && (
             <div
@@ -198,11 +200,11 @@ export function ChatPage() {
           onDeleteSession={handleDeleteSession}
           onNewChat={handleNewChat}
         />
-      )}
+      ))}
 
       {/* Main chat area */}
       <div className="flex flex-1 min-h-0 flex-col">
-        {isMobile && (
+        {isMobile && mode !== "onboarding" && (
           <div className="flex shrink-0 items-center border-b px-3 py-2 landscape-compact">
             <button
               onClick={() => setChatSidebarOpen(true)}
@@ -215,7 +217,7 @@ export function ChatPage() {
         )}
 
         <div className="shrink-0">
-          <ChatTopBar agentId={agentId} isRunning={isRunning} isBusy={isBusy} activity={activity} teamTasks={teamTasks} />
+          <ChatTopBar agentId={agentId} isRunning={isRunning} isBusy={isBusy} activity={activity} teamTasks={teamTasks} mode={mode} />
         </div>
 
         {sendError && (
@@ -237,6 +239,7 @@ export function ChatPage() {
             isBusy={isBusy}
             loading={messagesLoading}
             scrollTrigger={scrollTrigger}
+            mode={mode}
           />
 
           {isOwn ? (
