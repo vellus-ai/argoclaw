@@ -162,6 +162,18 @@
       "summary": "Không gian làm việc của bạn đã được cấu hình.",
       "goToDashboard": "Đi đến Dashboard"
     },
+    "agentIdentity": {
+      "question": "Tôi nên tự giới thiệu mình như thế nào với bạn?",
+      "male": "Nam",
+      "maleDesc": "Trợ lý của bạn sẽ dùng ngôn ngữ giới tính nam",
+      "female": "Nữ",
+      "femaleDesc": "Trợ lý của bạn sẽ dùng ngôn ngữ giới tính nữ",
+      "other": "Không quan trọng",
+      "otherDesc": "Ngôn ngữ trung tính",
+      "customize": "Tôi muốn chọn tên",
+      "customizeDesc": "Bạn đặt tên cho trợ lý của mình",
+      "namePlaceholder": "Nhập tên trợ lý"
+    },
     "error": {
       "notUnderstood": "Tôi không hiểu. Chọn một trong các tùy chọn:",
       "toolFailed": "Sự cố: {{error}}. Thử lại?",

@@ -55,6 +55,18 @@
       "summary": "Tu espacio de trabajo esta configurado.",
       "goToDashboard": "Ir al Panel"
     },
+    "agentIdentity": {
+      "question": "Como debo identificarme contigo?",
+      "male": "Hombre",
+      "maleDesc": "Tu asistente usara lenguaje masculino",
+      "female": "Mujer",
+      "femaleDesc": "Tu asistente usara lenguaje femenino",
+      "other": "Me da igual",
+      "otherDesc": "Lenguaje neutro",
+      "customize": "Quiero elegir un nombre",
+      "customizeDesc": "Tu defines el nombre de tu asistente",
+      "namePlaceholder": "Escribe el nombre del asistente"
+    },
     "error": {
       "notUnderstood": "No entendi. Elige una de las opciones:",
       "toolFailed": "Problema: {{error}}. Intentar de nuevo?",

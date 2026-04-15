@@ -162,6 +162,18 @@
       "summary": "Seu ambiente esta configurado.",
       "goToDashboard": "Ir para o Dashboard"
     },
+    "agentIdentity": {
+      "question": "Como devo me identificar com voce?",
+      "male": "Homem",
+      "maleDesc": "Seu assistente usara linguagem masculina",
+      "female": "Mulher",
+      "femaleDesc": "Seu assistente usara linguagem feminina",
+      "other": "Tanto faz",
+      "otherDesc": "Linguagem neutra",
+      "customize": "Quero escolher um nome",
+      "customizeDesc": "Voce define o nome do seu assistente",
+      "namePlaceholder": "Digite o nome do assistente"
+    },
     "error": {
       "notUnderstood": "Nao entendi. Escolha uma das opcoes:",
       "toolFailed": "Problema: {{error}}. Tentar novamente?",

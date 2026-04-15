@@ -93,4 +93,21 @@ describe("QuickReplyBar", () => {
 
     expect(container.firstChild).toBeNull();
   });
+
+  it("should render simple replies (without descriptions) as cards with role=button", () => {
+    const simpleReplies: QuickReply[] = [
+      { label: "Simple A", value: "a" },
+      { label: "Simple B", value: "b" },
+    ];
+
+    render(
+      <QuickReplyBar replies={simpleReplies} onSelect={vi.fn()} disabled={false} />,
+    );
+
+    const buttons = screen.getAllByRole("button");
+    expect(buttons).toHaveLength(2);
+    // Both should be card-style buttons (not pill buttons)
+    expect(buttons[0]).toBeInTheDocument();
+    expect(buttons[1]).toBeInTheDocument();
+  });
 });

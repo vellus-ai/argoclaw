@@ -55,6 +55,18 @@
       "summary": "Ihr Arbeitsbereich ist konfiguriert.",
       "goToDashboard": "Zum Dashboard"
     },
+    "agentIdentity": {
+      "question": "Wie soll ich mich Ihnen gegenueber identifizieren?",
+      "male": "Maennlich",
+      "maleDesc": "Ihr Assistent wird maennliche Sprache verwenden",
+      "female": "Weiblich",
+      "femaleDesc": "Ihr Assistent wird weibliche Sprache verwenden",
+      "other": "Egal",
+      "otherDesc": "Geschlechtsneutrale Sprache",
+      "customize": "Ich moechte einen Namen waehlen",
+      "customizeDesc": "Sie legen den Namen Ihres Assistenten fest",
+      "namePlaceholder": "Name des Assistenten eingeben"
+    },
     "error": {
       "notUnderstood": "Ich habe das nicht verstanden. Waehlen Sie eine der Optionen:",
       "toolFailed": "Problem: {{error}}. Erneut versuchen?",

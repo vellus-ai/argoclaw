@@ -22,6 +22,7 @@ const INITIAL_CONTEXT: OnboardingContext = {
   agentName: "Imediato",
   agentId: "agent-001",
   gender: null,
+  agentGender: null,
   workspaceType: "",
   accountName: "",
   primaryColor: "#1E40AF",
@@ -189,13 +190,13 @@ describe("onboardingReducer", () => {
   // ========================================================================
 
   describe("REPLY action — valid transitions", () => {
-    it("welcome → naming on start", () => {
+    it("welcome → agent_identity on start", () => {
       const state = makeState("welcome");
       const next = onboardingReducer(state, {
         type: "REPLY",
         value: "start",
       });
-      expect(next.currentState).toBe("naming");
+      expect(next.currentState).toBe("agent_identity");
     });
 
     it("naming → workspace_type on keep", () => {
@@ -366,7 +367,7 @@ describe("onboardingReducer", () => {
         type: "REPLY",
         value: "start",
       });
-      expect(next.currentState).toBe("naming");
+      expect(next.currentState).toBe("agent_identity");
       expect(next.error).toBeNull();
     });
   });
@@ -593,12 +594,12 @@ describe("onboardingReducer", () => {
       });
       expect(state.currentState).toBe("welcome");
 
-      // Start
+      // Start → agent_identity
       state = onboardingReducer(state, { type: "REPLY", value: "start" });
-      expect(state.currentState).toBe("naming");
+      expect(state.currentState).toBe("agent_identity");
 
-      // Keep default name
-      state = onboardingReducer(state, { type: "REPLY", value: "keep" });
+      // Select gender → workspace_type
+      state = onboardingReducer(state, { type: "REPLY", value: "agent_male" });
       expect(state.currentState).toBe("workspace_type");
 
       // Business
@@ -644,9 +645,11 @@ describe("onboardingReducer", () => {
         type: "INIT",
         status: makeStatus(),
       });
+      // Start → agent_identity → customize → agent_identity_custom
       state = onboardingReducer(state, { type: "REPLY", value: "start" });
+      expect(state.currentState).toBe("agent_identity");
       state = onboardingReducer(state, { type: "REPLY", value: "customize" });
-      expect(state.currentState).toBe("naming_custom");
+      expect(state.currentState).toBe("agent_identity_custom");
 
       state = onboardingReducer(state, {
         type: "INPUT",
