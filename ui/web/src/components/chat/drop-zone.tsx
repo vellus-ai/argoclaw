@@ -35,7 +35,7 @@ export function DropZone({ onDrop, children }: DropZoneProps) {
       {children}
 
       {isDragging && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+        <div role="status" aria-live="assertive" className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-2 text-muted-foreground">
             <Upload className="h-10 w-10" />
             <span className="text-lg font-medium">Drop files here</span>
