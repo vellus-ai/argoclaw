@@ -463,6 +463,110 @@ func TestE2E_OperatorEndpoints_NonExistentTenant(t *testing.T) {
 	}
 }
 
+// TestE2E_OperatorMode_WSHandleConnectPath simulates the exact path that
+// handleConnect (internal/gateway/router.go) takes when a JWT from an operator
+// tenant is received on the WebSocket connect message.
+//
+// handleConnect flow:
+//  1. ValidateAccessToken(jwtString, secret) → TokenClaims
+//  2. tenantID := uuid.Parse(claims.TenantID)
+//  3. lookupCtx := store.WithCrossTenant(ctx)                  ← bypass for tenant lookup
+//  4. tenant := tenants.GetByID(lookupCtx, tenantID)
+//  5. if tenant.OperatorLevel >= 1 → client.operatorLevel = tenant.OperatorLevel
+//
+// Then in MethodRouter.Handle, for each WS method call:
+//
+//  6. ctx = store.WithCrossTenant(ctx)
+//  7. ctx = store.WithOperatorMode(ctx, tenantID)
+//
+// This test verifies steps 1–7 against a real PostgreSQL database.
+func TestE2E_OperatorMode_WSHandleConnectPath(t *testing.T) {
+	ctx := context.Background()
+
+	// Step 1: generate an access token exactly as the login endpoint does
+	opLoginBody := mustLoginBody(t, operatorEmail, testPassword)
+	rawToken, _ := opLoginBody["access_token"].(string)
+	if rawToken == "" {
+		t.Fatal("login returned empty access_token")
+	}
+
+	// Step 2: parse the JWT (handleConnect calls ValidateAccessToken)
+	claims, err := auth.ValidateAccessToken(rawToken, testJWTSecret)
+	if err != nil {
+		t.Fatalf("ValidateAccessToken: %v", err)
+	}
+
+	// Step 3: tenant_id in claims must match our operator tenant
+	claimsTenantID, err := uuid.Parse(claims.TenantID)
+	if err != nil {
+		t.Fatalf("parse TenantID from claims: %v", err)
+	}
+	if claimsTenantID != ts.operatorTenantID {
+		t.Errorf("claims.TenantID = %v, want %v", claimsTenantID, ts.operatorTenantID)
+	}
+
+	// Step 4: handleConnect loads the tenant using WithCrossTenant to bypass
+	// the tenant scope guard (tenants table is scoped — operator lookup is legit bypass)
+	lookupCtx := store.WithCrossTenant(ctx) // appsec:cross-tenant-bypass — operator tenant self-lookup in handleConnect
+	tenant, err := ts.tenantStore.GetByID(lookupCtx, claimsTenantID)
+	if err != nil || tenant == nil {
+		t.Fatalf("GetByID with cross-tenant context: %v (tenant=%v)", err, tenant)
+	}
+
+	// Step 5: OperatorLevel >= 1 → handleConnect sets client.operatorLevel
+	if tenant.OperatorLevel < 1 {
+		t.Fatalf("handleConnect would not activate operator mode: OperatorLevel=%d (need >= 1)", tenant.OperatorLevel)
+	}
+	clientOperatorLevel := tenant.OperatorLevel // mirrors what handleConnect stores
+
+	// Step 6–7: MethodRouter.Handle injects operator context for each WS call
+	// mirror the exact code in router.go Handle():
+	//   if client.operatorLevel >= 1 {
+	//       ctx = store.WithCrossTenant(ctx)
+	//       ctx = store.WithOperatorMode(ctx, client.tenantID)
+	//   }
+	methodCtx := store.WithTenantID(ctx, claimsTenantID)
+	if clientOperatorLevel >= 1 {
+		methodCtx = store.WithCrossTenant(methodCtx) // appsec:cross-tenant-bypass — operator WS method dispatch
+		methodCtx = store.WithOperatorMode(methodCtx, claimsTenantID)
+	}
+
+	if !store.IsOperatorMode(methodCtx) {
+		t.Error("IsOperatorMode must be true in WS method dispatch context for operator tenant")
+	}
+	if store.OperatorModeFromContext(methodCtx) != claimsTenantID {
+		t.Errorf("OperatorModeFromContext = %v, want %v", store.OperatorModeFromContext(methodCtx), claimsTenantID)
+	}
+	if !store.IsCrossTenant(methodCtx) {
+		t.Error("IsCrossTenant must be true in WS method dispatch context for operator tenant")
+	}
+
+	// Boundary: customer tenant must NOT get operator mode
+	custLoginBody := mustLoginBody(t, customerEmail, testPassword)
+	custToken, _ := custLoginBody["access_token"].(string)
+
+	custClaims, err := auth.ValidateAccessToken(custToken, testJWTSecret)
+	if err != nil {
+		t.Fatalf("ValidateAccessToken customer: %v", err)
+	}
+	custTenantID, _ := uuid.Parse(custClaims.TenantID)
+
+	custTenant, err := ts.tenantStore.GetByID(store.WithCrossTenant(ctx), custTenantID)
+	if err != nil || custTenant == nil {
+		t.Fatalf("GetByID customer tenant: %v", err)
+	}
+	if custTenant.OperatorLevel != 0 {
+		t.Errorf("customer tenant must have operator_level=0, got %d", custTenant.OperatorLevel)
+	}
+
+	// handleConnect would leave custClientOperatorLevel == 0 → no operator context injection
+	custMethodCtx := store.WithTenantID(ctx, custTenantID)
+	// custTenant.OperatorLevel == 0 → the if block is not entered → no WithOperatorMode
+	if store.IsOperatorMode(custMethodCtx) {
+		t.Error("IsOperatorMode must be false in WS context for customer tenant (operator_level=0)")
+	}
+}
+
 // =============================================================================
 // helpers
 // =============================================================================
