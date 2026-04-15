@@ -32,7 +32,7 @@ steps:
       - 'argoclaw=${_IMAGE}:$TAG_NAME'
       - 'onboard=${_IMAGE}:$TAG_NAME'
     env:
-      - 'CLOUDSDK_COMPUTE_ZONE=us-central1'
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
       - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER}'
     id: 'deploy-central'
     waitFor: ['push']
