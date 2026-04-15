@@ -61,9 +61,10 @@ func (h *UserAuthHandler) RegisterRoutes(mux *http.ServeMux) {
 }
 
 type registerRequest struct {
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-	DisplayName string `json:"display_name"`
+	Email       string  `json:"email"`
+	Password    string  `json:"password"`
+	DisplayName string  `json:"display_name"`
+	Gender      *string `json:"gender,omitempty"`
 }
 
 type loginRequest struct {
@@ -127,6 +128,7 @@ func (h *UserAuthHandler) handleRegister(w http.ResponseWriter, r *http.Request)
 		DisplayName:  req.DisplayName,
 		Role:         "member",
 		Status:       "active",
+		Gender:       req.Gender,
 	}
 
 	if err := h.users.CreateUser(r.Context(), user); err != nil {

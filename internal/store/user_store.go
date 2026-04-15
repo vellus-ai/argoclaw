@@ -22,6 +22,7 @@ type User struct {
 	EmailVerified  bool       `json:"email_verified"`
 	MFAEnabled         bool       `json:"mfa_enabled"`
 	MustChangePassword bool       `json:"-"`
+	Gender             *string    `json:"gender,omitempty"`
 	CreatedAt          time.Time  `json:"created_at"`
 	UpdatedAt          time.Time  `json:"updated_at"`
 }
