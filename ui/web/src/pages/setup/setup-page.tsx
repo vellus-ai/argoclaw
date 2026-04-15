@@ -4,6 +4,7 @@ import { useOnboardingEngine } from "./hooks/use-onboarding-engine";
 import { useOnboardingApi } from "./hooks/use-onboarding-api";
 import { OnboardingChat } from "./onboarding-chat";
 import { OnboardingInput } from "./onboarding-input";
+import { ProviderOAuthSection } from "./provider-oauth-section";
 import { ROUTES } from "@/lib/constants";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { ErrorState } from "@/components/shared/error-state";
@@ -18,6 +19,8 @@ export function SetupPage() {
   const [initialized, setInitialized] = useState(false);
   const [typing, setTyping] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  // When the OAuth flow shows the fallback, reveal the manual API key input
+  const [showApiKeyFallback, setShowApiKeyFallback] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -46,6 +49,11 @@ export function SetupPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Reset OAuth fallback whenever the onboarding state changes
+  useEffect(() => {
+    setShowApiKeyFallback(false);
+  }, [engine.currentState]);
 
   // Navigate to dashboard on complete state
   useEffect(() => {
@@ -174,13 +182,28 @@ export function SetupPage() {
 
       {/* Input area */}
       <footer className="shrink-0 border-t border-border safe-bottom">
-        <OnboardingInput
-          quickReplies={lastMessage?.quickReplies}
-          inputField={lastMessage?.inputField}
-          onReply={handleReply}
-          onInput={handleInput}
-          disabled={actionLoading}
-        />
+        {engine.currentState === "provider_config" &&
+        engine.context.selectedProvider === "openai" &&
+        !showApiKeyFallback ? (
+          <ProviderOAuthSection
+            provider={engine.context.selectedProvider}
+            disabled={actionLoading}
+            onSuccess={() => {
+              engine.dispatch({ type: "TOOL_SUCCESS", tool: "oauth_provider" });
+            }}
+            onFallback={() => {
+              setShowApiKeyFallback(true);
+            }}
+          />
+        ) : (
+          <OnboardingInput
+            quickReplies={lastMessage?.quickReplies}
+            inputField={lastMessage?.inputField}
+            onReply={handleReply}
+            onInput={handleInput}
+            disabled={actionLoading}
+          />
+        )}
       </footer>
     </div>
   );

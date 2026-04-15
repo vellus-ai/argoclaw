@@ -710,7 +710,7 @@ function handleToolSuccess(state: EngineState, tool: string): EngineState {
 
   switch (currentState) {
     case "provider_config":
-      if (tool === "validate_provider" || tool === "create_provider") {
+      if (tool === "validate_provider" || tool === "create_provider" || tool === "oauth_provider") {
         return { ...state, currentState: "channel", error: null };
       }
       return state;
