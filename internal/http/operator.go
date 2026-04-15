@@ -273,7 +273,7 @@ func (h *OperatorHandler) queryAgents(ctx context.Context, tenantID uuid.UUID, l
 	}
 	defer rows.Close()
 
-	var result []map[string]any
+	result := []map[string]any{} // initialize as empty slice (not nil) — nil marshals to JSON null
 	var total int
 	for rows.Next() {
 		var id uuid.UUID
@@ -316,7 +316,7 @@ func (h *OperatorHandler) querySessions(ctx context.Context, tenantID uuid.UUID,
 	}
 	defer rows.Close()
 
-	var result []map[string]any
+	result := []map[string]any{} // initialize as empty slice (not nil) — nil marshals to JSON null
 	var total int
 	for rows.Next() {
 		var id, agentID, userID, label, channel string

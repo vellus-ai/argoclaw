@@ -6,7 +6,8 @@
 ALTER TABLE tenants ADD COLUMN IF NOT EXISTS operator_level INT NOT NULL DEFAULT 0;
 
 -- Sparse index: only index rows where operator_level > 0 (very few rows)
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_tenants_operator_level
+-- Note: CONCURRENTLY omitted — cannot run inside a transaction block (golang-migrate wraps each migration)
+CREATE INDEX IF NOT EXISTS idx_tenants_operator_level
     ON tenants (operator_level) WHERE operator_level > 0;
 
 -- Seed the Vellus operator tenant (idempotent)
