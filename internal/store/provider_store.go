@@ -72,6 +72,7 @@ type LLMProviderData struct {
 	APIBase      string          `json:"api_base,omitempty"`
 	APIKey       string          `json:"api_key,omitempty"`
 	Enabled      bool            `json:"enabled"`
+	HostManaged  bool            `json:"host_managed,omitempty"`
 	Settings     json.RawMessage `json:"settings,omitempty"`
 }
 

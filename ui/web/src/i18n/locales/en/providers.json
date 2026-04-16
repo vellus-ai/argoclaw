@@ -82,7 +82,8 @@
     "chatgpt_oauth": "ChatGPT (OAuth)",
     "anthropic_oauth": "Anthropic (OAuth Token)",
     "yescale": "YesScale",
-    "acp": "ACP"
+    "acp": "ACP",
+    "vertex_ai": "Google Vertex AI (Workload Identity)"
   },
   "acp": {
     "description": "Orchestrate ACP-compatible coding agents as subprocesses. No API key needed.",
