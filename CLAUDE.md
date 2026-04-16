@@ -124,6 +124,35 @@ kubectl -n control-plane rollout status deployment/argoclaw-vellus --timeout=5m
 rm -rf /tmp/argoclaw-build
 ```
 
+## Known Gotchas
+
+### Go: embedded struct literals
+- Structs que embebem `BaseModel` (ex: `LLMProviderData`, `AgentData`) **não aceitam campos promovidos diretamente** em composite literals
+- ❌ `store.LLMProviderData{ID: uuid.NewSHA1(...)}` → `unknown field ID in struct literal`
+- ✅ `store.LLMProviderData{BaseModel: store.BaseModel{ID: uuid.NewSHA1(...)}, ...}`
+
+### Plugin manifest: dual-format validation
+- A API de catálogo de plugins recebe manifestos em dois formatos: nested (`spec.permissions`) e legado flat (`permissions` no root)
+- Sempre validar ambos — bridge struct com fallback: `perms := bridge.Spec.Permissions; if empty { perms = bridge.Permissions }`
+
+### Cloud Build: sem triggers automáticos
+- **Nenhum** Cloud Build trigger está configurado no projeto — tags Git **não disparam** build automaticamente
+- O step `kubectl` do `cloudbuild.yaml` sempre falha (cluster privado, `privateEndpointEnforcementEnabled=true`)
+- `gcloud builds submit` sem `.gcloudignore` envia ~365 MiB (inclui node_modules e worktrees)
+
+### GKE Deploy: fluxo real via VM
+O deploy de produção é sempre via script na VM `argoclaw-admin`:
+```bash
+# 1. Escrever script local com: git clone → docker build (ENABLE_WEB_UI=true) → docker push → kubectl set image (central + customers)
+# 2. Enviar para VM:
+gcloud compute scp deploy.sh argoclaw-admin:/tmp/ --zone=us-central1-a --tunnel-through-iap
+# 3. Executar (tunnel como background + SSH direto):
+gcloud compute start-iap-tunnel argoclaw-admin 22 --zone=us-central1-a --local-host-port=localhost:2299 &
+ssh -p 2299 -i ~/.ssh/google_compute_engine milton_vellus_tech@localhost "bash /tmp/deploy.sh"
+```
+- Atualizar **sempre** os dois deployments no mesmo script: `argoclaw-central` e `argoclaw-customers`
+- Tag `onboard` container DEVE ser atualizada junto com `argoclaw` (init container — mismatch causa crash)
+
 ## Post-Implementation Checklist
 
 After implementing or modifying Go code, run these checks:
@@ -144,7 +173,6 @@ Go conventions to follow:
 - **i18n strings:** When adding user-facing error messages, add key to `internal/i18n/keys.go` and translations to `catalog_en.go`, `catalog_vi.go`, `catalog_zh.go`. For UI strings, add to all locale JSON files in `ui/web/src/i18n/locales/{en,vi,zh}/`
 - **SQL safety:** When implementing or modifying SQL store code (`store/pg/*.go`), always verify: (1) All user inputs use parameterized queries (`$1, $2, ...`), never string concatenation — prevents SQL injection. (2) Queries are optimized — no N+1 queries, no unnecessary full table scans. (3) WHERE clauses, JOINs, and ORDER BY columns use existing indices — check migration files for available indexes
 - **DB query reuse:** Before adding a new DB query for key entities (teams, agents, sessions, users), check if the same data is already fetched earlier in the current flow/pipeline. Prefer passing resolved data through context, event payloads, or function params rather than re-querying. Duplicate queries waste DB resources and add latency
-- **Known flaky test:** `TestPluginHandler_CreateCatalogEntry_InvalidPermissions` (`internal/http/plugins_test.go:268`) — pré-existente, bug na validação de permissões do catálogo de plugins
 - **Solution design:** When designing a fix or feature, identify the root cause first — don't just patch symptoms. Think through production scenarios (high concurrency, multi-tenant isolation, failure cascades, long-running sessions) to ensure the solution holds up. Prefer explicit configuration over runtime heuristics. Prefer the simplest solution that addresses the root cause directly
 
 ## Mobile UI/UX Rules
