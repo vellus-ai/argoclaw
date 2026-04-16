@@ -82,7 +82,8 @@
     "chatgpt_oauth": "ChatGPT (OAuth)",
     "anthropic_oauth": "Anthropic (OAuth Token)",
     "yescale": "YesScale",
-    "acp": "ACP"
+    "acp": "ACP",
+    "vertex_ai": "Google Vertex AI (Workload Identity)"
   },
   "acp": {
     "description": "Điều phối các agent lập trình tương thích ACP dưới dạng tiến trình con. Không cần API key.",

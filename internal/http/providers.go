@@ -170,7 +170,7 @@ func (h *ProvidersHandler) registerInMemory(p *store.LLMProviderData) {
 // --- Provider CRUD ---
 
 func (h *ProvidersHandler) handleListProviders(w http.ResponseWriter, r *http.Request) {
-	providers, err := h.store.ListProviders(r.Context())
+	dbProviders, err := h.store.ListProviders(r.Context())
 	if err != nil {
 		slog.Error("providers.list", "error", err)
 		locale := extractLocale(r)
@@ -178,11 +178,39 @@ func (h *ProvidersHandler) handleListProviders(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	for i := range providers {
-		maskAPIKey(&providers[i])
+	for i := range dbProviders {
+		maskAPIKey(&dbProviders[i])
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"providers": providers})
+	// Inject host-managed providers (registered via config.json, not the DB)
+	// so they appear in the UI as read-only entries.
+	result := dbProviders
+	if h.providerReg != nil {
+		// Build a set of names already present from the DB.
+		dbNames := make(map[string]struct{}, len(dbProviders))
+		for _, p := range dbProviders {
+			dbNames[p.Name] = struct{}{}
+		}
+
+		for _, name := range h.providerReg.List() {
+			if _, exists := dbNames[name]; exists {
+				continue
+			}
+			// Determine provider type: for vertex-ai the name matches the constant.
+			providerType := name
+			if name == "vertex-ai" {
+				providerType = store.ProviderVertexAI
+			}
+			result = append(result, store.LLMProviderData{
+				Name:         name,
+				ProviderType: providerType,
+				Enabled:      true,
+				HostManaged:  true,
+			})
+		}
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"providers": result})
 }
 
 func (h *ProvidersHandler) handleCreateProvider(w http.ResponseWriter, r *http.Request) {

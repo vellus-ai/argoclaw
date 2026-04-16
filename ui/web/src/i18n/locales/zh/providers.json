@@ -82,7 +82,8 @@
     "chatgpt_oauth": "ChatGPT (OAuth)",
     "anthropic_oauth": "Anthropic（设置令牌）",
     "yescale": "YesScale",
-    "acp": "ACP"
+    "acp": "ACP",
+    "vertex_ai": "Google Vertex AI（工作负载身份）"
   },
   "acp": {
     "description": "将兼容 ACP 的编程代理作为子进程进行编排。无需 API 密钥。",
