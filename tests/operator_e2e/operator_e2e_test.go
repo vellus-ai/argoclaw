@@ -133,11 +133,11 @@ func (ts *testServer) seed(ctx context.Context) error {
 	// -- Operator tenant --
 	opID := uuid.Must(uuid.NewV7())
 	_, err := ts.db.ExecContext(ctx,
-		`INSERT INTO tenants (id, slug, name, plan, status, operator_level, created_at, updated_at)
-		 VALUES ($1, $2, 'E2E Operator Tenant', 'internal', 'active', 1, NOW(), NOW())
+		`INSERT INTO tenants (id, slug, name, plan, status, settings, operator_level, created_at, updated_at)
+		 VALUES ($1, $2, 'E2E Operator Tenant', 'internal', 'active', $3::JSONB, 1, NOW(), NOW())
 		 ON CONFLICT (slug) DO UPDATE SET operator_level = 1, status = 'active'
 		 RETURNING id`,
-		opID, operatorSlug,
+		opID, operatorSlug, "{}",
 	)
 	if err != nil {
 		return fmt.Errorf("insert operator tenant: %w", err)
@@ -152,10 +152,10 @@ func (ts *testServer) seed(ctx context.Context) error {
 	// -- Customer tenant --
 	custID := uuid.Must(uuid.NewV7())
 	_, err = ts.db.ExecContext(ctx,
-		`INSERT INTO tenants (id, slug, name, plan, status, operator_level, created_at, updated_at)
-		 VALUES ($1, $2, 'E2E Customer Tenant', 'starter', 'active', 0, NOW(), NOW())
+		`INSERT INTO tenants (id, slug, name, plan, status, settings, operator_level, created_at, updated_at)
+		 VALUES ($1, $2, 'E2E Customer Tenant', 'starter', 'active', $3::JSONB, 0, NOW(), NOW())
 		 ON CONFLICT (slug) DO UPDATE SET operator_level = 0, status = 'active'`,
-		custID, customerSlug,
+		custID, customerSlug, "{}",
 	)
 	if err != nil {
 		return fmt.Errorf("insert customer tenant: %w", err)
