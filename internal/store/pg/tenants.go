@@ -22,11 +22,15 @@ func (s *PGTenantStore) CreateTenant(ctx context.Context, tenant *store.Tenant) 
 	if tenant.ID == uuid.Nil {
 		tenant.ID = uuid.New()
 	}
+	settings := tenant.Settings
+	if settings == "" {
+		settings = "{}"
+	}
 	_, err := s.db.ExecContext(ctx, `
 		INSERT INTO tenants (id, slug, name, plan, status, trial_ends_at, settings, stripe_customer_id, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7::JSONB, $8, NOW(), NOW())`,
 		tenant.ID, tenant.Slug, tenant.Name, tenant.Plan, tenant.Status,
-		tenant.TrialEndsAt, nullIfEmpty(tenant.Settings), tenant.StripeCustomerID)
+		tenant.TrialEndsAt, settings, tenant.StripeCustomerID)
 	if err != nil {
 		return fmt.Errorf("create tenant: %w", err)
 	}
