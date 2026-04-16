@@ -206,15 +206,24 @@ func (r *MethodRouter) handleConnect(ctx context.Context, client *Client, req *p
 				if tid, err := uuid.Parse(claims.TenantID); err == nil {
 					// appsec:cross-tenant-bypass — load tenant to check operator_level
 					lookupCtx := store.WithCrossTenant(ctx)
-					if tenant, err := r.server.tenants.GetByID(lookupCtx, tid); err != nil {
-						slog.Warn("security.ws_operator_level_lookup_failed",
+					tenant, err := r.server.tenants.GetByID(lookupCtx, tid)
+					if err != nil || tenant == nil {
+						// appsec:cross-tenant-bypass — tenant autenticado com operator_level >= 1
+						// Treat GetByID error or missing tenant as ErrUnauthorized.
+						client.authenticated = false
+						slog.Warn("security.ws_tenant_lookup_failed",
 							"client", client.id,
 							"tenant_id", claims.TenantID,
 							"error", err,
+							"remote_addr", client.remoteAddr,
 						)
-						// Non-fatal: continue without operator mode
-					} else if tenant != nil && tenant.OperatorLevel >= 1 {
-						// appsec:cross-tenant-bypass — tenant with operator_level >= 1 authenticated via JWT WS
+						locale := i18n.Normalize(client.locale)
+						client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized,
+							i18n.T(locale, i18n.MsgUnauthorized)))
+						return
+					}
+					if tenant.OperatorLevel >= 1 {
+						// appsec:cross-tenant-bypass — tenant autenticado com operator_level >= 1
 						client.operatorLevel = tenant.OperatorLevel
 						slog.Info("security.operator_mode_activated_ws",
 							"client", client.id,

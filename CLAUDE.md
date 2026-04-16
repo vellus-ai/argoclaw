@@ -227,15 +227,19 @@ if tenant.OperatorLevel >= 1 {
 
 **Regra crítica:** `operator_level` é write-protected em todos os handlers públicos. Nunca expor no request body de criação/update de tenant.
 
-### Pendências de Implementação
+### Implementação Concluída (2026-04-16)
 
-1. Migration `0000XX_operator_level.up.sql` + bump `RequiredSchemaVersion`
-2. `store.WithOperatorMode(ctx, tenantID)` — novo helper de contexto
-3. Middleware `requireOperatorRole` em `internal/http/`
-4. Endpoints `/v1/operator/*` em `internal/http/operator.go`
-5. K8s manifests: `argoclaw-central/` + `argoclaw-customers/` (forks do atual `argoclaw-vellus/`)
-6. Terraform: node pool `argoclaw-control-pool` com taint
-7. `cloudbuild.yaml`: step deploy aponta para `argoclaw-central`
+Todos os componentes implementados e testados:
+- Migration 000035 (`operator_level` + seed tenant vellus) + bump `RequiredSchemaVersion` → 35
+- Context helpers: `WithOperatorMode`, `OperatorModeFromContext`, `IsOperatorMode` em `internal/store/context.go`
+- `ListAllTenantsForOperator` no `TenantStore` com `WithCrossTenant` obrigatório
+- Propagação de Operator Mode no WS handshake (`handleConnect`) e HTTP (`TenantMiddleware.Wrap`)
+- Middleware `requireOperatorRole` em `internal/http/` — dual-check operator_level + Role
+- 4 endpoints `/v1/operator/*` em `internal/http/operator.go`
+- K8s manifests: `argoclaw-central/` + `argoclaw-customers/` (forks do `argoclaw-vellus/`)
+- Terraform: node pool `argoclaw-control-pool` com taint `vellus.ai/tier=control`
+- CI/CD: `cloudbuild.yaml` → Central + `promote.sh` → Customers
+- Testes: integração (matriz de acesso PBT), isolamento cross-tenant, E2E (login → operator endpoints)
 
 ## Onboarding Conversacional — CONCLUIDO
 
