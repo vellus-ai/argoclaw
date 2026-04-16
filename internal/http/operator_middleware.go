@@ -8,6 +8,21 @@ import (
 	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
+// Error codes returned by requireOperatorRole middleware.
+const (
+	// ErrCodeOperatorRequired is returned when the tenant does not have operator_level >= 1.
+	ErrCodeOperatorRequired = "OPERATOR_REQUIRED"
+	// ErrCodeInsufficientRole is returned when the user's role is below RoleOperator.
+	ErrCodeInsufficientRole = "INSUFFICIENT_ROLE"
+)
+
+// Error messages for operator access denial.
+const (
+	errMsgOperatorRequired  = "tenant does not have operator access"
+	errMsgInsufficientRole  = "insufficient role for operator access"
+	logKeySecurityDenied    = "security.operator_access_denied"
+)
+
 // RequireOperatorRole is the exported version of requireOperatorRole for use by server.go.
 // It verifies dual-check: operator_level >= 1 AND role >= RoleOperator.
 var RequireOperatorRole = requireOperatorRole
@@ -22,14 +37,14 @@ func requireOperatorRole(next http.HandlerFunc) http.HandlerFunc {
 
 		// Check 1: Operator Mode (tenant with operator_level >= 1 authenticated via JWT)
 		if !store.IsOperatorMode(ctx) {
-			slog.Warn("security.operator_access_denied",
-				"reason", "OPERATOR_REQUIRED",
+			slog.Warn(logKeySecurityDenied,
+				"reason", ErrCodeOperatorRequired,
 				"tenant_id", store.TenantIDFromContext(ctx).String(),
 				"user_id", store.UserIDFromContext(ctx),
 				"path", r.URL.Path,
 			)
 			writeOperatorJSONError(w, http.StatusForbidden,
-				"tenant does not have operator access", "OPERATOR_REQUIRED")
+				errMsgOperatorRequired, ErrCodeOperatorRequired)
 			return
 		}
 
@@ -38,15 +53,15 @@ func requireOperatorRole(next http.HandlerFunc) http.HandlerFunc {
 		auth := resolveAuth(r, "") // no gateway token check — JWT/API key only
 		role := auth.Role
 		if !permissions.HasMinRole(role, permissions.RoleOperator) {
-			slog.Warn("security.operator_access_denied",
-				"reason", "INSUFFICIENT_ROLE",
+			slog.Warn(logKeySecurityDenied,
+				"reason", ErrCodeInsufficientRole,
 				"tenant_id", store.TenantIDFromContext(ctx).String(),
 				"user_id", store.UserIDFromContext(ctx),
 				"role", string(role),
 				"path", r.URL.Path,
 			)
 			writeOperatorJSONError(w, http.StatusForbidden,
-				"insufficient role for operator access", "INSUFFICIENT_ROLE")
+				errMsgInsufficientRole, ErrCodeInsufficientRole)
 			return
 		}
 

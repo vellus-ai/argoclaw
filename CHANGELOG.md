@@ -7,6 +7,25 @@
 
 ## [Unreleased]
 
+### Added
+- feat(operator): Ponte de Comando Central — visibilidade cross-tenant para o operador Vellus via dual-check `operator_level + Role` (migration 000035, context helpers, middleware, handler, 4 endpoints `/v1/operator/*`)
+- feat(operator): migration 000035 — coluna `operator_level` na tabela `tenants` com seed idempotente do tenant `vellus` (`operator_level=1`, `plan=internal`)
+- feat(operator): context helpers `WithOperatorMode`, `OperatorModeFromContext`, `IsOperatorMode` para propagação de Operator Mode via contexto Go
+- feat(operator): middleware `requireOperatorRole` com dual-check: `operator_level >= 1` AND `Role >= RoleOperator`
+- feat(operator): endpoints `GET /v1/operator/tenants`, `/tenants/{id}/agents`, `/tenants/{id}/sessions`, `/tenants/{id}/usage` com paginação e validação de UUID
+- feat(infra): split de deployment K8s em `argoclaw-central` (canary, node pool dedicado) e `argoclaw-customers` (stable)
+- feat(infra): node pool Terraform `argoclaw-control-pool` com taint `vellus.ai/tier=control:NoSchedule`
+- feat(ci): `cloudbuild.yaml` para deploy automático no `argoclaw-central` + `promote.sh` para promoção manual para `argoclaw-customers`
+- test(operator): testes de integração da matriz de acesso operator com PBT bicondicional (banco real)
+- test(operator): testes de integração de isolamento cross-tenant e idempotência da migration 000035
+- test(operator): testes E2E do fluxo completo login → JWT → acesso operator → propagação WS/HTTP
+
+### Security
+- Proteção write do campo `operator_level` — rejeitado com 422 em todos os handlers de criação/atualização de tenant
+- `operator_level` lido exclusivamente do banco de dados na autenticação — nunca derivado de JWT claims
+- Audit trail completo: `slog.Info("operator.access")` em todos os acessos, `slog.Warn("security.operator_access_denied")` em todas as rejeições
+- Endpoints operator são somente leitura — nenhuma operação write em tenants de clientes
+
 ### Fixed
 - Corrigido loop infinito de login para usuarios autenticados por email e senha — conexao WebSocket agora reconhece JWT e atribui a role correta (#44)
 - Login por email retornava 401 em endpoints autenticados (ex: /v1/providers) porque `resolveAuth()` nao reconhecia JWT como metodo de autenticacao

@@ -11,6 +11,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/vellus-ai/argoclaw/internal/store"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // OperatorHandler exposes cross-tenant management endpoints for Vellus operators.
@@ -66,16 +69,34 @@ func parsePagination(r *http.Request) (limit, offset int) {
 	return limit, offset
 }
 
-// auditOperatorAccess emits a structured audit log for every operator API request.
+// operatorTracer is the OTel tracer for operator endpoints.
+var operatorTracer = otel.Tracer("argoclaw/operator")
+
+// auditOperatorAccess emits a structured audit log for every operator API request
+// and starts an OTel span with operator.mode = true for tracing.
 // This is the primary accountability mechanism for cross-tenant access.
-func auditOperatorAccess(r *http.Request, targetTenantID string) {
+func auditOperatorAccess(r *http.Request, targetTenantID string) (context.Context, trace.Span) {
+	ctx := r.Context()
+	operatorTenantID := store.OperatorModeFromContext(ctx)
+
 	slog.Info("operator.access",
-		"operator_tenant_id", store.OperatorModeFromContext(r.Context()).String(),
+		"operator_tenant_id", operatorTenantID.String(),
 		"target_tenant_id", targetTenantID,
 		"endpoint", r.URL.Path,
 		"method", r.Method,
-		"user_id", store.UserIDFromContext(r.Context()),
+		"user_id", store.UserIDFromContext(ctx),
 	)
+
+	ctx, span := operatorTracer.Start(ctx, "operator."+r.URL.Path,
+		trace.WithSpanKind(trace.SpanKindServer))
+	span.SetAttributes(
+		attribute.Bool("operator.mode", true),
+		attribute.String("operator.tenant_id", operatorTenantID.String()),
+		attribute.String("operator.target_tenant_id", targetTenantID),
+		attribute.String("operator.endpoint", r.URL.Path),
+	)
+
+	return ctx, span
 }
 
 // listTenants returns a paginated list of all tenants.
@@ -83,8 +104,8 @@ func auditOperatorAccess(r *http.Request, targetTenantID string) {
 // GET /v1/operator/tenants?limit=N&offset=M
 // Response: {"data": [...], "total": N, "limit": N, "offset": N}
 func (h *OperatorHandler) listTenants(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	auditOperatorAccess(r, "all")
+	ctx, span := auditOperatorAccess(r, "all")
+	defer span.End()
 
 	limit, offset := parsePagination(r)
 
@@ -115,7 +136,8 @@ func (h *OperatorHandler) listTenantAgents(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	auditOperatorAccess(r, tenantID.String())
+	_, span := auditOperatorAccess(r, tenantID.String())
+	defer span.End()
 
 	if _, ok := h.checkTenantExists(w, r, tenantID); !ok {
 		return
@@ -149,7 +171,8 @@ func (h *OperatorHandler) listTenantSessions(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	auditOperatorAccess(r, tenantID.String())
+	_, span := auditOperatorAccess(r, tenantID.String())
+	defer span.End()
 
 	if _, ok := h.checkTenantExists(w, r, tenantID); !ok {
 		return
@@ -158,8 +181,9 @@ func (h *OperatorHandler) listTenantSessions(w http.ResponseWriter, r *http.Requ
 	// appsec:cross-tenant-bypass — operator requesting sessions for a specific tenant
 	opCtx := store.WithCrossTenant(store.WithTenantID(r.Context(), tenantID))
 	limit, offset := parsePagination(r)
+	status := r.URL.Query().Get("status") // optional status filter
 
-	sessions, total, err := h.querySessions(opCtx, tenantID, limit, offset)
+	sessions, total, err := h.querySessions(opCtx, tenantID, limit, offset, status)
 	if err != nil {
 		slog.Error("operator.list_tenant_sessions failed", "tenant_id", tenantID, "error", err)
 		writeOperatorJSONError(w, http.StatusInternalServerError, "internal server error", "INTERNAL_ERROR")
@@ -175,11 +199,14 @@ func (h *OperatorHandler) listTenantSessions(w http.ResponseWriter, r *http.Requ
 }
 
 // TenantUsage holds usage metrics for a tenant over a period.
+// Matches the TenantUsageStatsResponse from the design spec.
 type TenantUsage struct {
-	Period       string `json:"period"`
-	AgentCount   int    `json:"agent_count"`
-	SessionCount int    `json:"session_count"`
-	TraceCount   int    `json:"trace_count"`
+	TenantID     uuid.UUID `json:"tenant_id"`
+	Period       string    `json:"period"`
+	MessageCount int64     `json:"message_count"`
+	ToolCallCount int64   `json:"tool_call_count"`
+	SessionCount int64     `json:"session_count"`
+	TokensUsed   int64     `json:"tokens_used"`
 }
 
 // getTenantUsage returns usage metrics for a specific tenant.
@@ -191,7 +218,8 @@ func (h *OperatorHandler) getTenantUsage(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	auditOperatorAccess(r, tenantID.String())
+	_, span := auditOperatorAccess(r, tenantID.String())
+	defer span.End()
 
 	period := r.URL.Query().Get("period")
 	if period == "" {
@@ -295,7 +323,8 @@ func (h *OperatorHandler) queryAgents(ctx context.Context, tenantID uuid.UUID, l
 
 // querySessions returns sessions for a tenant from the database.
 // Returns empty results when db is nil.
-func (h *OperatorHandler) querySessions(ctx context.Context, tenantID uuid.UUID, limit, offset int) ([]map[string]any, int, error) {
+// status is an optional filter — when non-empty, only sessions with matching status are returned.
+func (h *OperatorHandler) querySessions(ctx context.Context, tenantID uuid.UUID, limit, offset int, status string) ([]map[string]any, int, error) {
 	if h.db == nil {
 		return []map[string]any{}, 0, nil
 	}
@@ -303,14 +332,28 @@ func (h *OperatorHandler) querySessions(ctx context.Context, tenantID uuid.UUID,
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	rows, err := h.db.QueryContext(ctx, `
-		SELECT id, agent_id, user_id, label, channel, created_at,
-		       COUNT(*) OVER() AS total_count
-		FROM sessions
-		WHERE tenant_id = $1
-		ORDER BY created_at DESC
-		LIMIT $2 OFFSET $3`,
-		tenantID, limit, offset)
+	var rows *sql.Rows
+	var err error
+
+	if status != "" {
+		rows, err = h.db.QueryContext(ctx, `
+			SELECT id, agent_id, user_id, label, channel, created_at,
+			       COUNT(*) OVER() AS total_count
+			FROM sessions
+			WHERE tenant_id = $1 AND status = $2
+			ORDER BY created_at DESC
+			LIMIT $3 OFFSET $4`,
+			tenantID, status, limit, offset)
+	} else {
+		rows, err = h.db.QueryContext(ctx, `
+			SELECT id, agent_id, user_id, label, channel, created_at,
+			       COUNT(*) OVER() AS total_count
+			FROM sessions
+			WHERE tenant_id = $1
+			ORDER BY created_at DESC
+			LIMIT $2 OFFSET $3`,
+			tenantID, limit, offset)
+	}
 	if err != nil {
 		return nil, 0, err
 	}
@@ -339,7 +382,7 @@ func (h *OperatorHandler) querySessions(ctx context.Context, tenantID uuid.UUID,
 // queryUsage returns aggregated usage metrics for a tenant over a period.
 // Returns zeros when db is nil.
 func (h *OperatorHandler) queryUsage(ctx context.Context, tenantID uuid.UUID, period string, days int) TenantUsage {
-	usage := TenantUsage{Period: period}
+	usage := TenantUsage{TenantID: tenantID, Period: period}
 	if h.db == nil {
 		return usage
 	}
@@ -349,19 +392,25 @@ func (h *OperatorHandler) queryUsage(ctx context.Context, tenantID uuid.UUID, pe
 
 	since := time.Now().UTC().AddDate(0, 0, -days)
 
-	// Agent count (not time-bounded — all agents ever created)
-	h.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM agents WHERE tenant_id = $1`, tenantID). //nolint:errcheck
-		Scan(&usage.AgentCount)
-
 	// Session count within period
 	h.db.QueryRowContext(ctx, //nolint:errcheck
 		`SELECT COUNT(*) FROM sessions WHERE tenant_id = $1 AND created_at >= $2`,
 		tenantID, since).Scan(&usage.SessionCount)
 
-	// Message / trace count within period (from traces table)
+	// Message count within period (from traces table — each root trace is a message)
 	h.db.QueryRowContext(ctx, //nolint:errcheck
 		`SELECT COUNT(*) FROM traces WHERE tenant_id = $1 AND start_time >= $2 AND parent_trace_id IS NULL`,
-		tenantID, since).Scan(&usage.TraceCount)
+		tenantID, since).Scan(&usage.MessageCount)
+
+	// Tool call count within period (traces with tool_name set)
+	h.db.QueryRowContext(ctx, //nolint:errcheck
+		`SELECT COUNT(*) FROM traces WHERE tenant_id = $1 AND start_time >= $2 AND tool_name IS NOT NULL AND tool_name != ''`,
+		tenantID, since).Scan(&usage.ToolCallCount)
+
+	// Tokens used within period (sum of input + output tokens from traces)
+	h.db.QueryRowContext(ctx, //nolint:errcheck
+		`SELECT COALESCE(SUM(COALESCE(input_tokens, 0) + COALESCE(output_tokens, 0)), 0) FROM traces WHERE tenant_id = $1 AND start_time >= $2`,
+		tenantID, since).Scan(&usage.TokensUsed)
 
 	return usage
 }

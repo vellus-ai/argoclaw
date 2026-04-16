@@ -12,6 +12,11 @@ import (
 // This is the fail-closed default: queries never run without tenant scoping.
 var ErrTenantRequired = errors.New("tenant_id required in context")
 
+// ErrOperatorLevelForbidden is returned when a client attempts to set
+// operator_level > 0 via CreateTenant or UpdateTenant.
+// appsec: operator_level is derived exclusively from DB/migration — never from API input.
+var ErrOperatorLevelForbidden = errors.New("operator_level cannot be set via API")
+
 // BaseModel provides common fields for all database models.
 type BaseModel struct {
 	ID        uuid.UUID `json:"id"`

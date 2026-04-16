@@ -1,9 +1,11 @@
 package http
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -276,3 +278,260 @@ func TestOperatorHandler_ListTenants_StoreError(t *testing.T) {
 	}
 }
 
+
+func TestOperatorHandler_ListTenantAgents_ReturnsAgentsForValidTenant(t *testing.T) {
+	operatorTenantID := uuid.New()
+	targetTenantID := uuid.New()
+	mockStore := &mockTenantStoreForOperator{
+		tenants: []store.Tenant{
+			{ID: targetTenantID, Slug: "t1", Name: "T1", Plan: "starter", Status: "active", CreatedAt: time.Now(), UpdatedAt: time.Now()},
+		},
+	}
+	// db=nil means queryAgents returns empty results — that's fine for unit test
+	h := NewOperatorHandler(mockStore, nil)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux, requireOperatorRole)
+
+	req := httptest.NewRequest("GET", "/v1/operator/tenants/"+targetTenantID.String()+"/agents?limit=10&offset=0", nil)
+	req = req.WithContext(operatorCtx(operatorTenantID, "admin"))
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("status = %d, want 200; body: %s", rec.Code, rec.Body.String())
+	}
+
+	var resp map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to parse response: %v", err)
+	}
+	if _, ok := resp["data"]; !ok {
+		t.Error("response missing 'data' key")
+	}
+	if _, ok := resp["total"]; !ok {
+		t.Error("response missing 'total' key")
+	}
+	if _, ok := resp["limit"]; !ok {
+		t.Error("response missing 'limit' key")
+	}
+	if _, ok := resp["offset"]; !ok {
+		t.Error("response missing 'offset' key")
+	}
+}
+
+func TestOperatorHandler_ListTenantSessions_ReturnsSessionsForValidTenant(t *testing.T) {
+	operatorTenantID := uuid.New()
+	targetTenantID := uuid.New()
+	mockStore := &mockTenantStoreForOperator{
+		tenants: []store.Tenant{
+			{ID: targetTenantID, Slug: "t1", Name: "T1", Plan: "starter", Status: "active", CreatedAt: time.Now(), UpdatedAt: time.Now()},
+		},
+	}
+	h := NewOperatorHandler(mockStore, nil)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux, requireOperatorRole)
+
+	req := httptest.NewRequest("GET", "/v1/operator/tenants/"+targetTenantID.String()+"/sessions?limit=5&offset=0", nil)
+	req = req.WithContext(operatorCtx(operatorTenantID, "admin"))
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("status = %d, want 200; body: %s", rec.Code, rec.Body.String())
+	}
+
+	var resp map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to parse response: %v", err)
+	}
+	if _, ok := resp["data"]; !ok {
+		t.Error("response missing 'data' key")
+	}
+	if _, ok := resp["total"]; !ok {
+		t.Error("response missing 'total' key")
+	}
+}
+
+func TestOperatorHandler_ListTenantSessions_WithStatusFilter(t *testing.T) {
+	operatorTenantID := uuid.New()
+	targetTenantID := uuid.New()
+	mockStore := &mockTenantStoreForOperator{
+		tenants: []store.Tenant{
+			{ID: targetTenantID, Slug: "t1", Name: "T1", Plan: "starter", Status: "active", CreatedAt: time.Now(), UpdatedAt: time.Now()},
+		},
+	}
+	h := NewOperatorHandler(mockStore, nil)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux, requireOperatorRole)
+
+	// Request with status filter — should be accepted and passed through
+	req := httptest.NewRequest("GET", "/v1/operator/tenants/"+targetTenantID.String()+"/sessions?status=active&limit=10", nil)
+	req = req.WithContext(operatorCtx(operatorTenantID, "admin"))
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("status = %d, want 200 with status filter; body: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestOperatorHandler_GetTenantUsage_ResponseContainsTenantID(t *testing.T) {
+	operatorTenantID := uuid.New()
+	targetTenantID := uuid.New()
+	mockStore := &mockTenantStoreForOperator{
+		tenants: []store.Tenant{
+			{ID: targetTenantID, Slug: "t1", Name: "T1", Plan: "starter", Status: "active", CreatedAt: time.Now(), UpdatedAt: time.Now()},
+		},
+	}
+	h := NewOperatorHandler(mockStore, nil)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux, requireOperatorRole)
+
+	req := httptest.NewRequest("GET", "/v1/operator/tenants/"+targetTenantID.String()+"/usage?period=7d", nil)
+	req = req.WithContext(operatorCtx(operatorTenantID, "admin"))
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200; body: %s", rec.Code, rec.Body.String())
+	}
+
+	var resp map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to parse response: %v", err)
+	}
+	if resp["tenant_id"] != targetTenantID.String() {
+		t.Errorf("tenant_id = %v, want %s", resp["tenant_id"], targetTenantID.String())
+	}
+	if resp["period"] != "7d" {
+		t.Errorf("period = %v, want 7d", resp["period"])
+	}
+}
+
+func TestOperatorHandler_GetTenantUsage_InvalidUUID(t *testing.T) {
+	operatorTenantID := uuid.New()
+	h := NewOperatorHandler(&mockTenantStoreForOperator{}, nil)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux, requireOperatorRole)
+
+	req := httptest.NewRequest("GET", "/v1/operator/tenants/not-a-uuid/usage?period=7d", nil)
+	req = req.WithContext(operatorCtx(operatorTenantID, "admin"))
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("status = %d, want 400 for invalid UUID", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "INVALID_UUID") {
+		t.Errorf("body = %s, want INVALID_UUID error code", rec.Body.String())
+	}
+}
+
+func TestOperatorHandler_GetTenantUsage_TenantNotFound(t *testing.T) {
+	operatorTenantID := uuid.New()
+	mockStore := &mockTenantStoreForOperator{tenants: []store.Tenant{}}
+	h := NewOperatorHandler(mockStore, nil)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux, requireOperatorRole)
+
+	req := httptest.NewRequest("GET", "/v1/operator/tenants/"+uuid.New().String()+"/usage?period=30d", nil)
+	req = req.WithContext(operatorCtx(operatorTenantID, "admin"))
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Errorf("status = %d, want 404 for non-existent tenant", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "TENANT_NOT_FOUND") {
+		t.Errorf("body = %s, want TENANT_NOT_FOUND error code", rec.Body.String())
+	}
+}
+
+func TestOperatorHandler_ListTenantSessions_TenantNotFound(t *testing.T) {
+	operatorTenantID := uuid.New()
+	mockStore := &mockTenantStoreForOperator{tenants: []store.Tenant{}}
+	h := NewOperatorHandler(mockStore, nil)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux, requireOperatorRole)
+
+	req := httptest.NewRequest("GET", "/v1/operator/tenants/"+uuid.New().String()+"/sessions", nil)
+	req = req.WithContext(operatorCtx(operatorTenantID, "admin"))
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Errorf("status = %d, want 404 for non-existent tenant", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "TENANT_NOT_FOUND") {
+		t.Errorf("body = %s, want TENANT_NOT_FOUND error code", rec.Body.String())
+	}
+}
+
+func TestOperatorHandler_AuditLogEmitted(t *testing.T) {
+	var buf bytes.Buffer
+	logger := slog.New(slog.NewJSONHandler(&buf, nil))
+	orig := slog.Default()
+	slog.SetDefault(logger)
+	defer slog.SetDefault(orig)
+
+	operatorTenantID := uuid.New()
+	mockStore := &mockTenantStoreForOperator{
+		tenants: []store.Tenant{
+			{ID: uuid.New(), Slug: "t1", Name: "T1", Plan: "starter", Status: "active", CreatedAt: time.Now(), UpdatedAt: time.Now()},
+		},
+	}
+	h := NewOperatorHandler(mockStore, nil)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux, requireOperatorRole)
+
+	req := httptest.NewRequest("GET", "/v1/operator/tenants", nil)
+	req = req.WithContext(operatorCtx(operatorTenantID, "admin"))
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	logOutput := buf.String()
+	if !strings.Contains(logOutput, "operator.access") {
+		t.Errorf("expected operator.access audit log, got: %s", logOutput)
+	}
+	if !strings.Contains(logOutput, operatorTenantID.String()) {
+		t.Errorf("expected operator_tenant_id in log, got: %s", logOutput)
+	}
+}
+
+func TestOperatorHandler_ListTenants_PaginationDefaults(t *testing.T) {
+	operatorTenantID := uuid.New()
+	mockStore := &mockTenantStoreForOperator{
+		tenants: []store.Tenant{
+			{ID: uuid.New(), Slug: "t1", Name: "T1", Plan: "starter", Status: "active", CreatedAt: time.Now(), UpdatedAt: time.Now()},
+		},
+	}
+	h := NewOperatorHandler(mockStore, nil)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux, requireOperatorRole)
+
+	// No limit/offset params — should use defaults
+	req := httptest.NewRequest("GET", "/v1/operator/tenants", nil)
+	req = req.WithContext(operatorCtx(operatorTenantID, "admin"))
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	var resp map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to parse response: %v", err)
+	}
+	// Default limit should be 20
+	if limit, ok := resp["limit"].(float64); !ok || int(limit) != 20 {
+		t.Errorf("default limit = %v, want 20", resp["limit"])
+	}
+	if offset, ok := resp["offset"].(float64); !ok || int(offset) != 0 {
+		t.Errorf("default offset = %v, want 0", resp["offset"])
+	}
+}

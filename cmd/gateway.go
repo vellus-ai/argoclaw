@@ -315,6 +315,13 @@ func runGateway() {
 	// Onboarding HTTP API (conversational onboarding — uses tools via registry)
 	server.SetOnboardingHandler(httpapi.NewOnboardingHandler(onbStore, toolsReg, cfg.Gateway.Token))
 
+	// Ponte de Comando Central — cross-tenant operator API.
+	// TenantStore is needed for: (1) operator_level checks in WS handleConnect,
+	// (2) TenantMiddleware HTTP operator mode injection, (3) OperatorHandler endpoints.
+	tenantStore := pg.NewPGTenantStore(pgStores.DB)
+	server.SetTenantStore(tenantStore)
+	server.SetOperatorHandler(httpapi.NewOperatorHandler(tenantStore, pgStores.DB))
+
 	// contextFileInterceptor is created inside wireExtras.
 	// Declared here so it can be passed to registerAllMethods → AgentsMethods
 	// for immediate cache invalidation on agents.files.set.

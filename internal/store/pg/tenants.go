@@ -19,6 +19,10 @@ func NewPGTenantStore(db *sql.DB) *PGTenantStore {
 }
 
 func (s *PGTenantStore) CreateTenant(ctx context.Context, tenant *store.Tenant) error {
+	// appsec: operator_level is derived exclusively from DB/migration — reject any attempt to set it via API.
+	if tenant.OperatorLevel > 0 {
+		return store.ErrOperatorLevelForbidden
+	}
 	if tenant.ID == uuid.Nil {
 		tenant.ID = uuid.New()
 	}
@@ -133,6 +137,26 @@ func (s *PGTenantStore) ListAllTenantsForOperator(ctx context.Context, limit, of
 }
 
 func (s *PGTenantStore) UpdateTenant(ctx context.Context, id uuid.UUID, updates map[string]any) error {
+	// appsec: operator_level is derived exclusively from DB/migration — reject any attempt to set it via API.
+	if v, ok := updates["operator_level"]; ok {
+		switch n := v.(type) {
+		case int:
+			if n > 0 {
+				return store.ErrOperatorLevelForbidden
+			}
+		case float64:
+			if n > 0 {
+				return store.ErrOperatorLevelForbidden
+			}
+		case int64:
+			if n > 0 {
+				return store.ErrOperatorLevelForbidden
+			}
+		default:
+			// Any non-zero-like value for operator_level is forbidden
+			return store.ErrOperatorLevelForbidden
+		}
+	}
 	return execMapUpdate(ctx, s.db, "tenants", id, updates)
 }
 
