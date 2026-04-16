@@ -114,12 +114,25 @@ func (h *PluginHandler) handleCreateCatalogEntry(w http.ResponseWriter, r *http.
 	}
 
 	// G4 blocker: validate permissions declared in the manifest (if provided).
+	// Supports both the new nested format (spec.permissions) and the legacy flat
+	// format (top-level permissions) so that forbidden core:* writes are always
+	// caught regardless of which manifest schema the client sends.
 	if len(req.Manifest) > 0 {
-		var m plugins.PluginManifest
-		if err := json.Unmarshal(req.Manifest, &m); err == nil {
+		var bridge struct {
+			Spec struct {
+				Permissions plugins.ManifestPermissions `json:"permissions"`
+			} `json:"spec"`
+			Permissions plugins.ManifestPermissions `json:"permissions"`
+		}
+		if err := json.Unmarshal(req.Manifest, &bridge); err == nil {
+			perms := bridge.Spec.Permissions
+			if len(perms.Data.Write) == 0 && len(perms.Data.Read) == 0 &&
+				len(perms.Tools.Provide) == 0 && len(perms.Tools.Consume) == 0 {
+				perms = bridge.Permissions
+			}
 			if err := plugins.ValidatePermissions(plugins.Permissions{
-				Tools: m.Spec.Permissions.Tools,
-				Data:  m.Spec.Permissions.Data,
+				Tools: perms.Tools,
+				Data:  perms.Data,
 			}); err != nil {
 				writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 				return

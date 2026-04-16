@@ -202,6 +202,7 @@ func (h *ProvidersHandler) handleListProviders(w http.ResponseWriter, r *http.Re
 				providerType = store.ProviderVertexAI
 			}
 			result = append(result, store.LLMProviderData{
+				BaseModel:    store.BaseModel{ID: uuid.NewSHA1(uuid.NameSpaceDNS, []byte(name))},
 				Name:         name,
 				ProviderType: providerType,
 				Enabled:      true,
