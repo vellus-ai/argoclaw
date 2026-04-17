@@ -61,7 +61,7 @@
   "saveChanges": "Lưu thay đổi",
   "saving": "Đang lưu...",
   "status": {
-    "activeProvider": "Provider đang hoạt động",
+    "activeProvider": "Provider chính: {{provider}}, Tự động: {{auto}}",
     "configured": "Đã cấu hình",
     "disabled": "Đã tắt",
     "noProvider": "Chưa cấu hình provider TTS",

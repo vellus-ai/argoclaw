@@ -11,7 +11,7 @@
   "logout": "退出登录",
   "openMenu": "打开菜单",
   "pairingRequests": "配对请求",
-  "pendingPairingRequest": "待处理配对请求",
+  "pendingPairingRequest": "{{count}} 个待处理配对请求",
   "pendingPairingRequests": "{{count}} 个待处理配对请求",
   "toggleTheme": "切换主题"
 }

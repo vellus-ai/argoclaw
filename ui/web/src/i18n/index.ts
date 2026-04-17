@@ -69,6 +69,7 @@ import viActivity from "./locales/vi/activity.json";
 import viApiKeys from "./locales/vi/api-keys.json";
 import viCliCredentials from "./locales/vi/cli-credentials.json";
 import viPackages from "./locales/vi/packages.json";
+import viProjects from "./locales/vi/projects.json";
 
 // --- PT namespaces ---
 import ptCommon from "./locales/pt/common.json";
@@ -278,6 +279,7 @@ import zhActivity from "./locales/zh/activity.json";
 import zhApiKeys from "./locales/zh/api-keys.json";
 import zhCliCredentials from "./locales/zh/cli-credentials.json";
 import zhPackages from "./locales/zh/packages.json";
+import zhProjects from "./locales/zh/projects.json";
 
 import { SUPPORTED_LANGUAGES } from "../lib/constants";
 
@@ -331,7 +333,7 @@ i18n.use(initReactI18next).init({
       "pending-messages": viPendingMessages,
       contacts: viContacts, activity: viActivity, "api-keys": viApiKeys,
       "cli-credentials": viCliCredentials,
-      packages: viPackages,
+      packages: viPackages, projects: viProjects,
     },
     zh: {
       common: zhCommon, sidebar: zhSidebar, topbar: zhTopbar, login: zhLogin,
@@ -344,7 +346,7 @@ i18n.use(initReactI18next).init({
       "pending-messages": zhPendingMessages,
       contacts: zhContacts, activity: zhActivity, "api-keys": zhApiKeys,
       "cli-credentials": zhCliCredentials,
-      packages: zhPackages,
+      packages: zhPackages, projects: zhProjects,
     },
     pt: {
       common: ptCommon, sidebar: ptSidebar, topbar: ptTopbar, login: ptLogin,

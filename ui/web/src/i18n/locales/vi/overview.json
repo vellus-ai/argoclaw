@@ -55,16 +55,16 @@
   "statCards": {
     "agents": "Agent",
     "channels": "Channel",
-    "inOut": "Vào / Ra",
+    "inOut": "{{input}} vào / {{output}} ra",
     "online": "Trực tuyến",
     "requestsToday": "Request hôm nay",
     "running": "Đang chạy",
     "tokensToday": "Token hôm nay",
     "costToday": "Chi phí hôm nay",
-    "users": "Người dùng"
+    "users": "{{count}} người dùng"
   },
   "systemHealth": {
-    "active": "hoạt động",
+    "active": "{{count}} đang hoạt động",
     "channels": "Channel",
     "clients": "Máy khách",
     "database": "Cơ sở dữ liệu",
