@@ -49,7 +49,7 @@ func processNormalMessage(
 	channelType := resolveChannelType(channelMgr, msg.Channel)
 	projectID, projectOverrides := resolveProjectOverrides(ctx, projectStore, channelType, msg.ChatID)
 
-	agentLoop, err := agents.GetForProject(agentID, projectID, projectOverrides)
+	agentLoop, err := agents.GetForProject(ctx, agentID, projectID, projectOverrides)
 	if err != nil {
 		slog.Warn("inbound: agent not found", "agent", agentID, "channel", msg.Channel)
 		return

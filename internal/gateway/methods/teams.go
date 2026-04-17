@@ -118,7 +118,7 @@ func (m *TeamsMethods) handleCreate(ctx context.Context, client *gateway.Client,
 	}
 
 	// Resolve lead agent
-	leadAgent, err := resolveAgentInfo(m.agentStore, params.Lead)
+	leadAgent, err := resolveAgentInfo(ctx, m.agentStore, params.Lead)
 	if err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, "lead agent: "+err.Error()))
 		return
@@ -134,7 +134,7 @@ func (m *TeamsMethods) handleCreate(ctx context.Context, client *gateway.Client,
 	// Resolve member agents
 	var memberAgents []*store.AgentData
 	for _, memberKey := range params.Members {
-		ag, err := resolveAgentInfo(m.agentStore, memberKey)
+		ag, err := resolveAgentInfo(ctx, m.agentStore, memberKey)
 		if err != nil {
 			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, "member agent "+memberKey+": "+err.Error()))
 			return

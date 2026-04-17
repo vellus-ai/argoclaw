@@ -27,11 +27,12 @@ type ProvidersHandler struct {
 	apiBaseFallback func(providerType string) string // optional: config/env fallback for api_base
 	cliMu           sync.Mutex                       // serializes Claude CLI provider create to prevent duplicates
 	msgBus          *bus.MessageBus
+	tenantMw        *TenantMiddleware                // injects tenant_id from JWT into context
 }
 
 // NewProvidersHandler creates a handler for provider management endpoints.
-func NewProvidersHandler(s store.ProviderStore, secretStore store.ConfigSecretsStore, token string, providerReg *providers.Registry, gatewayAddr string) *ProvidersHandler {
-	return &ProvidersHandler{store: s, secretStore: secretStore, token: token, providerReg: providerReg, gatewayAddr: gatewayAddr}
+func NewProvidersHandler(s store.ProviderStore, secretStore store.ConfigSecretsStore, token string, providerReg *providers.Registry, gatewayAddr string, tenantMw *TenantMiddleware) *ProvidersHandler {
+	return &ProvidersHandler{store: s, secretStore: secretStore, token: token, providerReg: providerReg, gatewayAddr: gatewayAddr, tenantMw: tenantMw}
 }
 
 // SetMessageBus sets the message bus for audit event broadcasting.
@@ -78,24 +79,33 @@ func (h *ProvidersHandler) emitProviderCacheInvalidate(name string) {
 // RegisterRoutes registers all provider management routes on the given mux.
 func (h *ProvidersHandler) RegisterRoutes(mux *http.ServeMux) {
 	// Provider CRUD
-	mux.HandleFunc("GET /v1/providers", h.auth(h.handleListProviders))
-	mux.HandleFunc("POST /v1/providers", h.auth(h.handleCreateProvider))
-	mux.HandleFunc("GET /v1/providers/{id}", h.auth(h.handleGetProvider))
-	mux.HandleFunc("PUT /v1/providers/{id}", h.auth(h.handleUpdateProvider))
-	mux.HandleFunc("DELETE /v1/providers/{id}", h.auth(h.handleDeleteProvider))
+	mux.HandleFunc("GET /v1/providers", h.withTenant(h.auth(h.handleListProviders)))
+	mux.HandleFunc("POST /v1/providers", h.withTenant(h.auth(h.handleCreateProvider)))
+	mux.HandleFunc("GET /v1/providers/{id}", h.withTenant(h.auth(h.handleGetProvider)))
+	mux.HandleFunc("PUT /v1/providers/{id}", h.withTenant(h.auth(h.handleUpdateProvider)))
+	mux.HandleFunc("DELETE /v1/providers/{id}", h.withTenant(h.auth(h.handleDeleteProvider)))
 
 	// Model listing (proxied to upstream provider API)
-	mux.HandleFunc("GET /v1/providers/{id}/models", h.auth(h.handleListProviderModels))
+	mux.HandleFunc("GET /v1/providers/{id}/models", h.withTenant(h.auth(h.handleListProviderModels)))
 
 	// Provider + model verification (pre-flight check)
-	mux.HandleFunc("POST /v1/providers/{id}/verify", h.auth(h.handleVerifyProvider))
+	mux.HandleFunc("POST /v1/providers/{id}/verify", h.withTenant(h.auth(h.handleVerifyProvider)))
 
 	// Claude CLI auth status (global — not per-provider)
-	mux.HandleFunc("GET /v1/providers/claude-cli/auth-status", h.auth(h.handleClaudeCLIAuthStatus))
+	mux.HandleFunc("GET /v1/providers/claude-cli/auth-status", h.withTenant(h.auth(h.handleClaudeCLIAuthStatus)))
 }
 
 func (h *ProvidersHandler) auth(next http.HandlerFunc) http.HandlerFunc {
 	return requireAuth(h.token, "", next)
+}
+
+// withTenant wraps a handler with TenantMiddleware to inject tenant_id from JWT into context.
+func (h *ProvidersHandler) withTenant(next http.HandlerFunc) http.HandlerFunc {
+	if h.tenantMw == nil {
+		return next
+	}
+	wrapped := h.tenantMw.Wrap(next)
+	return wrapped.ServeHTTP
 }
 
 // maskAPIKey replaces non-empty API keys with "***".

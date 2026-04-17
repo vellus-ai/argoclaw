@@ -3,8 +3,13 @@ package agent
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/vellus-ai/argoclaw/internal/store"
 )
 
 // ResolveOpts carries per-request context for the resolver (e.g., project scoping).
@@ -18,7 +23,7 @@ type ResolveOpts struct {
 
 // ResolverFunc is called when an agent isn't found in the cache.
 // Used to lazy-create agents from DB.
-type ResolverFunc func(agentKey string, opts ResolveOpts) (Agent, error)
+type ResolverFunc func(ctx context.Context, agentKey string, opts ResolveOpts) (Agent, error)
 
 const defaultRouterTTL = 10 * time.Minute
 
@@ -65,17 +70,23 @@ func (r *Router) SetResolver(fn ResolverFunc) {
 }
 
 // Register adds an agent to the router.
+// Uses uuid.Nil as tenant prefix (backward compat for non-tenant-scoped registration).
 func (r *Router) Register(ag Agent) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.agents[ag.ID()] = &agentEntry{agent: ag, cachedAt: time.Now()}
+	cacheKey := fmt.Sprintf("%s:%s", uuid.Nil, ag.ID())
+	r.agents[cacheKey] = &agentEntry{agent: ag, cachedAt: time.Now()}
 }
 
 // Get returns an agent by ID. Lazy-creates from DB via resolver if needed.
 // Cached entries expire after TTL as a safety net for multi-instance deployments.
-func (r *Router) Get(agentID string) (Agent, error) {
+// Cache key is tenantID:agentID for tenant isolation.
+func (r *Router) Get(ctx context.Context, agentID string) (Agent, error) {
+	tenantID := store.TenantIDFromContext(ctx)
+	cacheKey := fmt.Sprintf("%s:%s", tenantID, agentID)
+
 	r.mu.RLock()
-	entry, ok := r.agents[agentID]
+	entry, ok := r.agents[cacheKey]
 	resolver := r.resolver
 	r.mu.RUnlock()
 
@@ -86,23 +97,23 @@ func (r *Router) Get(agentID string) (Agent, error) {
 	// TTL expired → remove stale entry so resolver re-creates
 	if ok {
 		r.mu.Lock()
-		delete(r.agents, agentID)
+		delete(r.agents, cacheKey)
 		r.mu.Unlock()
 	}
 
 	// Try resolver (create from DB)
 	if resolver != nil {
-		ag, err := resolver(agentID, ResolveOpts{})
+		ag, err := resolver(ctx, agentID, ResolveOpts{})
 		if err != nil {
 			return nil, err
 		}
 		r.mu.Lock()
 		// Double-check: another goroutine might have created it
-		if existing, ok := r.agents[agentID]; ok {
+		if existing, ok := r.agents[cacheKey]; ok {
 			r.mu.Unlock()
 			return existing.agent, nil
 		}
-		r.agents[agentID] = &agentEntry{agent: ag, cachedAt: time.Now()}
+		r.agents[cacheKey] = &agentEntry{agent: ag, cachedAt: time.Now()}
 		r.mu.Unlock()
 		return ag, nil
 	}
@@ -111,12 +122,13 @@ func (r *Router) Get(agentID string) (Agent, error) {
 }
 
 // GetForProject returns an agent Loop scoped to a specific project.
-// Cache key: "agentID:projectID". If projectID is empty, falls back to Get(agentID).
-func (r *Router) GetForProject(agentID, projectID string, projectOverrides map[string]map[string]string) (Agent, error) {
+// Cache key: "tenantID:agentID:projectID". If projectID is empty, falls back to Get(ctx, agentID).
+func (r *Router) GetForProject(ctx context.Context, agentID, projectID string, projectOverrides map[string]map[string]string) (Agent, error) {
 	if projectID == "" {
-		return r.Get(agentID)
+		return r.Get(ctx, agentID)
 	}
-	cacheKey := agentID + ":" + projectID
+	tenantID := store.TenantIDFromContext(ctx)
+	cacheKey := fmt.Sprintf("%s:%s:%s", tenantID, agentID, projectID)
 
 	r.mu.RLock()
 	entry, ok := r.agents[cacheKey]
@@ -135,7 +147,7 @@ func (r *Router) GetForProject(agentID, projectID string, projectOverrides map[s
 		return nil, fmt.Errorf("agent not found: %s", agentID)
 	}
 
-	ag, err := resolver(agentID, ResolveOpts{
+	ag, err := resolver(ctx, agentID, ResolveOpts{
 		ProjectID:        projectID,
 		ProjectOverrides: projectOverrides,
 	})
@@ -154,11 +166,16 @@ func (r *Router) GetForProject(agentID, projectID string, projectOverrides map[s
 	return ag, nil
 }
 
-// Remove removes an agent from the router.
+// Remove removes an agent from the router (all tenant entries with that agentID suffix).
 func (r *Router) Remove(agentID string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	delete(r.agents, agentID)
+	suffix := ":" + agentID
+	for key := range r.agents {
+		if strings.HasSuffix(key, suffix) {
+			delete(r.agents, key)
+		}
+	}
 }
 
 // List returns all registered agent IDs.
@@ -180,11 +197,17 @@ type AgentInfo struct {
 }
 
 // ListInfo returns metadata for all agents.
-func (r *Router) ListInfo() []AgentInfo {
+// If tenantID is non-nil, only returns agents whose cache key starts with that tenant.
+// ListInfo(uuid.Nil) returns all entries (backward compat for no-DB mode).
+func (r *Router) ListInfo(tenantID uuid.UUID) []AgentInfo {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
+	prefix := tenantID.String() + ":"
 	infos := make([]AgentInfo, 0, len(r.agents))
-	for _, entry := range r.agents {
+	for key, entry := range r.agents {
+		if tenantID != uuid.Nil && !strings.HasPrefix(key, prefix) {
+			continue
+		}
 		infos = append(infos, AgentInfo{
 			ID:        entry.agent.ID(),
 			Model:     entry.agent.Model(),
@@ -195,11 +218,15 @@ func (r *Router) ListInfo() []AgentInfo {
 }
 
 // IsRunning checks if a specific agent is currently running (cached in router).
+// Searches all tenant entries for the given agentID suffix.
 func (r *Router) IsRunning(agentID string) bool {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	if entry, ok := r.agents[agentID]; ok {
-		return entry.agent.IsRunning()
+	suffix := ":" + agentID
+	for key, entry := range r.agents {
+		if strings.HasSuffix(key, suffix) && entry.agent.IsRunning() {
+			return true
+		}
 	}
 	return false
 }

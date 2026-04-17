@@ -2,7 +2,7 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 LDFLAGS  = -s -w -X github.com/nextlevelbuilder/argoclaw/cmd.Version=$(VERSION)
 BINARY   = argoclaw
 
-.PHONY: build run clean version net up down logs reset test vet check-web dev migrate setup ci
+.PHONY: build run clean version net up down logs reset test vet check-web dev migrate setup ci lint-ctx
 
 build:
 	CGO_ENABLED=0 go build -ldflags="$(LDFLAGS)" -o $(BINARY) .
@@ -56,3 +56,11 @@ setup:
 	cd ui/web && pnpm install --frozen-lockfile
 
 ci: build test vet check-web
+
+lint-ctx:
+	@if grep -rn "context.Background()" internal/gateway/methods/ | grep -v "_test.go" | grep -v "// background:" | grep -q .; then \
+		echo "FAIL: context.Background() in WS handlers without // background: annotation"; \
+		grep -rn "context.Background()" internal/gateway/methods/ | grep -v "_test.go" | grep -v "// background:"; \
+		exit 1; \
+	fi
+	@echo "OK: no unannoted context.Background() in WS handlers"

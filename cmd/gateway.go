@@ -353,7 +353,10 @@ func runGateway() {
 	if mcpMgr != nil {
 		mcpToolLister = mcpMgr
 	}
-	agentsH, skillsH, tracesH, mcpH, customToolsH, channelInstancesH, providersH, delegationsH, builtinToolsH, pendingMessagesH, projectsH, teamEventsH, secureCLIH := wireHTTP(pgStores, cfg.Gateway.Token, cfg.Agents.Defaults.Workspace, msgBus, toolsReg, providerRegistry, permPE.IsOwner, gatewayAddr, mcpToolLister)
+	// TenantMiddleware injects tenant_id from JWT into context for multi-tenant isolation.
+	// Shared across all HTTP handlers that need tenant context.
+	tenantMw := httpapi.NewTenantMiddleware(nil)
+	agentsH, skillsH, tracesH, mcpH, customToolsH, channelInstancesH, providersH, delegationsH, builtinToolsH, pendingMessagesH, projectsH, teamEventsH, secureCLIH := wireHTTP(pgStores, cfg.Gateway.Token, cfg.Agents.Defaults.Workspace, msgBus, toolsReg, providerRegistry, permPE.IsOwner, gatewayAddr, mcpToolLister, tenantMw)
 	if providersH != nil {
 		providersH.SetAPIBaseFallback(cfg.Providers.APIBaseForType)
 	}
@@ -413,9 +416,8 @@ func runGateway() {
 	}
 
 	// Plugin host: management API + data proxy
-	// TenantMiddleware injects tenant_id from JWT into context for multi-tenant isolation.
+	// Reuse the shared tenantMw for plugin handlers.
 	if pgStores != nil && pgStores.Plugins != nil {
-		tenantMw := httpapi.NewTenantMiddleware(nil)
 		pluginH := httpapi.NewPluginHandler(pgStores.Plugins, cfg.Gateway.Token, msgBus, tenantMw)
 		server.SetPluginHandler(pluginH)
 		dataProxy := plugins.NewDataProxy(pgStores.Plugins)

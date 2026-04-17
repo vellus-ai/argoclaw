@@ -114,7 +114,7 @@ func (m *ChatMethods) handleSend(ctx context.Context, client *gateway.Client, re
 		}
 	}
 
-	loop, err := m.agents.Get(params.AgentID)
+	loop, err := m.agents.Get(ctx, params.AgentID)
 	if err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrNotFound, err.Error()))
 		return
@@ -227,12 +227,12 @@ func (m *ChatMethods) handleSend(ctx context.Context, client *gateway.Client, re
 			agentModel := loop.Model()
 			userMsg := params.Message
 			go func() {
-				title := agent.GenerateTitle(context.Background(), agentProvider, agentModel, userMsg)
+				title := agent.GenerateTitle(context.Background(), agentProvider, agentModel, userMsg) // background: GenerateTitle survives WS request
 				if title == "" {
 					return
 				}
 				m.sessions.SetLabel(sessionKey, title)
-				if err := m.sessions.Save(context.Background(), sessionKey); err != nil {
+				if err := m.sessions.Save(context.Background(), sessionKey); err != nil { // background: sessions.Save survives WS request
 					slog.Warn("failed to save session title", "sessionKey", sessionKey, "error", err)
 					return
 				}
