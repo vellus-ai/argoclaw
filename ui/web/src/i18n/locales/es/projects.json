@@ -1,0 +1,79 @@
+{
+  "title": "Proyectos",
+  "description": "Gestionar espacios de trabajo del proyecto y sus anulaciones de servidor MCP",
+  "addProject": "Nuevo Proyecto",
+  "searchPlaceholder": "Buscar proyectos...",
+  "emptyTitle": "Sin proyectos",
+  "emptyDescription": "Crea tu primer proyecto para comenzar.",
+  "noMatchTitle": "Sin proyectos coincidentes",
+  "noMatchDescription": "Intenta con un término de búsqueda diferente.",
+  "columns": {
+    "name": "Nombre",
+    "slug": "Slug",
+    "channel": "Canal",
+    "status": "Estado",
+    "overrides": "Anulaciones MCP",
+    "createdBy": "Creado Por",
+    "actions": "Acciones"
+  },
+  "manageOverrides": "Gestionar anulaciones MCP",
+  "delete": {
+    "title": "Eliminar Proyecto",
+    "description": "¿Estás seguro de que deseas eliminar \"{{name}}\"? También se eliminarán todas las anulaciones MCP.",
+    "confirmLabel": "Eliminar"
+  },
+  "form": {
+    "createTitle": "Nuevo Proyecto",
+    "editTitle": "Editar Proyecto",
+    "name": "Nombre *",
+    "slug": "Slug *",
+    "slugHint": "Solo letras minúsculas, números y guiones",
+    "channelType": "Tipo de Canal",
+    "channelTypePlaceholder": "Seleccionar tipo de canal...",
+    "chatId": "ID de Chat",
+    "chatIdPlaceholder": "p.ej. -1001234567890",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Breve descripción de este proyecto",
+    "status": "Estado",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "saving": "Guardando...",
+    "errors": {
+      "nameRequired": "Nombre y slug son obligatorios",
+      "slugInvalid": "El slug debe ser solo letras minúsculas, números y guiones"
+    }
+  },
+  "overrides": {
+    "title": "Anulaciones MCP — {{name}}",
+    "description": "Anulaciones de variables de entorno por proyecto para servidores MCP. Las claves secretas (TOKEN, SECRET, PASSWORD, API_KEY) deben establecerse en la configuración global del servidor MCP.",
+    "serverName": "Servidor MCP *",
+    "serverNamePlaceholder": "p.ej. gitlab, atlassian",
+    "envOverrides": "Variables de Entorno",
+    "envKeyPlaceholder": "Nombre de variable",
+    "envValuePlaceholder": "Valor",
+    "addVariable": "Añadir Variable",
+    "addOverride": "Añadir Anulación",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "noOverrides": "Sin anulaciones MCP configuradas",
+    "noOverridesDescription": "Añade variables de entorno por proyecto para servidores MCP.",
+    "failedLoad": "Error al cargar anulaciones",
+    "failedSave": "Error al guardar anulación",
+    "failedDelete": "Error al eliminar anulación",
+    "saved": "Anulación guardada",
+    "deleted": "Anulación eliminada"
+  },
+  "status": {
+    "active": "Activo",
+    "archived": "Archivado"
+  },
+  "toast": {
+    "created": "Proyecto creado",
+    "updated": "Proyecto actualizado",
+    "deleted": "Proyecto eliminado",
+    "failedCreate": "Error al crear proyecto",
+    "failedUpdate": "Error al actualizar proyecto",
+    "failedDelete": "Error al eliminar proyecto"
+  }
+}

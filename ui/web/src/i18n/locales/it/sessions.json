@@ -1,0 +1,45 @@
+{
+  "title": "Sessioni",
+  "description": "Sfoglia sessioni di conversazione",
+  "searchPlaceholder": "Cerca sessioni...",
+  "emptyTitle": "Nessuna sessione ancora",
+  "emptyDescription": "Le sessioni appariranno qui una volta iniziato a chattare.",
+  "noMatchTitle": "Nessuna sessione corrispondente",
+  "noMatchDescription": "Prova un termine di ricerca diverso.",
+  "columns": {
+    "session": "Sessione",
+    "agent": "Agente",
+    "context": "Contesto",
+    "messages": "Messaggi",
+    "updated": "Aggiornato"
+  },
+  "contextBar": {
+    "compacted": "Compattato {{count}} volta(e)"
+  },
+  "detail": {
+    "reset": "Ripristina",
+    "delete": "Elimina",
+    "deleteTitle": "Elimina Sessione",
+    "deleteDescription": "Questo eliminerà permanentemente tutti i messaggi in questa sessione.",
+    "resetTitle": "Ripristina Sessione",
+    "resetDescription": "Questo cancellerà tutti i messaggi ma manterrà la sessione.",
+    "confirmDelete": "Elimina",
+    "confirmReset": "Ripristina",
+    "noMessages": "Nessun messaggio in questa sessione",
+    "summary": "Riassunto",
+    "showMore": "Mostra di più",
+    "showLess": "Mostra meno",
+    "showDetails": "mostra dettagli",
+    "hide": "nascondi",
+    "systemMessage": "Messaggio di Sistema",
+    "messages": "messaggi"
+  },
+  "toast": {
+    "deleted": "Sessione eliminata",
+    "deleteFailed": "Errore nell'eliminazione della sessione",
+    "reset": "Sessione ripristinata",
+    "resetFailed": "Errore nel ripristino della sessione",
+    "updated": "Sessione aggiornata",
+    "updateFailed": "Errore nell'aggiornamento della sessione"
+  }
+}

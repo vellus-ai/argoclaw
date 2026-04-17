@@ -1,0 +1,21 @@
+{
+  "title": "Speicher",
+  "description": "Workspace-Datei-Browser",
+  "descriptionWithPath": "{{path}} — {{size}}",
+  "sizeCacheInfo": "Speichergröße wird 60 Minuten lang gecacht",
+  "unsupportedFile": "Dieser Dateityp wird für Vorschau nicht unterstützt",
+  "download": "Herunterladen",
+  "delete": {
+    "fileTitle": "Datei löschen",
+    "folderTitle": "Ordner löschen",
+    "description": "Bist du sicher, dass du {{name}} löschen möchtest?",
+    "folderWarning": " Alle Inhalte werden rekursiv entfernt.",
+    "undone": " Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleting": "Wird gelöscht...",
+    "confirmLabel": "Löschen"
+  },
+  "toast": {
+    "deleted": "Datei gelöscht",
+    "deleteFailed": "Fehler beim Löschen der Datei"
+  }
+}

@@ -41,7 +41,7 @@
   "span": {
     "model": "Model:",
     "tokens": "Token:",
-    "createdAt": "Tạo lúc:",
+    "createdAt": "Đã tạo:",
     "input": "Đầu vào:",
     "output": "Đầu ra:",
     "copy": "Sao chép",

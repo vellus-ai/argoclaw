@@ -1,0 +1,28 @@
+{
+  "deleteChat": "Eliminar chat",
+  "deleteChatConfirm": "Esto eliminará permanentemente esta conversación y todos sus mensajes.",
+  "newChat": "Nuevo chat",
+  "openSessions": "Sesiones abiertas",
+  "readOnly": "Solo lectura — esta sesión pertenece a otro usuario",
+  "empty": {
+    "title": "Inicia una conversación",
+    "description": "Envía un mensaje para comenzar a chatear con el agente."
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "¡Bienvenido a ARGO!",
+      "description": "Soy el Primer Oficial, tu timonel. Vamos a configurar tu equipo."
+    }
+  },
+  "media": {
+    "image": "Imagen",
+    "video": "Vídeo",
+    "audio": "Audio",
+    "voice": "Mensaje de voz",
+    "document": "Documento",
+    "animation": "Animación",
+    "attached": "adjunto"
+  },
+  "forwardedFrom": "Reenviado desde",
+  "replyingTo": "Respondiendo a"
+}

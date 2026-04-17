@@ -1,0 +1,21 @@
+{
+  "title": "Almacenamiento",
+  "description": "Explorador de archivos del workspace",
+  "descriptionWithPath": "{{path}} — {{size}}",
+  "sizeCacheInfo": "El tamaño del almacenamiento se almacena en caché durante 60 minutos",
+  "unsupportedFile": "Este tipo de archivo no es soportado para previsualización",
+  "download": "Descargar",
+  "delete": {
+    "fileTitle": "Eliminar archivo",
+    "folderTitle": "Eliminar carpeta",
+    "description": "¿Estás seguro de que deseas eliminar {{name}}?",
+    "folderWarning": " Todo el contenido será removido recursivamente.",
+    "undone": " Esta acción no se puede deshacer.",
+    "deleting": "Eliminando...",
+    "confirmLabel": "Eliminar"
+  },
+  "toast": {
+    "deleted": "Archivo eliminado",
+    "deleteFailed": "Error al eliminar archivo"
+  }
+}

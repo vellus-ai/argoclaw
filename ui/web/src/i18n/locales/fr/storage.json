@@ -1,0 +1,21 @@
+{
+  "title": "Stockage",
+  "description": "Navigateur de fichiers de l'espace de travail",
+  "descriptionWithPath": "{{path}} — {{size}}",
+  "sizeCacheInfo": "La taille du stockage est mise en cache pour 60 minutes",
+  "unsupportedFile": "Ce type de fichier n'est pas supporté pour l'aperçu",
+  "download": "Télécharger",
+  "delete": {
+    "fileTitle": "Supprimer le fichier",
+    "folderTitle": "Supprimer le dossier",
+    "description": "Êtes-vous sûr de vouloir supprimer {{name}} ?",
+    "folderWarning": " Tout le contenu sera supprimé récursivement.",
+    "undone": " Cette action ne peut pas être annulée.",
+    "deleting": "Suppression...",
+    "confirmLabel": "Supprimer"
+  },
+  "toast": {
+    "deleted": "Fichier supprimé",
+    "deleteFailed": "Échec de la suppression du fichier"
+  }
+}

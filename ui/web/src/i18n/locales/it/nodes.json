@@ -1,0 +1,35 @@
+{
+  "title": "Nodi",
+  "description": "Gestisci dispositivi accoppiati e richieste di accoppiamento in sospeso",
+  "emptyTitle": "Nessun dispositivo",
+  "emptyDescription": "Nessun dispositivo accoppiato o richieste di accoppiamento in sospeso.",
+  "pendingRequests": "Richieste in Sospeso ({{count}})",
+  "pairedDevices": "Dispositivi Accoppiati ({{count}})",
+  "sender": "Mittente:",
+  "chat": "Chat:",
+  "columns": {
+    "channel": "Canale",
+    "senderId": "ID Mittente",
+    "paired": "Accoppiato",
+    "by": "Da",
+    "actions": "Azioni"
+  },
+  "approve": "Approva",
+  "deny": "Nega",
+  "revoke": "Revoca",
+  "confirmApprove": {
+    "title": "Approva Accoppiamento",
+    "description": "Approvare richiesta accoppiamento da {{channel}}:{{senderId}} (codice: {{code}})? Questo dispositivo potrà interagire con gli agenti.",
+    "confirmLabel": "Approva"
+  },
+  "confirmDeny": {
+    "title": "Nega Accoppiamento",
+    "description": "Negare richiesta accoppiamento da {{channel}}:{{senderId}} (codice: {{code}})? La richiesta verrà rimossa.",
+    "confirmLabel": "Nega"
+  },
+  "confirmRevoke": {
+    "title": "Revoca Dispositivo",
+    "description": "Revocare accoppiamento per {{channel}}:{{senderId}}? Il dispositivo dovrà ri-accoppiare.",
+    "confirmLabel": "Revoca"
+  }
+}

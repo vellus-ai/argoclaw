@@ -1,0 +1,45 @@
+{
+  "title": "Sesiones",
+  "description": "Explorar sesiones de conversación",
+  "searchPlaceholder": "Buscar sesiones...",
+  "emptyTitle": "Sin sesiones aún",
+  "emptyDescription": "Las sesiones aparecerán aquí una vez que comiences a chatear.",
+  "noMatchTitle": "Sin sesiones coincidentes",
+  "noMatchDescription": "Intenta con un término de búsqueda diferente.",
+  "columns": {
+    "session": "Sesión",
+    "agent": "Agente",
+    "context": "Contexto",
+    "messages": "Mensajes",
+    "updated": "Actualizado"
+  },
+  "contextBar": {
+    "compacted": "Compactado {{count}} vez(ces)"
+  },
+  "detail": {
+    "reset": "Restablecer",
+    "delete": "Eliminar",
+    "deleteTitle": "Eliminar Sesión",
+    "deleteDescription": "Esto eliminará permanentemente todos los mensajes en esta sesión.",
+    "resetTitle": "Restablecer Sesión",
+    "resetDescription": "Esto borrará todos los mensajes pero mantendrá la sesión.",
+    "confirmDelete": "Eliminar",
+    "confirmReset": "Restablecer",
+    "noMessages": "Sin mensajes en esta sesión",
+    "summary": "Resumen",
+    "showMore": "Mostrar más",
+    "showLess": "Mostrar menos",
+    "showDetails": "mostrar detalles",
+    "hide": "ocultar",
+    "systemMessage": "Mensaje del Sistema",
+    "messages": "mensajes"
+  },
+  "toast": {
+    "deleted": "Sesión eliminada",
+    "deleteFailed": "Error al eliminar sesión",
+    "reset": "Sesión restablecida",
+    "resetFailed": "Error al restablecer sesión",
+    "updated": "Sesión actualizada",
+    "updateFailed": "Error al actualizar sesión"
+  }
+}

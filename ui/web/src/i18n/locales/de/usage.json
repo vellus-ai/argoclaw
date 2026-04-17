@@ -1,0 +1,97 @@
+{
+  "title": "Nutzung",
+  "description": "Token-Nutzung und Kosten nach Agent",
+  "emptyTitle": "Keine Nutzungsdaten",
+  "emptyDescription": "Nutzungsdaten erscheinen hier, nachdem Agents Anfragen verarbeiten.",
+  "summary": {
+    "sessions": "{{count}} Sitzungen",
+    "inputTokens": "Input-Tokens",
+    "outputTokens": "Output-Tokens",
+    "total": "Insgesamt"
+  },
+  "recentRecords": "Letzte Einträge",
+  "columns": {
+    "agent": "Agent",
+    "model": "Modell",
+    "provider": "Provider",
+    "input": "Input",
+    "output": "Output",
+    "total": "Insgesamt",
+    "channel": "Kanal",
+    "cost": "Kosten",
+    "status": "Status"
+  },
+  "analytics": {
+    "title": "Nutzungs-Analytik",
+    "period24h": "24h",
+    "period7d": "7 Tage",
+    "period30d": "30 Tage",
+    "periodCustom": "Benutzerdefiniert",
+    "allAgents": "Alle Agents",
+    "allProviders": "Alle Provider",
+    "allChannels": "Alle Kanäle",
+    "activeFilters": "Aktive Filter",
+    "clearAll": "Alle löschen",
+    "exportCsv": "CSV exportieren",
+    "requests": "Anfragen",
+    "tokens": "Tokens",
+    "cost": "Kosten",
+    "errors": "Fehler",
+    "uniqueUsers": "Eindeutige Benutzer",
+    "llmCalls": "LLM-Calls",
+    "toolCalls": "Tool-Calls",
+    "trendUp": "+{{value}}%",
+    "trendDown": "{{value}}%",
+    "vsPrevious": "vs. vorherige Periode",
+    "configurePricing": "Konfiguriere Model-Pricing für Kosten-Tracking",
+    "noData": "Keine Daten für ausgewählte Periode",
+    "tokenChart": {
+      "title": "Token-Nutzung über Zeit",
+      "input": "Input-Tokens",
+      "output": "Output-Tokens",
+      "cache": "Cache-Lese-Tokens",
+      "thinking": "Überlegungs-Tokens",
+      "total": "Insgesamt"
+    },
+    "requestChart": {
+      "title": "Anfrage-Volumen & Fehler",
+      "requests": "Anfragen",
+      "errors": "Fehler",
+      "errorRate": "Fehler-Rate"
+    },
+    "distribution": {
+      "provider": "Provider-Verteilung",
+      "model": "Modell-Verteilung",
+      "channel": "Kanal-Verteilung",
+      "other": "Sonstiges",
+      "calls": "Calls"
+    },
+    "durationChart": {
+      "title": "Dauer & Performance",
+      "avgDuration": "Durchschn. Dauer",
+      "errorRate": "Fehler-Rate %"
+    },
+    "knowledgeChart": {
+      "title": "Speicher- & Wissens-Graph-Wachstum",
+      "memoryDocs": "Speicher-Docs",
+      "memoryChunks": "Speicher-Chunks",
+      "kgEntities": "KG-Entities",
+      "kgRelations": "KG-Relationen"
+    },
+    "topModels": {
+      "title": "Top-Modelle",
+      "model": "Modell",
+      "provider": "Provider",
+      "llmCalls": "LLM-Calls",
+      "inputTokens": "Input-Tokens",
+      "outputTokens": "Output-Tokens",
+      "avgDuration": "Durchschn. Dauer",
+      "cost": "Kosten"
+    },
+    "tooltip": {
+      "date": "Datum",
+      "total": "Insgesamt",
+      "errorRate": "{{value}}% Fehler-Rate"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "title": "Appareils",
+  "description": "Gérer les appareils appairés et les demandes d'appairage en attente",
+  "emptyTitle": "Aucun appareil",
+  "emptyDescription": "Aucun appareil appairé ou demande d'appairage en attente.",
+  "pendingRequests": "Demandes en attente ({{count}})",
+  "pairedDevices": "Appareils appairés ({{count}})",
+  "sender": "Expéditeur :",
+  "chat": "Chat :",
+  "columns": {
+    "channel": "Canal",
+    "senderId": "ID de l'expéditeur",
+    "paired": "Appairé",
+    "by": "Par",
+    "actions": "Actions"
+  },
+  "approve": "Approuver",
+  "deny": "Refuser",
+  "revoke": "Révoquer",
+  "confirmApprove": {
+    "title": "Approuver l'appairage",
+    "description": "Approuver la demande d'appairage de {{channel}}:{{senderId}} (code : {{code}}) ? Cet appareil pourra interagir avec les agents.",
+    "confirmLabel": "Approuver"
+  },
+  "confirmDeny": {
+    "title": "Refuser l'appairage",
+    "description": "Refuser la demande d'appairage de {{channel}}:{{senderId}} (code : {{code}}) ? La demande sera supprimée.",
+    "confirmLabel": "Refuser"
+  },
+  "confirmRevoke": {
+    "title": "Révoquer l'appareil",
+    "description": "Révoquer l'appairage pour {{channel}}:{{senderId}} ? L'appareil devra se réappairer.",
+    "confirmLabel": "Révoquer"
+  }
+}

@@ -1,0 +1,333 @@
+{
+  "title": "Kanäle",
+  "description": "Verwalte Kanal-Instanzen",
+  "statusDescription": "Status des Kommunikationskanals",
+  "addChannel": "Kanal hinzufügen",
+  "refresh": "Aktualisieren",
+  "searchPlaceholder": "Kanäle durchsuchen...",
+  "emptyTitle": "Keine Kanäle",
+  "emptyDescription": "Füge deine erste Kanal-Instanz hinzu, um zu beginnen.",
+  "emptyStatusDescription": "Keine Kommunikationskanäle sind konfiguriert.",
+  "noMatchTitle": "Keine passenden Kanäle",
+  "noMatchDescription": "Versuche einen anderen Suchbegriff.",
+  "columns": {
+    "name": "Name",
+    "type": "Typ",
+    "agent": "Agent",
+    "status": "Status",
+    "enabled": "Aktiviert",
+    "actions": "Aktionen"
+  },
+  "status": {
+    "running": "Läuft",
+    "stopped": "Gestoppt"
+  },
+  "enabled": "Aktiviert",
+  "disabled": "Deaktiviert",
+  "actions": {
+    "reauthenticate": "Erneut authentifizieren",
+    "authenticate": "Authentifizieren zum Starten des Kanals"
+  },
+  "delete": {
+    "title": "Kanal-Instanz löschen",
+    "description": "Bist du sicher, dass du \"{{name}}\" löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "confirmLabel": "Löschen"
+  },
+  "form": {
+    "createTitle": "Kanal-Instanz erstellen",
+    "editTitle": "Kanal-Instanz bearbeiten",
+    "key": "Schlüssel *",
+    "keyPlaceholder": "mein-telegram-bot",
+    "keyHint": "Eindeutiger Slug als Kanal-Kennzeichnung",
+    "displayName": "Anzeigename",
+    "displayNamePlaceholder": "Verkaufs-Bot",
+    "channelType": "Kanal-Typ *",
+    "agent": "Agent *",
+    "selectAgent": "Agent auswählen",
+    "credentials": "Anmeldeinformationen",
+    "credentialsHint": "(leer lassen zum Behalten der aktuellen)",
+    "credentialsEncrypted": "Serverseitig verschlüsselt. Nie in API-Antworten zurückgegeben.",
+    "configuration": "Konfiguration",
+    "enabled": "Aktiviert",
+    "cancel": "Abbrechen",
+    "create": "Erstellen",
+    "update": "Aktualisieren",
+    "saving": "Wird gespeichert...",
+    "step": "Schritt {{current}} von {{total}}",
+    "authenticate": "Authentifizieren — {{label}}",
+    "configure": "Konfigurieren — {{label}}",
+    "skip": "Überspringen",
+    "done": "Fertig",
+    "errors": {
+      "keyRequired": "Schlüssel ist erforderlich",
+      "keySlug": "Schlüssel muss ein gültiger Slug sein (nur Kleinbuchstaben, Zahlen, Bindestriche)",
+      "agentRequired": "Agent ist erforderlich",
+      "requiredFields": "Erforderlich: {{fields}}",
+      "failedSave": "Fehler beim Speichern",
+      "failedSaveConfig": "Fehler beim Speichern der Konfiguration"
+    },
+    "authStatus": {
+      "authenticated": "Authentifiziert",
+      "notAuthenticated": "Nicht authentifiziert",
+      "useQrHint": "— Verwende den QR-Login-Button aus der Kanäle-Tabelle"
+    }
+  },
+  "detail": {
+    "agent": "Agent: {{name}}",
+    "advanced": "Erweitert",
+    "advancedTitle": "Erweiterte Einstellungen",
+    "policies": "Richtlinien",
+    "policiesDesc": "Nachrichtenbehandlungsrichtlinien",
+    "network": "Netzwerk",
+    "networkDesc": "Server- und Proxy-Konfiguration",
+    "limits": "Grenzwerte",
+    "limitsDesc": "Nachricht- und Medienbeschränkungen",
+    "streaming": "Streaming",
+    "streamingDesc": "Echtzeit-Nachricht-Streaming-Optionen",
+    "behavior": "Verhalten",
+    "behaviorDesc": "Antwortverhaltenskonfiguration",
+    "accessControl": "Zugriffskontrolle",
+    "accessControlDesc": "Benutzer-Zugriffsbeschränkungen",
+    "tabs": {
+      "general": "Allgemein",
+      "config": "Konfiguration",
+      "credentials": "Anmeldeinformationen",
+      "groups": "Gruppen",
+      "managers": "Manager"
+    },
+    "general": {
+      "identity": "Identität",
+      "name": "Name",
+      "nameHint": "Eindeutiger Slug (schreibgeschützt)",
+      "channelType": "Kanal-Typ",
+      "displayName": "Anzeigename",
+      "displayNamePlaceholder": "Benutzerfreundlicher Name",
+      "agent": "Agent",
+      "selectAgent": "Agent auswählen",
+      "enabled": "Aktiviert",
+      "saved": "Gespeichert",
+      "saveChanges": "Änderungen speichern",
+      "saving": "Wird gespeichert..."
+    },
+    "credentials": {
+      "hint": "Lasse Felder leer, um aktuelle Werte zu behalten. Anmeldeinformationen sind serverseitig verschlüsselt und werden nie in API-Antworten zurückgegeben.",
+      "noSchema": "Kein Anmeldeinformationsschema für diesen Kanal-Typ.",
+      "noCredentials": "Keine Anmeldeinformationen zu aktualisieren",
+      "failedSave": "Fehler beim Speichern",
+      "saved": "Gespeichert",
+      "updateCredentials": "Anmeldeinformationen aktualisieren",
+      "saving": "Wird gespeichert..."
+    },
+    "config": {
+      "noSchema": "Kein Konfigurationsschema für diesen Kanal-Typ.",
+      "saved": "Gespeichert",
+      "saveConfig": "Konfiguration speichern",
+      "saving": "Wird gespeichert...",
+      "webhookUrlLabel": "Lege dies als Event-Anfrage-URL deiner Lark-App fest:",
+      "copyPath": "Pfad kopieren"
+    },
+    "groups": {
+      "saved": "Gespeichert",
+      "saveGroups": "Gruppen speichern",
+      "saving": "Wird gespeichert..."
+    },
+    "managers": {
+      "description": "Verwalte, welche Benutzer Manager-Berechtigungen in Gruppen-Chats haben.",
+      "groups": "Gruppen",
+      "noManagerGroups": "Keine Manager-Gruppen",
+      "noManagerGroupsHint": "Verwende das Formular unten, um einen Manager zu einer Gruppe hinzuzufügen.",
+      "loadingManagers": "Manager werden geladen...",
+      "noManagers": "Keine Manager in dieser Gruppe.",
+      "managersCount": "{{count}} Manager",
+      "managersCountPlural": "{{count}} Manager",
+      "searchContacts": "Kontakte durchsuchen...",
+      "noResults": "Keine Kontakte gefunden",
+      "columns": {
+        "userId": "Benutzer-ID",
+        "name": "Name",
+        "username": "Benutzername"
+      },
+      "addForm": {
+        "title": "Manager zu neuer Gruppe hinzufügen",
+        "hint": "Füge einen Manager zu einer Gruppe hinzu, die nicht in der obigen Liste angezeigt wird.",
+        "groupId": "Gruppen-ID *",
+        "groupIdPlaceholder": "z.B. group:telegram:-100123456",
+        "userId": "Benutzer-ID *",
+        "userIdPlaceholder": "Suche oder gib Benutzer-ID ein",
+        "displayName": "Anzeigename",
+        "username": "Benutzername",
+        "optional": "Optional",
+        "usernameWithout": "Optional (ohne @)",
+        "adding": "Wird hinzugefügt...",
+        "addManager": "Manager hinzufügen",
+        "add": "Hinzufügen",
+        "errors": {
+          "groupUserRequired": "Gruppen-ID und Benutzer-ID sind erforderlich",
+          "failedAdd": "Fehler beim Hinzufügen des Managers"
+        }
+      }
+    }
+  },
+  "fieldConfig": {
+    "token": { "label": "Bot-Token", "help": "Von @BotFather" },
+    "bot_token": { "label": "Bot-Token" },
+    "app_token": { "label": "App-Level-Token", "help": "App-Level-Token mit connections:write-Umfang (erforderlich für Socket Mode)" },
+    "user_token": { "label": "Benutzer-Token (Optional)", "help": "Optional: Benutzer-OAuth-Token für benutzerdefinierte Bot-Identität. Leer lassen für Standard-Bot-Identität." },
+    "app_id": { "label": "App-ID" },
+    "app_secret": { "label": "App-Secret" },
+    "encrypt_key": { "label": "Verschlüsselungsschlüssel", "help": "Für Webhook-Modus" },
+    "verification_token": { "label": "Verifizierungstoken", "help": "Für Webhook-Modus" },
+    "webhook_secret": { "label": "Webhook-Secret" },
+    "bridge_url": { "label": "Bridge-URL" },
+    "api_server": { "label": "API-Server-URL", "help": "Benutzerdefinierter Telegram-Bot-API-Server für große Datei-Uploads (bis 2GB). Leer lassen für Standard." },
+    "proxy": { "label": "HTTP-Proxy", "help": "Leite Bot-Traffic durch einen HTTP-Proxy" },
+    "dm_policy": { "label": "DM-Richtlinie" },
+    "group_policy": { "label": "Gruppen-Richtlinie" },
+    "require_mention": { "label": "@mention in Gruppen erforderlich" },
+    "history_limit": { "label": "Gruppen-Verlauf-Limit", "help": "Max. ausstehende Gruppen-Nachrichten für Kontext (0 = deaktiviert)" },
+    "dm_stream": { "label": "DM-Streaming", "help": "Streaming-Antwort progressiv in DMs" },
+    "group_stream": { "label": "Gruppen-Streaming", "help": "Streaming-Antwort progressiv in Gruppen" },
+    "draft_transport": { "label": "Entwurfsvorschau", "help": "Verwende stealth draft preview für Antwort-Stream in DMs – keine Benachrichtigung pro Bearbeitung (erfordert DM-Streaming)" },
+    "reasoning_stream": { "label": "Überlegungen anzeigen", "help": "KI-Überlegungen als separate Nachricht vor der Antwort anzeigen (erfordert Streaming)" },
+    "reaction_level": { "label": "Reaktions-Level" },
+    "media_max_mb": { "label": "Max. Mediengröße (MB)" },
+    "link_preview": { "label": "Link-Vorschau" },
+    "allow_from": { "label": "Zugelassene Benutzer" },
+    "block_reply": { "label": "Antwort blockieren", "help": "Liefere Zwischentexte während Tool-Iterationen" },
+    "domain": { "label": "Domain" },
+    "connection_mode": { "label": "Verbindungsmodus", "help": "WebSocket benötigt keine öffentliche IP – nur ausgehende Verbindung" },
+    "webhook_port": { "label": "Webhook-Port", "help": "0 = Hauptgateway-Port teilen (empfohlen)" },
+    "webhook_path": { "label": "Webhook-Pfad", "help": "Pfad auf Hauptserver für Lark-Events" },
+    "webhook_url": { "label": "Webhook-URL" },
+    "topic_session_mode": { "label": "Thema-Sitzungs-Modus", "help": "Nutze thread root_id für Sitzungs-Isolierung" },
+    "render_mode": { "label": "Render-Modus" },
+    "text_chunk_limit": { "label": "Text-Chunk-Limit", "help": "Max. Zeichen pro Nachricht" },
+    "group_allow_from": { "label": "Gruppen-Zugelassene Benutzer", "help": "Separate Zulassungsliste für Gruppen-Absender" },
+    "native_stream": { "label": "Native Streaming (Agents & AI Apps)", "help": "Nutze Slack's ChatStreamer API für natives Streaming. Fällt zurück auf Edit-in-Place, wenn nicht verfügbar." },
+    "debounce_delay": { "label": "Debounce-Verzögerung (ms)", "help": "Millisekunden zum Warten vor Dispatch schneller Nachrichten. 0 = deaktiviert." },
+    "thread_ttl": { "label": "Thread-Partizipations-TTL (Stunden)", "help": "Stunden, bevor Bot aufhört, automatisch in Threads zu antworten, an denen es teilgenommen hat. 0 = @mention immer erforderlich." },
+    "skills": { "label": "Skills-Filter", "help": "Begrenzte verfügbare Skills für diese Gruppe" },
+    "tools": { "label": "Tool-Zulassungsliste", "help": "Beschränke, welche Tools der Agent in dieser Gruppe nutzen kann" },
+    "system_prompt": { "label": "System-Prompt" }
+  },
+  "fieldOptions": {
+    "block_reply": {
+      "inherit": "Von Gateway erben",
+      "true": "Aktiviert",
+      "false": "Deaktiviert"
+    },
+    "dm_policy": {
+      "pairing": "Pairing (Code erforderlich)",
+      "open": "Offen (alle akzeptieren)",
+      "allowlist": "Nur Zulassungsliste",
+      "disabled": "Deaktiviert"
+    },
+    "group_policy": {
+      "open": "Offen (alle akzeptieren)",
+      "pairing": "Pairing (Genehmigung erforderlich)",
+      "allowlist": "Nur Zulassungsliste",
+      "disabled": "Deaktiviert"
+    },
+    "reaction_level": {
+      "off": "Aus",
+      "minimal": "Minimal",
+      "full": "Vollständig"
+    },
+    "domain": {
+      "lark": "Lark (Global)",
+      "feishu": "Feishu (China)"
+    },
+    "connection_mode": {
+      "webhook": "Webhook",
+      "websocket": "WebSocket (empfohlen)"
+    },
+    "topic_session_mode": {
+      "disabled": "Deaktiviert",
+      "enabled": "Aktiviert"
+    },
+    "render_mode": {
+      "auto": "Automatisch",
+      "raw": "Roh",
+      "card": "Karte"
+    }
+  },
+  "groupOverrides": {
+    "title": "Gruppen- & Thema-Overrides",
+    "hint": "Überschreibe Kanal-Standardeinstellungen pro Gruppenchat oder Forum-Thema. Verwende \"*\" als Gruppen-ID für Wildcard-Standardeinstellungen.",
+    "groupLabel": "Gruppe: {{id}}",
+    "groupWildcard": "* (wildcard)",
+    "addGroupPlaceholder": "Chat-ID (z.B. -100123456) oder *",
+    "addGroup": "Gruppe hinzufügen",
+    "knownGroups": "Bekannte Gruppen",
+    "topicOverrides": "Thema-Overrides",
+    "topicLabel": "Thema: {{id}}",
+    "addTopicPlaceholder": "Thema-Thread-ID",
+    "addTopic": "Thema hinzufügen",
+    "fieldConfig": {
+      "dm_stream": { "label": "DM-Streaming", "help": "Streaming-Antwort progressiv in DMs" },
+      "group_stream": { "label": "Gruppen-Streaming", "help": "Streaming-Antwort progressiv in Gruppen" },
+      "draft_transport": { "label": "Entwurfsvorschau", "help": "Verwende stealth draft preview für Antwort-Stream in DMs – keine Benachrichtigung pro Bearbeitung (erfordert DM-Streaming)" },
+      "reasoning_stream": { "label": "Überlegungen anzeigen", "help": "KI-Überlegungen als separate Nachricht vor der Antwort anzeigen (erfordert Streaming)" }
+    },
+    "fields": {
+      "groupPolicy": "Gruppen-Richtlinie",
+      "requireMention": "@mention erforderlich",
+      "enabled": "Aktiviert",
+      "allowedUsers": "Zugelassene Benutzer",
+      "allowedUsersPlaceholder": "Eine Benutzer-ID pro Zeile oder kommagetrennt",
+      "skillsFilter": "Skills-Filter",
+      "skillsPlaceholder": "Ein Skill-Name pro Zeile (leer = erben)",
+      "toolAllow": "Tool-Zulassung",
+      "toolAllowPlaceholder": "Zugelassene Tools auswählen (leer = alle erben)...",
+      "toolAllowHint": "Beschränke, welche Tools in dieser Gruppe verfügbar sind. Unterstützt Gruppennamen wie \"group:web\", \"group:fs\". Leer = alle Tools erben.",
+      "systemPrompt": "System-Prompt",
+      "systemPromptPlaceholder": "Zusätzlicher System-Prompt für diese Gruppe/Thema",
+      "inherit": "Erben (Kanal-Standard)",
+      "yes": "Ja",
+      "no": "Nein"
+    }
+  },
+  "wizard": {
+    "zaloPersonal": {
+      "createLabel": "Erstellen & Authentifizieren",
+      "formBanner": "Nach dem Erstellen wirst du dich über QR-Code authentifizieren und zugelassene Benutzer konfigurieren."
+    }
+  },
+  "scopes": {
+    "title": "Erforderliche API-Berechtigungen",
+    "description": "Deine Lark/Feishu-App muss diese Bereiche in der Developer Console aktiviert haben. Veröffentliche eine neue App-Version nach dem Hinzufügen von Berechtigungen.",
+    "publishReminder": "Nach dem Hinzufügen von Bereichen stellst du Kontaktbereich auf \"Alle Mitglieder\" ein und veröffentlichst eine neue App-Version, damit Änderungen wirksam werden."
+  },
+  "toast": {
+    "created": "Kanal erstellt",
+    "createdDesc": "{{name}} wurde hinzugefügt",
+    "updated": "Kanal aktualisiert",
+    "deleted": "Kanal gelöscht",
+    "failedCreate": "Fehler beim Erstellen des Kanals",
+    "failedUpdate": "Fehler beim Aktualisieren des Kanals",
+    "failedDelete": "Fehler beim Löschen des Kanals"
+  },
+  "zalo": {
+    "allowedUsers": "Zugelassene Benutzer",
+    "loadContacts": "Kontakte laden",
+    "loading": "Wird geladen...",
+    "searchContacts": "Kontakte durchsuchen...",
+    "friends": "Freunde",
+    "groups": "Gruppen",
+    "membersCount": "{{count}} Mitglieder",
+    "noContacts": "Keine Kontakte gefunden",
+    "noContactsMatch": "Keine Kontakte passen zu \"{{search}}\"",
+    "addManualPlaceholder": "Füge ID manuell hinzu",
+    "add": "Hinzufügen",
+    "zaloIdsHint": "Zalo-Benutzer-IDs oder Gruppen-IDs",
+    "completeQrLogin": "Vollende QR-Login, um Kontakte zu laden",
+    "loginQr": "Mit QR anmelden — {{name}}",
+    "loginSuccessful": "Anmeldung erfolgreich! Kanal startet...",
+    "generatingQr": "QR-Code wird generiert...",
+    "scanHint": "Mit deiner Zalo-App scannen (läuft ab in ~100s)",
+    "loginSuccessLoading": "Anmeldung erfolgreich! Kontakte werden geladen...",
+    "retry": "Erneut versuchen",
+    "close": "Schließen",
+    "skip": "Überspringen"
+  }
+}

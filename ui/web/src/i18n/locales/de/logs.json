@@ -1,0 +1,15 @@
+{
+  "title": "Protokolle",
+  "description": "Live-Protokoll-Verfolgung",
+  "descriptionLive": "Live-Verfolgung auf {{level}}-Ebene",
+  "live": "Live",
+  "start": "Start",
+  "stop": "Stop",
+  "clear": "Löschen",
+  "filterPlaceholder": "Protokolle filtern...",
+  "logLevelTitle": "Protokoll-Ebene",
+  "emptyWaiting": "Warte auf Protokolle...",
+  "emptyFilter": "Keine Protokolle entsprechen Filter.",
+  "emptyStart": "Klicke \"Start\", um Protokolle zu streamen.",
+  "count": "{{filtered}}/{{total}}"
+}

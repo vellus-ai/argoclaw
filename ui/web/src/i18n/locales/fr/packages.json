@@ -1,0 +1,43 @@
+{
+  "title": "Runtime et packages",
+  "description": "Gérer les runtimes système et les packages installés",
+  "runtimes": {
+    "title": "Runtimes",
+    "available": "Disponible",
+    "missing": "Manquant"
+  },
+  "system": {
+    "title": "Packages système",
+    "placeholder": "Nom du package (ex. github-cli)"
+  },
+  "pip": {
+    "title": "Packages Python",
+    "placeholder": "Nom du package (ex. pandas)"
+  },
+  "npm": {
+    "title": "Packages Node",
+    "placeholder": "Nom du package (ex. typescript)"
+  },
+  "actions": {
+    "install": "Installer",
+    "uninstall": "Désinstaller",
+    "installing": "Installation...",
+    "uninstalling": "Suppression..."
+  },
+  "messages": {
+    "installSuccess": "{{name}} installé avec succès",
+    "installError": "Échec de l'installation de {{name}}",
+    "uninstallSuccess": "{{name}} supprimé avec succès",
+    "uninstallError": "Échec de la suppression de {{name}}"
+  },
+  "confirmUninstall": {
+    "title": "Confirmer la désinstallation",
+    "description": "Êtes-vous sûr de vouloir supprimer {{name}} ? Cette action ne peut pas être annulée."
+  },
+  "table": {
+    "name": "Nom",
+    "version": "Version",
+    "actions": "Actions",
+    "empty": "Aucun package installé"
+  }
+}

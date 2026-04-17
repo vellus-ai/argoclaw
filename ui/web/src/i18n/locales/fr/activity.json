@@ -1,0 +1,26 @@
+{
+  "title": "Journal d'activité",
+  "description": "Piste d'audit des modifications d'administrateur et de configuration.",
+  "filters": {
+    "action": "Action",
+    "allActions": "Toutes les actions",
+    "agentCreated": "Agent créé",
+    "agentUpdated": "Agent mis à jour",
+    "agentDeleted": "Agent supprimé",
+    "entityType": "Type d'entité",
+    "allEntities": "Toutes les entités",
+    "agent": "Agent"
+  },
+  "table": {
+    "action": "Action",
+    "actor": "Acteur",
+    "entity": "Entité",
+    "entityId": "ID d'entité",
+    "ip": "Adresse IP",
+    "time": "Heure"
+  },
+  "empty": {
+    "title": "Aucun journal d'activité",
+    "description": "Les journaux d'activité apparaîtront ici lors de l'exécution d'actions administrateur."
+  }
+}

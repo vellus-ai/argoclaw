@@ -1,0 +1,79 @@
+{
+  "title": "Projets",
+  "description": "Gérer les espaces de travail des projets et leurs remplacements de serveur MCP",
+  "addProject": "Nouveau projet",
+  "searchPlaceholder": "Rechercher des projets...",
+  "emptyTitle": "Aucun projet",
+  "emptyDescription": "Créez votre premier projet pour commencer.",
+  "noMatchTitle": "Aucun projet correspondant",
+  "noMatchDescription": "Essayez un terme de recherche différent.",
+  "columns": {
+    "name": "Nom",
+    "slug": "Slug",
+    "channel": "Canal",
+    "status": "Statut",
+    "overrides": "Remplacements MCP",
+    "createdBy": "Créé par",
+    "actions": "Actions"
+  },
+  "manageOverrides": "Gérer les remplacements MCP",
+  "delete": {
+    "title": "Supprimer le projet",
+    "description": "Êtes-vous sûr de vouloir supprimer « {{name}} » ? Cela supprimera également tous les remplacements MCP.",
+    "confirmLabel": "Supprimer"
+  },
+  "form": {
+    "createTitle": "Nouveau projet",
+    "editTitle": "Éditer le projet",
+    "name": "Nom *",
+    "slug": "Slug *",
+    "slugHint": "Lettres minuscules, chiffres et traits d'union uniquement",
+    "channelType": "Type de canal",
+    "channelTypePlaceholder": "Sélectionner un type de canal...",
+    "chatId": "ID du chat",
+    "chatIdPlaceholder": "ex. -1001234567890",
+    "description": "Description",
+    "descriptionPlaceholder": "Brève description de ce projet",
+    "status": "Statut",
+    "cancel": "Annuler",
+    "create": "Créer",
+    "update": "Mettre à jour",
+    "saving": "Enregistrement...",
+    "errors": {
+      "nameRequired": "Le nom et le slug sont requis",
+      "slugInvalid": "Le slug doit contenir uniquement des lettres minuscules, des chiffres et des traits d'union"
+    }
+  },
+  "overrides": {
+    "title": "Remplacements MCP — {{name}}",
+    "description": "Remplacements de variables d'environnement par projet pour les serveurs MCP. Les clés secrètes (TOKEN, SECRET, PASSWORD, API_KEY) doivent être définies dans la configuration globale du serveur MCP.",
+    "serverName": "Serveur MCP *",
+    "serverNamePlaceholder": "ex. gitlab, atlassian",
+    "envOverrides": "Variables d'environnement",
+    "envKeyPlaceholder": "Nom de variable",
+    "envValuePlaceholder": "Valeur",
+    "addVariable": "Ajouter une variable",
+    "addOverride": "Ajouter un remplacement",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "noOverrides": "Aucun remplacement MCP configuré",
+    "noOverridesDescription": "Ajouter des variables d'environnement par projet pour les serveurs MCP.",
+    "failedLoad": "Échec du chargement des remplacements",
+    "failedSave": "Échec de l'enregistrement du remplacement",
+    "failedDelete": "Échec de la suppression du remplacement",
+    "saved": "Remplacement enregistré",
+    "deleted": "Remplacement supprimé"
+  },
+  "status": {
+    "active": "Actif",
+    "archived": "Archivé"
+  },
+  "toast": {
+    "created": "Projet créé",
+    "updated": "Projet mis à jour",
+    "deleted": "Projet supprimé",
+    "failedCreate": "Échec de la création du projet",
+    "failedUpdate": "Échec de la mise à jour du projet",
+    "failedDelete": "Échec de la suppression du projet"
+  }
+}

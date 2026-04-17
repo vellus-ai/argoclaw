@@ -1,0 +1,190 @@
+{
+  "title": "Mémoire",
+  "description": "Parcourir et gérer les documents, morceaux et plongements de mémoire de l'agent",
+  "search": "Recherche",
+  "create": "Créer",
+  "indexAll": "Indexer tout",
+  "indexing": "Indexation...",
+  "emptyTitle": "Aucun document de mémoire",
+  "emptyAgentDescription": "Cet agent n'a pas encore de documents de mémoire.",
+  "emptyGlobalDescription": "Aucun document de mémoire trouvé dans aucun agent.",
+  "filters": {
+    "agent": "Agent",
+    "allAgents": "Tous les agents",
+    "scope": "Portée",
+    "allScope": "Tous (global + personnel)",
+    "selectAgent": "Sélectionner un agent"
+  },
+  "tabs": {
+    "documents": "Documents",
+    "knowledgeGraph": "Graphe de connaissances"
+  },
+  "columns": {
+    "path": "Chemin",
+    "agent": "Agent",
+    "scope": "Portée",
+    "hash": "Hash",
+    "updated": "Mise à jour",
+    "actions": "Actions"
+  },
+  "scopeLabel": {
+    "personal": "Personnel",
+    "global": "Global"
+  },
+  "delete": {
+    "title": "Supprimer le document de mémoire",
+    "description": "Êtes-vous sûr de vouloir supprimer « {{path}} » ? Cela supprimera également tous les morceaux et plongements associés.",
+    "confirmLabel": "Supprimer"
+  },
+  "createDialog": {
+    "title": "Créer un document de mémoire",
+    "path": "Chemin *",
+    "pathPlaceholder": "ex. notes/présentation-projet.md",
+    "content": "Contenu *",
+    "contentPlaceholder": "Contenu du document...",
+    "agentId": "Agent *",
+    "agentIdPlaceholder": "Sélectionner un agent...",
+    "scope": "Portée",
+    "existingScope": "Portée existante",
+    "customScope": "Personnalisée",
+    "selectGroupUser": "Sélectionner un groupe/utilisateur...",
+    "scopeHint": "Global = partagé dans tous les utilisateurs. Personnel = étendu à un utilisateur ou chat de groupe spécifique.",
+    "autoIndex": "Indexer automatiquement après création",
+    "agentRequired": "Veuillez sélectionner un agent",
+    "pathRequired": "Le chemin est requis",
+    "contentRequired": "Le contenu est requis",
+    "cancel": "Annuler",
+    "create": "Créer",
+    "creating": "Création..."
+  },
+  "documentDialog": {
+    "title": "Document de mémoire",
+    "path": "Chemin :",
+    "agent": "Agent :",
+    "scope": "Portée :",
+    "hash": "Hash :",
+    "updated": "Mise à jour :",
+    "content": "Contenu",
+    "chunks": "Morceaux ({{count}})",
+    "chunkIndex": "Morceau {{index}}",
+    "noChunks": "Aucun morceau",
+    "embedded": "Plongé",
+    "noEmbedding": "Aucun plongement"
+  },
+  "searchDialog": {
+    "title": "Recherche de mémoire",
+    "query": "Requête de recherche",
+    "queryPlaceholder": "Entrer une requête de recherche...",
+    "agentId": "ID d'agent",
+    "agentIdPlaceholder": "Filtrer par agent...",
+    "limit": "Limite",
+    "search": "Recherche",
+    "searching": "Recherche...",
+    "results": "Résultats",
+    "noResults": "Aucun résultat trouvé",
+    "similarity": "similarité",
+    "path": "Chemin :"
+  },
+  "kg": {
+    "pageTitle": "Graphe de connaissances",
+    "pageDescription": "Explorez les entités et les relations extraites de la mémoire de l'agent.",
+    "selectAgentTitle": "Sélectionner un agent",
+    "selectAgentDescription": "Choisissez un agent pour voir son graphe de connaissances.",
+    "emptyTitle": "Aucune entité",
+    "emptyDescription": "Aucune entité de graphe de connaissances pour cet agent pour le moment.",
+    "emptySearchDescription": "Aucune entité ne correspond à votre recherche.",
+    "stats": {
+      "entities": "Entités : {{count}}",
+      "relations": "Relations : {{count}}"
+    },
+    "search": {
+      "placeholder": "Rechercher des entités...",
+      "button": "Recherche",
+      "clear": "Effacer"
+    },
+    "refresh": "Actualiser",
+    "extract": "Extraire",
+    "columns": {
+      "name": "Nom",
+      "type": "Type",
+      "description": "Description",
+      "confidence": "Confiance",
+      "actions": "Actions",
+      "observations": "Observations",
+      "relations": "Relations"
+    },
+    "deleteEntity": {
+      "title": "Supprimer l'entité",
+      "description": "Supprimer « {{name}} » ? Cela supprimera également toutes les relations associées.",
+      "confirmLabel": "Supprimer"
+    },
+    "entity": {
+      "externalId": "ID externe :",
+      "confidence": "Confiance :",
+      "description": "Description :",
+      "source": "Source :",
+      "properties": "Propriétés :",
+      "relations": "Relations",
+      "traverse": "Traverser (2 sauts)",
+      "traversing": "Traversée...",
+      "loading": "Chargement...",
+      "noRelations": "Aucune relation trouvée.",
+      "traversalResults": "Résultats de traversée ({{count}})",
+      "direction": {
+        "outgoing": "→ sortante",
+        "incoming": "← entrante"
+      },
+      "columns": {
+        "direction": "Direction",
+        "relation": "Relation",
+        "target": "Cible",
+        "confidence": "Confiance"
+      }
+    },
+    "extractDialog": {
+      "title": "Extraire les entités du texte",
+      "providerLabel": "Fournisseur d'extraction",
+      "modelLabel": "Modèle d'extraction",
+      "textLabel": "Texte à extraire de",
+      "textPlaceholder": "Collez un texte de conversation, des notes ou tout contenu pour en extraire les entités et les relations...",
+      "extract": "Extraire",
+      "extracting": "Extraction...",
+      "cancel": "Annuler",
+      "agentId": "ID d'agent",
+      "agentIdPlaceholder": "Laisser vide pour global"
+    },
+    "graphView": {
+      "loading": "Chargement du graphe...",
+      "empty": "Aucune entité à visualiser",
+      "nodes": "{{count}} nœuds",
+      "edges": "{{count}} arêtes"
+    }
+  },
+  "toast": {
+    "created": "Document de mémoire créé",
+    "deleted": "Document de mémoire supprimé",
+    "indexed": "Tous les documents indexés",
+    "failedCreate": "Échec de la création du document",
+    "failedDelete": "Échec de la suppression du document",
+    "failedIndex": "Échec de l'indexation des documents",
+    "entitySaved": "Entité enregistrée",
+    "entitySaveFailed": "Échec de l'enregistrement de l'entité",
+    "entityDeleted": "Entité supprimée",
+    "entityDeleteFailed": "Échec de la suppression de l'entité",
+    "extractionComplete": "Extraction terminée",
+    "extractionFailed": "Échec de l'extraction",
+    "traversalFailed": "Échec de la traversée",
+    "unknownError": "Erreur inconnue",
+    "docCreated": "Document créé",
+    "docCreateFailed": "Échec de la création du document",
+    "docUpdated": "Document mis à jour",
+    "docUpdateFailed": "Échec de la mise à jour du document",
+    "docDeleted": "Document supprimé",
+    "docDeleteFailed": "Échec de la suppression du document",
+    "docIndexed": "Document indexé",
+    "docIndexFailed": "Échec de l'indexation du document",
+    "allIndexed": "Tous les documents indexés",
+    "allIndexFailed": "Échec de l'indexation de tous",
+    "searchFailed": "Échec de la recherche"
+  }
+}

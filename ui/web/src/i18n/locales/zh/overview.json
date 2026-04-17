@@ -55,16 +55,16 @@
   "statCards": {
     "agents": "Agent",
     "channels": "Channel",
-    "inOut": "输入 / 输出",
+    "inOut": "输入 {{input}} / 输出 {{output}}",
     "online": "在线",
     "requestsToday": "今日请求",
     "running": "运行中",
     "tokensToday": "今日 Token",
     "costToday": "今日费用",
-    "users": "用户"
+    "users": "{{count}} 用户"
   },
   "systemHealth": {
-    "active": "活跃",
+    "active": "{{count}} 活跃",
     "channels": "Channel",
     "clients": "客户端",
     "database": "数据库",

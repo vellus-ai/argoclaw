@@ -1,0 +1,50 @@
+{
+  "title": "Ausstehende Nachrichten",
+  "description": "Gepufferte Kanal-Nachrichten auf Agent-Verarbeitung wartend",
+  "emptyTitle": "Keine ausstehenden Nachrichten",
+  "emptyDescription": "Keine gepufferten Nachrichten-Gruppen gefunden. Nachrichten erscheinen hier, wenn Kanäle eingehende Nachrichten puffern, bevor Agent-Verarbeitung.",
+  "howItWorks": {
+    "title": "Wie es funktioniert",
+    "step1": "Nachrichten von Kanälen (Telegram, Discord, etc.) werden hier gepuffert, während der Agent beschäftigt oder offline ist.",
+    "step2": "Wenn der Puffer den Threshold erreicht (Standard: 50 Nachrichten), tritt Auto-Kompaktierung ein — LLM fasst ältere Nachrichten zusammen, behält nur die 15 jüngsten.",
+    "step3": "Beim nächsten Agent-Turn wird die kompakte Zusammenfassung + jüngste Nachrichten als Kontext injiziert, sodass der Agent sich auf den neuesten Stand bringt ohne überfordert zu werden.",
+    "compactAction": "Kompakt — Trigger LLM-Zusammenfassung jetzt manuell. Nützlich wenn du möchtest, dass der Agent eine saubere Zusammenfassung verarbeitet statt Nachrichten-Flut.",
+    "clearAction": "Löschen — Lösche permanent alle gepufferten Nachrichten für eine Gruppe. Nutze wenn Nachrichten nicht mehr relevant sind."
+  },
+  "columns": {
+    "channel": "Kanal",
+    "group": "Gruppe",
+    "messages": "Nachrichten",
+    "status": "Status",
+    "lastActivity": "Letzte Aktivität",
+    "actions": "Aktionen"
+  },
+  "status": {
+    "compacted": "Kompakt",
+    "raw": "Roh"
+  },
+  "compact": "Kompakt",
+  "compacting": "Wird kompaktiert…",
+  "clear": "Löschen",
+  "confirmClear": {
+    "title": "Nachrichten löschen?",
+    "description": "Dies wird permanent alle Nachrichten in {{channel}} / {{key}} löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "cancel": "Abbrechen",
+    "confirm": "Löschen"
+  },
+  "dialog": {
+    "title": "Nachrichten — {{name}}",
+    "noMessages": "Keine Nachrichten gefunden.",
+    "summary": "Zusammenfassung"
+  },
+  "toast": {
+    "compacted": "Kompaktierung abgeschlossen",
+    "compactedSummarized": "Zusammengefasst zu {{count}} Nachrichten",
+    "compactedDeleted": "Alle Nachrichten gelöscht (kein LLM-Provider verfügbar)",
+    "compacting": "Wird kompaktiert…",
+    "compactingDesc": "LLM-Zusammenfassung läuft im Hintergrund. Liste wird automatisch aktualisiert.",
+    "failedCompact": "Kompaktierung fehlgeschlagen",
+    "cleared": "Nachrichten gelöscht",
+    "failedClear": "Fehler beim Löschen von Nachrichten"
+  }
+}

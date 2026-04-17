@@ -1,0 +1,50 @@
+{
+  "title": "Messages en attente",
+  "description": "Messages de canal mis en mémoire tampon en attente du traitement par l'agent",
+  "emptyTitle": "Aucun message en attente",
+  "emptyDescription": "Aucun groupe de messages en mémoire tampon trouvé. Les messages apparaissent ici lorsque les canaux mettent en mémoire tampon les messages entrants avant le traitement par l'agent.",
+  "howItWorks": {
+    "title": "Comment ça fonctionne",
+    "step1": "Les messages des canaux (Telegram, Discord, etc.) sont mis en mémoire tampon ici tandis que l'agent est occupé ou hors ligne.",
+    "step2": "Lorsque la mémoire tampon atteint le seuil (par défaut : 50 messages), la compactage automatique s'active — une LLM résume les anciens messages, en conservant seulement les 15 plus récents.",
+    "step3": "Au prochain tour de l'agent, le résumé compacté + les messages récents sont injectés comme contexte, afin que l'agent se rattrape sans être submergé.",
+    "compactAction": "Compacter — Déclencher manuellement la résumé LLM maintenant. Utile lorsque vous voulez que l'agent traite un résumé propre au lieu d'une inondation de messages bruts.",
+    "clearAction": "Effacer — Supprimer définitivement tous les messages mis en mémoire tampon pour un groupe. Utiliser lorsque les messages ne sont plus pertinents."
+  },
+  "columns": {
+    "channel": "Canal",
+    "group": "Groupe",
+    "messages": "Messages",
+    "status": "Statut",
+    "lastActivity": "Dernière activité",
+    "actions": "Actions"
+  },
+  "status": {
+    "compacted": "Compacté",
+    "raw": "Brut"
+  },
+  "compact": "Compacter",
+  "compacting": "Compactage…",
+  "clear": "Effacer",
+  "confirmClear": {
+    "title": "Effacer les messages ?",
+    "description": "Cela supprimera définitivement tous les messages dans {{channel}} / {{key}}. Cette action ne peut pas être annulée.",
+    "cancel": "Annuler",
+    "confirm": "Effacer"
+  },
+  "dialog": {
+    "title": "Messages — {{name}}",
+    "noMessages": "Aucun message trouvé.",
+    "summary": "Résumé"
+  },
+  "toast": {
+    "compacted": "Compactage terminé",
+    "compactedSummarized": "Résumé à {{count}} messages",
+    "compactedDeleted": "Tous les messages supprimés (aucun fournisseur LLM disponible)",
+    "compacting": "Compactage…",
+    "compactingDesc": "Résumé LLM en cours d'exécution en arrière-plan. La liste s'actualisera automatiquement.",
+    "failedCompact": "Échec du compactage",
+    "cleared": "Messages effacés",
+    "failedClear": "Échec de l'effacement des messages"
+  }
+}

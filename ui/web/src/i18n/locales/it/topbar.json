@@ -1,0 +1,17 @@
+{
+  "expandSidebar": "Espandi barra laterale",
+  "collapseSidebar": "Comprimi barra laterale",
+  "openMenu": "Apri menu",
+  "toggleTheme": "Cambia tema",
+  "logout": "Logout",
+  "language": "Lingua",
+  "timezone": "Fuso orario",
+  "pairingRequests": "Richieste di accoppiamento",
+  "pendingPairingRequest": "{{count}} richiesta di accoppiamento in sospeso",
+  "pendingPairingRequests": "{{count}} richieste di accoppiamento in sospeso",
+  "languages": {
+    "en": "English",
+    "vi": "Tiếng Việt",
+    "zh": "中文"
+  }
+}

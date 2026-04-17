@@ -1,0 +1,45 @@
+{
+  "title": "Sessions",
+  "description": "Parcourir les sessions de conversation",
+  "searchPlaceholder": "Rechercher des sessions...",
+  "emptyTitle": "Aucune session pour le moment",
+  "emptyDescription": "Les sessions apparaîtront ici une fois que vous commencerez à discuter.",
+  "noMatchTitle": "Aucune session correspondante",
+  "noMatchDescription": "Essayez un terme de recherche différent.",
+  "columns": {
+    "session": "Session",
+    "agent": "Agent",
+    "context": "Contexte",
+    "messages": "Messages",
+    "updated": "Mise à jour"
+  },
+  "contextBar": {
+    "compacted": "Compacté {{count}} fois"
+  },
+  "detail": {
+    "reset": "Réinitialiser",
+    "delete": "Supprimer",
+    "deleteTitle": "Supprimer la session",
+    "deleteDescription": "Cela supprimera définitivement tous les messages dans cette session.",
+    "resetTitle": "Réinitialiser la session",
+    "resetDescription": "Cela effacera tous les messages mais conservera la session.",
+    "confirmDelete": "Supprimer",
+    "confirmReset": "Réinitialiser",
+    "noMessages": "Aucun message dans cette session",
+    "summary": "Résumé",
+    "showMore": "Afficher plus",
+    "showLess": "Afficher moins",
+    "showDetails": "afficher les détails",
+    "hide": "masquer",
+    "systemMessage": "Message système",
+    "messages": "messages"
+  },
+  "toast": {
+    "deleted": "Session supprimée",
+    "deleteFailed": "Échec de la suppression de la session",
+    "reset": "Session réinitialisée",
+    "resetFailed": "Échec de la réinitialisation de la session",
+    "updated": "Session mise à jour",
+    "updateFailed": "Échec de la mise à jour de la session"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "title": "Approbations",
+  "description": "Approbations d'exécution en attente",
+  "pending": "{{count}} en attente",
+  "emptyTitle": "Aucune approbation en attente",
+  "emptyDescription": "Toutes les demandes d'exécution ont été résolues. Les nouvelles demandes apparaîtront ici en temps réel.",
+  "allowOnce": "Autoriser une fois",
+  "allowAlways": "Toujours autoriser",
+  "deny": "Refuser",
+  "confirmAllowOnce": {
+    "title": "Autoriser une fois",
+    "description": "Autoriser l'exécution de « {{command}} » à partir de l'agent « {{agentId}} » ?"
+  },
+  "confirmAllowAlways": {
+    "title": "Toujours autoriser",
+    "description": "Autoriser définitivement « {{command}} » pour l'agent « {{agentId}} » ? Cette commande sera auto-approuvée à l'avenir."
+  },
+  "confirmDeny": {
+    "title": "Refuser l'exécution",
+    "description": "Refuser la demande d'exécution « {{command}} » de l'agent « {{agentId}} » ?",
+    "confirmLabel": "Refuser"
+  },
+  "toast": {
+    "approved": "Approuvé",
+    "approvedAlways": "Commande toujours autorisée",
+    "approvedOnce": "Commande approuvée",
+    "approveFailed": "Échec de l'approbation",
+    "denied": "Refusé",
+    "deniedDesc": "Commande refusée",
+    "denyFailed": "Échec du refus",
+    "unknownError": "Erreur inconnue"
+  }
+}

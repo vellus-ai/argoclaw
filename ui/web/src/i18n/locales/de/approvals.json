@@ -1,0 +1,33 @@
+{
+  "title": "Genehmigungen",
+  "description": "Ausstehende Ausführungsgenehmigungen",
+  "pending": "{{count}} ausstehend",
+  "emptyTitle": "Keine ausstehenden Genehmigungen",
+  "emptyDescription": "Alle Ausführungsanfragen wurden bearbeitet. Neue Anfragen erscheinen hier in Echtzeit.",
+  "allowOnce": "Einmal zulassen",
+  "allowAlways": "Immer zulassen",
+  "deny": "Ablehnen",
+  "confirmAllowOnce": {
+    "title": "Einmal zulassen",
+    "description": "Ausführung von \"{{command}}\" vom Agent \"{{agentId}}\" zulassen?"
+  },
+  "confirmAllowAlways": {
+    "title": "Immer zulassen",
+    "description": "Dauerhaft \"{{command}}\" für Agent \"{{agentId}}\" zulassen? Dieser Befehl wird zukünftig automatisch genehmigt."
+  },
+  "confirmDeny": {
+    "title": "Ausführung ablehnen",
+    "description": "Ausführungsanfrage \"{{command}}\" vom Agent \"{{agentId}}\" ablehnen?",
+    "confirmLabel": "Ablehnen"
+  },
+  "toast": {
+    "approved": "Genehmigt",
+    "approvedAlways": "Befehl immer zugelassen",
+    "approvedOnce": "Befehl genehmigt",
+    "approveFailed": "Fehler beim Genehmigen",
+    "denied": "Abgelehnt",
+    "deniedDesc": "Befehl abgelehnt",
+    "denyFailed": "Fehler beim Ablehnen",
+    "unknownError": "Unbekannter Fehler"
+  }
+}

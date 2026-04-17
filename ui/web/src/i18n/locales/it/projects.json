@@ -1,0 +1,79 @@
+{
+  "title": "Progetti",
+  "description": "Gestisci workspace progetti e i loro override server MCP",
+  "addProject": "Nuovo Progetto",
+  "searchPlaceholder": "Cerca progetti...",
+  "emptyTitle": "Nessun progetto",
+  "emptyDescription": "Crea il tuo primo progetto per iniziare.",
+  "noMatchTitle": "Nessun progetto corrispondente",
+  "noMatchDescription": "Prova un termine di ricerca diverso.",
+  "columns": {
+    "name": "Nome",
+    "slug": "Slug",
+    "channel": "Canale",
+    "status": "Stato",
+    "overrides": "Override MCP",
+    "createdBy": "Creato Da",
+    "actions": "Azioni"
+  },
+  "manageOverrides": "Gestisci override MCP",
+  "delete": {
+    "title": "Elimina Progetto",
+    "description": "Sei sicuro di voler eliminare \"{{name}}\"? Questo eliminerà anche tutti gli override MCP.",
+    "confirmLabel": "Elimina"
+  },
+  "form": {
+    "createTitle": "Nuovo Progetto",
+    "editTitle": "Modifica Progetto",
+    "name": "Nome *",
+    "slug": "Slug *",
+    "slugHint": "Solo lettere minuscole, numeri e trattini",
+    "channelType": "Tipo Canale",
+    "channelTypePlaceholder": "Seleziona tipo canale...",
+    "chatId": "ID Chat",
+    "chatIdPlaceholder": "es. -1001234567890",
+    "description": "Descrizione",
+    "descriptionPlaceholder": "Breve descrizione di questo progetto",
+    "status": "Stato",
+    "cancel": "Annulla",
+    "create": "Crea",
+    "update": "Aggiorna",
+    "saving": "Salvataggio...",
+    "errors": {
+      "nameRequired": "Nome e slug sono obbligatori",
+      "slugInvalid": "Slug deve contenere solo lettere minuscole, numeri e trattini"
+    }
+  },
+  "overrides": {
+    "title": "Override MCP — {{name}}",
+    "description": "Override variabili ambiente per-progetto per server MCP. Le chiavi segrete (TOKEN, SECRET, PASSWORD, API_KEY) devono essere impostate nella configurazione server MCP globale.",
+    "serverName": "Server MCP *",
+    "serverNamePlaceholder": "es. gitlab, atlassian",
+    "envOverrides": "Variabili Ambiente",
+    "envKeyPlaceholder": "Nome variabile",
+    "envValuePlaceholder": "Valore",
+    "addVariable": "Aggiungi Variabile",
+    "addOverride": "Aggiungi Override",
+    "save": "Salva",
+    "saving": "Salvataggio...",
+    "noOverrides": "Nessun override MCP configurato",
+    "noOverridesDescription": "Aggiungi variabili ambiente per-progetto per server MCP.",
+    "failedLoad": "Errore nel caricamento degli override",
+    "failedSave": "Errore nel salvataggio dell'override",
+    "failedDelete": "Errore nell'eliminazione dell'override",
+    "saved": "Override salvato",
+    "deleted": "Override eliminato"
+  },
+  "status": {
+    "active": "Attivo",
+    "archived": "Archiviato"
+  },
+  "toast": {
+    "created": "Progetto creato",
+    "updated": "Progetto aggiornato",
+    "deleted": "Progetto eliminato",
+    "failedCreate": "Errore nella creazione del progetto",
+    "failedUpdate": "Errore nell'aggiornamento del progetto",
+    "failedDelete": "Errore nell'eliminazione del progetto"
+  }
+}

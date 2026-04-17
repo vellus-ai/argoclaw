@@ -1,0 +1,26 @@
+{
+  "title": "Registro de Actividad",
+  "description": "Pista de auditoría de cambios administrativos y de configuración.",
+  "filters": {
+    "action": "Acción",
+    "allActions": "Todas las Acciones",
+    "agentCreated": "Agente Creado",
+    "agentUpdated": "Agente Actualizado",
+    "agentDeleted": "Agente Eliminado",
+    "entityType": "Tipo de Entidad",
+    "allEntities": "Todas las Entidades",
+    "agent": "Agente"
+  },
+  "table": {
+    "action": "Acción",
+    "actor": "Actor",
+    "entity": "Entidad",
+    "entityId": "ID de Entidad",
+    "ip": "Dirección IP",
+    "time": "Hora"
+  },
+  "empty": {
+    "title": "No hay registros de actividad",
+    "description": "Los registros de actividad aparecerán aquí cuando se realicen acciones administrativas."
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "title": "Skills",
+  "description": "Gestisci skills e capacità agenti",
+  "searchPlaceholder": "Cerca skills...",
+  "emptyTitle": "Nessuna skill",
+  "emptyDescription": "Nessuna skill è stata registrata ancora.",
+  "noMatchTitle": "Nessuna skill corrispondente",
+  "noMatchDescription": "Prova un termine di ricerca diverso.",
+  "columns": {
+    "name": "Nome",
+    "description": "Descrizione",
+    "source": "Fonte",
+    "author": "Autore",
+    "visibility": "Visibilità",
+    "status": "Stato",
+    "actions": "Azioni"
+  },
+  "noDescription": "Nessuna descrizione",
+  "visibility": {
+    "clickToCycle": "Clicca per cambiare visibilità"
+  },
+  "delete": {
+    "title": "Elimina Skill",
+    "description": "Sei sicuro di voler eliminare \"{{name}}\"? Questa azione non può essere annullata.",
+    "confirmLabel": "Elimina"
+  },
+  "upload": {
+    "title": "Carica Skills",
+    "description": "Carica file ZIP contenenti SKILL.md con frontmatter YAML (nome, descrizione, slug).",
+    "button": "Carica",
+    "uploading": "Caricamento...",
+    "dropOrClick": "Clicca o trascina file .zip",
+    "dropHere": "Trascina qui file .zip",
+    "onlyZip": "Solo file .zip sono accettati",
+    "cancel": "Annulla",
+    "done": "Fatto",
+    "tooLarge": "Il file supera il limite di 20MB",
+    "invalidZip": "File ZIP non valido",
+    "noSkillMd": "ZIP deve contenere SKILL.md alla radice",
+    "emptySkillMd": "SKILL.md è vuoto",
+    "noFrontmatter": "SKILL.md manca di frontmatter YAML",
+    "nameRequired": "nome obbligatorio nel frontmatter YAML SKILL.md",
+    "invalidSlug": "Formato slug non valido",
+    "failed": "Caricamento fallito",
+    "validating": "Validazione...",
+    "validCount": "{{valid}} di {{total}} validi",
+    "uploadCount": "Carica ({{count}})",
+    "successCount": "{{success}} di {{total}} caricati con successo",
+    "remove": "Rimuovi file"
+  },
+  "edit": {
+    "title": "Modifica Skill",
+    "name": "Nome",
+    "description": "Descrizione",
+    "visibility": "Visibilità",
+    "tags": "Tag",
+    "addTag": "Aggiungi tag...",
+    "add": "Aggiungi",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "saving": "Salvataggio...",
+    "privateOption": "Privata (solo proprietario)",
+    "internalOption": "Interna (agenti/utenti concessi)",
+    "publicOption": "Pubblica (tutti gli agenti)"
+  },
+  "system": "Sistema",
+  "tabs": {
+    "core": "Core",
+    "custom": "Personalizzato"
+  },
+  "toggle": {
+    "enable": "Abilita skill",
+    "disable": "Disabilita skill",
+    "disabled": "Disabilitata"
+  },
+  "deps": {
+    "rescan": "Riscannerizza Dipendenze",
+    "rescanning": "Scansione...",
+    "rescanSuccess": "Aggiornate {{count}} skills",
+    "missing": "Mancanti: {{deps}}",
+    "install": "Installa Dipendenze",
+    "installing": "Installazione...",
+    "installSuccess": "Dipendenze installate con successo",
+    "installPartial": "Alcune dipendenze hanno fallito l'installazione",
+    "installItem": "Installa",
+    "itemSuccess": "Installato",
+    "itemError": "Errore",
+    "missingTitle": "Dipendenze Mancanti",
+    "systemLabel": "Sistema",
+    "pythonLabel": "Python",
+    "nodeLabel": "Node.js",
+    "statusActive": "Attivo",
+    "statusArchived": "Dipendenze mancanti",
+    "runtimeMissing": "Prerequisiti Runtime Mancanti",
+    "runtimeMissingDesc": "Core skills richiedono runtime Python e/o Node.js. Ricompila con ENABLE_PYTHON=true, ENABLE_NODE=true, o ENABLE_FULL_SKILLS=true, o installa manualmente.",
+    "runtimeRequired": "Installa prima i runtime"
+  },
+  "detail": {
+    "title": "Dettaglio Skill",
+    "content": "Contenuto",
+    "files": "File",
+    "version": "Versione:",
+    "current": "(corrente)",
+    "noContent": "Nessun contenuto disponibile."
+  },
+  "toast": {
+    "updated": "Skill aggiornata",
+    "updateFailed": "Errore nell'aggiornamento della skill",
+    "deleted": "Skill eliminata",
+    "deleteFailed": "Errore nell'eliminazione della skill"
+  }
+}

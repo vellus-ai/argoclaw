@@ -1,75 +1,182 @@
 {
+  "layout": {
+    "subtitle": "Vamos a poner en funcionamiento tu puerta de enlace"
+  },
+  "steps": {
+    "provider": "Proveedor",
+    "model": "Modelo",
+    "agent": "Agente",
+    "channel": "Canal",
+    "channelOptional": "(Opcional)"
+  },
+  "complete": {
+    "title": "¡Configuración completa!",
+    "ready": "¡Tu sistema está listo para funcionar!",
+    "description": "El proveedor, agente y canal han sido configurados. Puedes gestionarlos en cualquier momento desde el panel.",
+    "goToDashboard": "Ir al panel"
+  },
+  "provider": {
+    "title": "Configurar proveedor de LLM",
+    "descriptionCli": "Conecta usando tu instalación local de Claude CLI. No necesitas clave API.",
+    "descriptionOauth": "Inicia sesión con tu cuenta de ChatGPT para usar tu suscripción a través de OAuth. No necesitas clave API.",
+    "description": "Conecta con un proveedor de IA para potenciar tus agentes. Necesitarás una clave API.",
+    "providerType": "Tipo de proveedor",
+    "providerTypeHint": "El servicio de LLM que deseas conectar. OpenRouter se recomienda para acceso a múltiples modelos.",
+    "name": "Nombre",
+    "nameHint": "Identificador interno para este proveedor. Se genera automáticamente a partir del tipo de proveedor.",
+    "apiKey": "Clave API *",
+    "apiKeyHint": "Tu clave secreta del proveedor. Se cifra del lado del servidor y nunca se expone en respuestas de API.",
+    "apiKeyHintOAuth": "Ejecuta 'claude setup-token' en tu terminal para obtener el token de OAuth. Tu token OAuth secreto del proveedor. Se cifra del lado del servidor y nunca se expone en respuestas de API.",
+    "setupToken": "Token de configuración",
+    "apiBase": "URL base de API",
+    "apiBaseHint": "La URL del punto final para solicitudes de API. Se rellena automáticamente según el tipo de proveedor. Anula solo si usas un proxy personalizado.",
+    "creating": "Creando...",
+    "create": "Crear proveedor",
+    "errors": {
+      "apiKeyRequired": "La clave API es requerida",
+      "oauthProviderNotFound": "La autenticación de OAuth fue exitosa, pero no se pudo encontrar el proveedor. Por favor, intenta de nuevo.",
+      "failedCreate": "Falló al crear proveedor"
+    }
+  },
+  "model": {
+    "title": "Seleccionar y verificar modelo",
+    "description": "Elige un modelo y verifica que la conexión de tu proveedor funcione.",
+    "provider": "Proveedor:",
+    "model": "Modelo *",
+    "modelHint": "El modelo de IA a usar. Selecciona de la lista o escribe un ID de modelo manualmente si no está listado.",
+    "loadingModels": "Cargando modelos...",
+    "selectModel": "Selecciona o escribe un ID de modelo",
+    "noModelsHint": "Este proveedor no lista modelos — escribe el ID del modelo manualmente.",
+    "verified": "Verificado",
+    "verify": "Verificar",
+    "verifying": "Verificando...",
+    "continue": "Continuar",
+    "modelVerified": "Modelo verificado",
+    "modelVerifiedDesc": "{{model}} está funcionando correctamente",
+    "verificationFailed": "Falló la verificación. Verifica tu clave API y modelo."
+  },
+  "agent": {
+    "title": "Crea tu primer agente",
+    "description": "Un agente es tu asistente de IA. Personaliza su nombre y personalidad.",
+    "provider": "Proveedor:",
+    "model": "Modelo:",
+    "displayName": "Nombre mostrado",
+    "displayNameHint": "Se generará automáticamente durante la invocación basado en la personalidad del agente.",
+    "agentKey": "Clave del agente",
+    "agentKeyHint": "Identificador único para el agente. Solo letras minúsculas, números y guiones.",
+    "agentKeyPlaceholder": "mi-agente",
+    "personality": "Personalidad del agente",
+    "personalityHint": "Describe el rol y comportamiento de tu agente. La IA generará archivos de contexto a partir de esto durante la invocación.",
+    "personalityPlaceholder": "Describe la personalidad, propósito y comportamiento de tu agente...",
+    "personalityHintBottom": "Personaliza este mensaje para dar forma a la personalidad y experiencia de tu agente.",
+    "selfEvolve": "Auto-evolución",
+    "selfEvolveDesc": "Permite que el agente evolucione su estilo de comunicación con el tiempo a través de SOUL.md",
+    "creating": "Creando...",
+    "create": "Crear agente",
+    "summoningFailed": "Falló la invocación. Por favor, ajusta tu configuración e intenta de nuevo.",
+    "errors": {
+      "noProvider": "Sin proveedor disponible",
+      "failedCreate": "Falló al crear agente"
+    }
+  },
+  "channel": {
+    "title": "Conectar un canal",
+    "description": "Conecta una plataforma de mensajería con tu agente. Siempre puedes añadir canales más tarde.",
+    "skip": "Saltar",
+    "skipFinish": "Saltar y terminar",
+    "agent": "Agente:",
+    "channelType": "Tipo de canal",
+    "channelTypeHint": "La plataforma de mensajería a conectar. P.ej. Telegram, Discord, Zalo.",
+    "name": "Nombre",
+    "nameHint": "Identificador interno para esta instancia de canal. Se genera automáticamente a partir del tipo de canal.",
+    "namePlaceholder": "mi-telegram",
+    "displayName": "Nombre mostrado",
+    "displayNameHint": "Un nombre amigable mostrado en la UI. Opcional.",
+    "displayNamePlaceholder": "Bot de ventas",
+    "credentials": "Credenciales",
+    "credentialsHint": "Se cifran del lado del servidor. Nunca se devuelven en respuestas de API.",
+    "creating": "Creando...",
+    "create": "Crear canal",
+    "errors": {
+      "noAgent": "Sin agente disponible",
+      "requiredFields": "Requerido: {{fields}}",
+      "failedCreate": "Falló al crear canal"
+    }
+  },
+  "common": {
+    "back": "Volver"
+  },
   "onboarding": {
     "welcome": {
       "greeting": "Hola, {{displayName}}! Soy {{agentName}}, tu asistente de confianza.",
-      "greetingMale": "Bienvenido a bordo, Capitan {{displayName}}! Soy {{agentName}}, tu asistente de confianza.",
+      "greetingMale": "Bienvenido a bordo, Capitán {{displayName}}! Soy {{agentName}}, tu asistente de confianza.",
       "greetingFemale": "Bienvenida a bordo, Capitana {{displayName}}! Soy {{agentName}}, tu asistente de confianza.",
       "greetingNeutral": "Bienvenido/a a bordo, {{displayName}}! Soy {{agentName}}, tu asistente de confianza.",
-      "intro": "Te ayudare a configurar tu espacio de trabajo. Sera rapido!",
-      "start": "Empecemos"
+      "intro": "Te ayudaré a configurar tu espacio de trabajo. ¡Será rápido!",
+      "start": "Vamos a empezar"
     },
     "naming": {
-      "question": "Mi nombre predeterminado es {{agentName}}. Quieres mantenerlo o elegir otro?",
-      "keepDefault": "{{agentName}} esta bien",
+      "question": "Mi nombre predeterminado es {{agentName}}. ¿Quieres mantenerlo o elegir otro?",
+      "keepDefault": "{{agentName}} está bien",
       "customize": "Quiero elegir otro nombre",
       "inputPlaceholder": "Escribe el nuevo nombre",
-      "confirm": "Listo! Ahora me llamo {{agentName}}."
+      "confirm": "¡Listo! Ahora me llamo {{agentName}}."
     },
     "workspace": {
-      "typeQuestion": "Uso personal o empresarial?",
+      "typeQuestion": "¿Uso personal o empresarial?",
       "personal": "Personal",
       "business": "Empresa",
-      "nameQuestion": "Cual es el nombre de tu cuenta?",
+      "nameQuestion": "¿Cuál es el nombre de tu cuenta?",
       "namePlaceholder": "Nombre de la empresa o personal",
       "confirm": "Cuenta '{{accountName}}' configurada."
     },
     "branding": {
-      "question": "Color del tema? El predeterminado es azul marino (#1E40AF).",
-      "keepDefault": "El azul esta bien",
+      "question": "¿Color del tema? El predeterminado es azul marino (#1E40AF).",
+      "keepDefault": "El azul está bien",
       "customize": "Quiero otro color",
-      "confirm": "Tema actualizado!"
+      "confirm": "¡Tema actualizado!"
     },
     "provider": {
-      "question": "Conectemos un proveedor de IA. Cual prefieres?",
+      "question": "Conectemos un proveedor de IA. ¿Cuál prefieres?",
       "skip": "Saltar por ahora",
       "openrouterDesc": "Acceso a 100+ modelos — recomendado",
       "anthropicDesc": "Claude — ideal para tareas complejas",
-      "openaiDesc": "GPT-4o, o1 y mas",
-      "skipDesc": "Configurar despues en Ajustes",
+      "openaiDesc": "GPT-4o, o1 y más",
+      "skipDesc": "Configurar después en Ajustes",
       "apiKeyLabel": "Pega la clave API de {{provider}}",
       "apiKeyPlaceholder": "sk-...",
-      "testingConnection": "Probando conexion...",
-      "confirm": "Proveedor {{provider}} configurado!",
-      "skipMessage": "Sin problema! Puedes configurar un proveedor mas tarde en el panel."
+      "testingConnection": "Probando conexión...",
+      "confirm": "¡Proveedor {{provider}} configurado!",
+      "skipMessage": "¡Sin problema! Puedes configurar un proveedor más tarde en el panel."
     },
     "channel": {
-      "question": "El Webchat ya esta activo. Conectar otro canal?",
-      "skip": "Solo WebChat por ahora",
+      "question": "El Webchat ya está activo. ¿Conectar otro canal?",
+      "skip": "Solo Webchat por ahora",
       "telegramDesc": "Conecta tu bot para chatear desde cualquier lugar",
-      "discordDesc": "Agrega ARGO a tu servidor",
+      "discordDesc": "Añade ARGO a tu servidor",
       "skipDesc": "Usa el chat de ARGO en el navegador",
-      "confirm": "Consulta las instrucciones de configuracion en tu panel."
+      "confirm": "Consulta las instrucciones de configuración en tu panel."
     },
     "complete": {
-      "title": "Todo listo!",
-      "summary": "Tu espacio de trabajo esta configurado.",
-      "goToDashboard": "Ir al Panel"
+      "title": "¡Todo listo!",
+      "summary": "Tu espacio de trabajo está configurado.",
+      "goToDashboard": "Ir al panel"
     },
     "agentIdentity": {
-      "question": "Como debo identificarme contigo?",
+      "question": "¿Cómo debo identificarme contigo?",
       "male": "Hombre",
-      "maleDesc": "Tu asistente usara lenguaje masculino",
+      "maleDesc": "Tu asistente usará lenguaje masculino",
       "female": "Mujer",
-      "femaleDesc": "Tu asistente usara lenguaje femenino",
+      "femaleDesc": "Tu asistente usará lenguaje femenino",
       "other": "Me da igual",
       "otherDesc": "Lenguaje neutro",
       "customize": "Quiero elegir un nombre",
-      "customizeDesc": "Tu defines el nombre de tu asistente",
+      "customizeDesc": "Tú defines el nombre de tu asistente",
       "namePlaceholder": "Escribe el nombre del asistente"
     },
     "error": {
-      "notUnderstood": "No entendi. Elige una de las opciones:",
-      "toolFailed": "Problema: {{error}}. Intentar de nuevo?",
+      "notUnderstood": "No entendí. Elige una de las opciones:",
+      "toolFailed": "Problema: {{error}}. ¿Intentar de nuevo?",
       "retry": "Intentar de nuevo"
     },
     "common": {

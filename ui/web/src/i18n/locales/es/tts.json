@@ -1,0 +1,71 @@
+{
+  "title": "Síntesis de Voz",
+  "description": "Configurar proveedores TTS y aplicar configuración automáticamente",
+  "save": "Guardar",
+  "saving": "Guardando...",
+  "saveChanges": "Guardar Cambios",
+  "status": {
+    "title": "Estado",
+    "configured": "Configurada",
+    "disabled": "Deshabilitada",
+    "noProvider": "Sin proveedor TTS configurado",
+    "activeProvider": "Proveedor principal: {{provider}}, Automático: {{auto}}"
+  },
+  "general": {
+    "title": "Configuración General",
+    "primaryProvider": "Proveedor Principal",
+    "autoApplyMode": "Modo Auto-Aplicar",
+    "replyMode": "Modo de Respuesta",
+    "maxTextLength": "Longitud Máxima de Texto",
+    "timeout": "Tiempo de Espera (ms)"
+  },
+  "providers": {
+    "none": "Ninguno (Deshabilitado)",
+    "openai": "OpenAI",
+    "elevenlabs": "ElevenLabs",
+    "edge": "Edge (Gratis)",
+    "minimax": "MiniMax"
+  },
+  "autoModes": {
+    "off": "Desactivado",
+    "offDesc": "El agente puede usar herramienta TTS manualmente",
+    "always": "Siempre",
+    "alwaysDesc": "Todas las respuestas obtienen audio",
+    "inbound": "Entrada",
+    "inboundDesc": "Solo cuando el usuario envía voz/audio",
+    "tagged": "Etiquetado",
+    "taggedDesc": "Solo cuando la respuesta contiene etiqueta [[tts]]"
+  },
+  "replyModes": {
+    "final": "Solo final",
+    "finalDesc": "Solo respuestas finales",
+    "all": "Todas",
+    "allDesc": "Todas las respuestas incluyendo herramienta/bloque"
+  },
+  "providerSettings": "Configuración de {{provider}}",
+  "openai": {
+    "apiKey": "Clave API",
+    "apiBase": "URL Base de API",
+    "model": "Modelo",
+    "voice": "Voz"
+  },
+  "elevenlabs": {
+    "apiKey": "Clave API",
+    "baseUrl": "URL Base",
+    "voiceId": "ID de Voz",
+    "modelId": "ID de Modelo"
+  },
+  "edge": {
+    "voice": "Voz",
+    "speechRate": "Velocidad de Voz",
+    "hint": "Edge TTS es gratis y no requiere clave API. Instalar con: pip install edge-tts"
+  },
+  "minimax": {
+    "apiKey": "Clave API",
+    "groupId": "ID de Grupo *",
+    "groupIdPlaceholder": "Requerido para MiniMax",
+    "apiBase": "API Base",
+    "model": "Modelo",
+    "voiceId": "ID de Voz"
+  }
+}

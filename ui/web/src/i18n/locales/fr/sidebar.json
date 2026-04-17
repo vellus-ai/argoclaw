@@ -1,0 +1,43 @@
+{
+  "groups": {
+    "core": "Cœur",
+    "conversations": "Conversations",
+    "connectivity": "Connectivité",
+    "capabilities": "Capacités",
+    "data": "Données",
+    "monitoring": "Surveillance",
+    "system": "Système"
+  },
+  "nav": {
+    "overview": "Aperçu",
+    "chat": "Discussion",
+    "agents": "Agents",
+    "agentTeams": "Équipes d'agents",
+    "sessions": "Sessions",
+    "pendingMessages": "Messages en attente",
+    "channels": "Canaux",
+    "contacts": "Contacts",
+    "skills": "Compétences",
+    "cron": "Cron",
+    "customTools": "Outils personnalisés",
+    "builtinTools": "Outils intégrés",
+    "mcpServers": "Serveurs MCP",
+    "memory": "Mémoire",
+    "knowledgeGraph": "Graphe de connaissances",
+    "traces": "Traces",
+    "realtimeEvents": "Événements en temps réel",
+    "usage": "Utilisation",
+    "logs": "Journaux",
+    "storage": "Stockage",
+    "providers": "Fournisseurs",
+    "config": "Configuration",
+    "approvals": "Approbations",
+    "nodes": "Nœuds",
+    "tts": "TTS",
+    "activity": "Activité",
+    "cliCredentials": "Identifiants CLI",
+    "apiKeys": "Clés API",
+    "apiDocs": "Documentation API",
+    "packages": "Packages"
+  }
+}

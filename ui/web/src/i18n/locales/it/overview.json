@@ -1,0 +1,80 @@
+{
+  "title": "Dashboard",
+  "description": "Panoramica gateway e utilizzo quota",
+  "tabs": {
+    "overview": "Panoramica",
+    "usage": "Utilizzo"
+  },
+  "statCards": {
+    "requestsToday": "Richieste Oggi",
+    "tokensToday": "Token Oggi",
+    "costToday": "Costo Oggi",
+    "agents": "Agenti",
+    "channels": "Canali",
+    "running": "in esecuzione",
+    "online": "online",
+    "users": "{{count}} utenti",
+    "inOut": "{{input}} in / {{output}} out"
+  },
+  "providers": {
+    "noProvidersTitle": "Nessun provider LLM configurato",
+    "noEnabledTitle": "Nessun provider LLM abilitato",
+    "noProvidersDesc": "Devi aggiungere almeno un provider LLM prima che gli agenti funzionino. ",
+    "noEnabledDesc": "Tutti i provider sono attualmente disabilitati. Abilita almeno uno per iniziare a usare gli agenti. ",
+    "goToSettings": "Vai alle Impostazioni Provider"
+  },
+  "systemHealth": {
+    "title": "Integrità del Sistema",
+    "uptime": "Tempo di Attività",
+    "database": "Database",
+    "providers": "Provider",
+    "tools": "Tool",
+    "sessions": "Sessioni",
+    "clients": "Client",
+    "channels": "Canali",
+    "active": "{{count}} attivi",
+    "none": "nessuno",
+    "runtimes": "Runtime"
+  },
+  "connectedClients": {
+    "title": "Client Connessi",
+    "noClients": "Nessun client connesso",
+    "columns": {
+      "ip": "IP",
+      "user": "Utente",
+      "role": "Ruolo",
+      "connected": "Connesso"
+    },
+    "you": "tu"
+  },
+  "cronJobs": {
+    "title": "Job Cron",
+    "manage": "Gestisci",
+    "noJobs": "Nessun job cron configurato",
+    "disabled": "disabilitato"
+  },
+  "recentRequests": {
+    "title": "Richieste Recenti",
+    "viewAll": "Visualizza Tutte",
+    "noRequests": "Nessuna richiesta recente",
+    "columns": {
+      "time": "Ora",
+      "name": "Nome",
+      "user": "Utente",
+      "channel": "Canale",
+      "tokens": "Token",
+      "duration": "Durata",
+      "status": "Stato"
+    }
+  },
+  "quotaUsage": {
+    "title": "Utilizzo Quota",
+    "columns": {
+      "userGroup": "Utente / Gruppo",
+      "hour": "Ora",
+      "day": "Giorno",
+      "week": "Settimana"
+    },
+    "noLimit": "nessun limite"
+  }
+}

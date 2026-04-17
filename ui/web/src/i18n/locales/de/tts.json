@@ -1,0 +1,71 @@
+{
+  "title": "Text-to-Speech",
+  "description": "Konfiguriere TTS-Provider und wende Auto-Einstellungen an",
+  "save": "Speichern",
+  "saving": "Wird gespeichert...",
+  "saveChanges": "Änderungen speichern",
+  "status": {
+    "title": "Status",
+    "configured": "Konfiguriert",
+    "disabled": "Deaktiviert",
+    "noProvider": "Kein TTS-Provider konfiguriert",
+    "activeProvider": "Primärer Provider: {{provider}}, Auto: {{auto}}"
+  },
+  "general": {
+    "title": "Allgemeine Einstellungen",
+    "primaryProvider": "Primärer Provider",
+    "autoApplyMode": "Auto-Anwende-Modus",
+    "replyMode": "Antwort-Modus",
+    "maxTextLength": "Max. Text-Länge",
+    "timeout": "Timeout (ms)"
+  },
+  "providers": {
+    "none": "Keine (Deaktiviert)",
+    "openai": "OpenAI",
+    "elevenlabs": "ElevenLabs",
+    "edge": "Edge (Kostenlos)",
+    "minimax": "MiniMax"
+  },
+  "autoModes": {
+    "off": "Aus",
+    "offDesc": "Agent kann TTS-Tool manuell nutzen",
+    "always": "Immer",
+    "alwaysDesc": "Alle Antworten erhalten Audio",
+    "inbound": "Eingehend",
+    "inboundDesc": "Nur wenn Benutzer Voice/Audio sendet",
+    "tagged": "Getaggt",
+    "taggedDesc": "Nur wenn Antwort [[tts]] Tag enthält"
+  },
+  "replyModes": {
+    "final": "Nur finale",
+    "finalDesc": "Nur finale Antworten",
+    "all": "Alle",
+    "allDesc": "Alle Antworten einschließlich Tool/Block"
+  },
+  "providerSettings": "{{provider}}-Einstellungen",
+  "openai": {
+    "apiKey": "API-Schlüssel",
+    "apiBase": "API Base URL",
+    "model": "Modell",
+    "voice": "Stimme"
+  },
+  "elevenlabs": {
+    "apiKey": "API-Schlüssel",
+    "baseUrl": "Base-URL",
+    "voiceId": "Stimmen-ID",
+    "modelId": "Modell-ID"
+  },
+  "edge": {
+    "voice": "Stimme",
+    "speechRate": "Sprach-Rate",
+    "hint": "Edge TTS ist kostenlos und erfordert keinen API-Schlüssel. Installiere mit: pip install edge-tts"
+  },
+  "minimax": {
+    "apiKey": "API-Schlüssel",
+    "groupId": "Gruppen-ID *",
+    "groupIdPlaceholder": "Erforderlich für MiniMax",
+    "apiBase": "API Base",
+    "model": "Modell",
+    "voiceId": "Stimmen-ID"
+  }
+}

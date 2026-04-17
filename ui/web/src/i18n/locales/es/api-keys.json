@@ -1,0 +1,63 @@
+{
+  "title": "Claves API",
+  "description": "Gestionar claves API del gateway con permisos granulares.",
+  "addKey": "Crear Clave API",
+  "searchPlaceholder": "Buscar claves...",
+  "emptyTitle": "No hay claves API",
+  "emptyDescription": "Crea tu primera clave API para autenticarte con el gateway.",
+  "columns": {
+    "name": "Nombre",
+    "prefix": "Clave",
+    "scopes": "Ámbitos",
+    "lastUsed": "Última Vez Usada",
+    "created": "Creada",
+    "status": "Estado",
+    "actions": "Acciones"
+  },
+  "status": {
+    "active": "Activa",
+    "revoked": "Revocada",
+    "expired": "Expirada"
+  },
+  "form": {
+    "title": "Crear Clave API",
+    "name": "Nombre",
+    "namePlaceholder": "p.ej. ci-deploy, dashboard-readonly",
+    "scopes": "Ámbitos",
+    "scopeDescriptions": {
+      "operator.admin": "Acceso administrativo completo",
+      "operator.read": "Acceso de solo lectura",
+      "operator.write": "Acceso de lectura y escritura",
+      "operator.approvals": "Gestionar aprobaciones de ejecución",
+      "operator.pairing": "Gestionar emparejamiento de dispositivos"
+    },
+    "expiry": "Expiración",
+    "expiryOptions": {
+      "never": "Nunca",
+      "7d": "7 días",
+      "30d": "30 días",
+      "90d": "90 días"
+    },
+    "create": "Crear",
+    "creating": "Creando..."
+  },
+  "created": {
+    "title": "Clave API Creada",
+    "description": "Copia esta clave ahora — no se mostrará de nuevo.",
+    "copied": "¡Copiada!",
+    "copy": "Copiar al portapapeles",
+    "done": "Listo"
+  },
+  "revoke": {
+    "title": "Revocar Clave API",
+    "description": "¿Estás seguro de que deseas revocar \"{{name}}\"? Esta acción no se puede deshacer.",
+    "confirmLabel": "Revocar"
+  },
+  "toast": {
+    "created": "Clave API creada",
+    "revoked": "Clave API revocada",
+    "failedCreate": "Error al crear la clave API",
+    "failedRevoke": "Error al revocar la clave API"
+  },
+  "never": "Nunca"
+}

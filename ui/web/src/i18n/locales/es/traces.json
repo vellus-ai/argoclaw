@@ -1,0 +1,58 @@
+{
+  "title": "Trazas",
+  "description": "Trazas de llamadas LLM y datos de rendimiento",
+  "filterPlaceholder": "Filtrar por ID de agente...",
+  "filter": "Filtro",
+  "allAgents": "Todos los agentes",
+  "allChannels": "Todos los canales",
+  "emptyTitle": "Sin trazas",
+  "emptyDescription": "Sin trazas encontradas. Las trazas se registran cuando los agentes procesan solicitudes.",
+  "columns": {
+    "name": "Nombre",
+    "status": "Estado",
+    "duration": "Duración",
+    "tokens": "Tokens",
+    "spans": "Spans",
+    "time": "Hora"
+  },
+  "unnamed": "Sin Nombre",
+  "cached": "cacheado",
+  "detail": {
+    "title": "Detalle de Traza",
+    "copyTraceId": "Copiar ID de traza",
+    "notFound": "Traza no encontrada.",
+    "name": "Nombre:",
+    "status": "Estado:",
+    "duration": "Duración:",
+    "channel": "Canal:",
+    "tokens": "Tokens:",
+    "spans": "Spans:",
+    "started": "Iniciado:",
+    "delegatedFrom": "Delegado desde:",
+    "createdAt": "Creado:",
+    "input": "Entrada",
+    "output": "Salida",
+    "copy": "Copiar",
+    "spansCount": "Spans ({{count}})",
+    "llmCalls": "LLM",
+    "toolCalls": "herramienta",
+    "export": "Exportar traza"
+  },
+  "span": {
+    "model": "Modelo:",
+    "tokens": "Tokens:",
+    "createdAt": "Creado:",
+    "input": "Entrada:",
+    "output": "Salida:",
+    "copy": "Copiar",
+    "startTime": "Inicio:",
+    "endTime": "Fin:",
+    "cacheRead": "lectura",
+    "cacheWrite": "escritura",
+    "thinking": "pensamiento",
+    "cached": "cacheado"
+  },
+  "toast": {
+    "failedLoad": "Error al cargar trazas"
+  }
+}

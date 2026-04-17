@@ -1,0 +1,112 @@
+{
+  "title": "Skills",
+  "description": "Verwalte Agent-Skills und Fähigkeiten",
+  "searchPlaceholder": "Skills durchsuchen...",
+  "emptyTitle": "Keine Skills",
+  "emptyDescription": "Noch keine Skills registriert.",
+  "noMatchTitle": "Keine passenden Skills",
+  "noMatchDescription": "Versuche einen anderen Suchbegriff.",
+  "columns": {
+    "name": "Name",
+    "description": "Beschreibung",
+    "source": "Quelle",
+    "author": "Autor",
+    "visibility": "Sichtbarkeit",
+    "status": "Status",
+    "actions": "Aktionen"
+  },
+  "noDescription": "Keine Beschreibung",
+  "visibility": {
+    "clickToCycle": "Klicke zum Ändern der Sichtbarkeit"
+  },
+  "delete": {
+    "title": "Skill löschen",
+    "description": "Bist du sicher, dass du \"{{name}}\" löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "confirmLabel": "Löschen"
+  },
+  "upload": {
+    "title": "Skills hochladen",
+    "description": "Lade ZIP-Dateien hoch mit SKILL.md mit YAML-Frontmatter (Name, Beschreibung, Slug).",
+    "button": "Hochladen",
+    "uploading": "Wird hochgeladen...",
+    "dropOrClick": "Klicke oder drag & drop .zip-Dateien",
+    "dropHere": "Lege .zip-Dateien hier ab",
+    "onlyZip": "Nur .zip-Dateien werden akzeptiert",
+    "cancel": "Abbrechen",
+    "done": "Fertig",
+    "tooLarge": "Datei überschreitet 20MB-Limit",
+    "invalidZip": "Ungültige ZIP-Datei",
+    "noSkillMd": "ZIP muss SKILL.md in Root enthalten",
+    "emptySkillMd": "SKILL.md ist leer",
+    "noFrontmatter": "SKILL.md fehlt YAML-Frontmatter",
+    "nameRequired": "name erforderlich in SKILL.md-Frontmatter",
+    "invalidSlug": "Ungültiges Slug-Format",
+    "failed": "Hochladen fehlgeschlagen",
+    "validating": "Wird validiert...",
+    "validCount": "{{valid}} von {{total}} gültig",
+    "uploadCount": "Hochladen ({{count}})",
+    "successCount": "{{success}} von {{total}} erfolgreich hochgeladen",
+    "remove": "Datei entfernen"
+  },
+  "edit": {
+    "title": "Skill bearbeiten",
+    "name": "Name",
+    "description": "Beschreibung",
+    "visibility": "Sichtbarkeit",
+    "tags": "Tags",
+    "addTag": "Tag hinzufügen...",
+    "add": "Hinzufügen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "saving": "Wird gespeichert...",
+    "privateOption": "Privat (nur Besitzer)",
+    "internalOption": "Intern (gewährte Agents/Benutzer)",
+    "publicOption": "Öffentlich (alle Agents)"
+  },
+  "system": "System",
+  "tabs": {
+    "core": "Kern",
+    "custom": "Benutzerdefiniert"
+  },
+  "toggle": {
+    "enable": "Skill aktivieren",
+    "disable": "Skill deaktivieren",
+    "disabled": "Deaktiviert"
+  },
+  "deps": {
+    "rescan": "Deps erneut scannen",
+    "rescanning": "Wird gescannt...",
+    "rescanSuccess": "{{count}} Skills aktualisiert",
+    "missing": "Fehlend: {{deps}}",
+    "install": "Abhängigkeiten installieren",
+    "installing": "Wird installiert...",
+    "installSuccess": "Abhängigkeiten erfolgreich installiert",
+    "installPartial": "Einige Abhängigkeiten konnten nicht installiert werden",
+    "installItem": "Installieren",
+    "itemSuccess": "Installiert",
+    "itemError": "Fehlgeschlagen",
+    "missingTitle": "Fehlende Abhängigkeiten",
+    "systemLabel": "System",
+    "pythonLabel": "Python",
+    "nodeLabel": "Node.js",
+    "statusActive": "Aktiv",
+    "statusArchived": "Fehlende Abhängigkeiten",
+    "runtimeMissing": "Runtime-Voraussetzungen fehlend",
+    "runtimeMissingDesc": "Kern-Skills erfordern Python- und/oder Node.js-Runtimes. Baue mit ENABLE_PYTHON=true, ENABLE_NODE=true oder ENABLE_FULL_SKILLS=true neu, oder installiere manuell.",
+    "runtimeRequired": "Installiere Runtimes zuerst"
+  },
+  "detail": {
+    "title": "Skill-Detail",
+    "content": "Inhalt",
+    "files": "Dateien",
+    "version": "Version:",
+    "current": "(aktuell)",
+    "noContent": "Kein Inhalt verfügbar."
+  },
+  "toast": {
+    "updated": "Skill aktualisiert",
+    "updateFailed": "Fehler beim Aktualisieren des Skills",
+    "deleted": "Skill gelöscht",
+    "deleteFailed": "Fehler beim Löschen des Skills"
+  }
+}
