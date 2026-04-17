@@ -124,17 +124,18 @@ import zhApiKeys from "./locales/zh/api-keys.json";
 import zhCliCredentials from "./locales/zh/cli-credentials.json";
 import zhPackages from "./locales/zh/packages.json";
 
+import { SUPPORTED_LANGUAGES } from "../lib/constants";
+
 const STORAGE_KEY = "argo:language";
 
-const SUPPORTED_LANGS = ["en", "vi", "zh", "pt", "es", "fr", "it", "de"] as const;
-type SupportedLang = (typeof SUPPORTED_LANGS)[number];
+type SupportedLang = (typeof SUPPORTED_LANGUAGES)[number];
 
 function getInitialLanguage(): SupportedLang {
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored && (SUPPORTED_LANGS as readonly string[]).includes(stored)) return stored as SupportedLang;
+  if (stored && (SUPPORTED_LANGUAGES as readonly string[]).includes(stored)) return stored as SupportedLang;
   const lang = navigator.language.toLowerCase();
   // Match browser language prefix to supported languages
-  for (const supported of SUPPORTED_LANGS) {
+  for (const supported of SUPPORTED_LANGUAGES) {
     if (lang.startsWith(supported)) return supported;
   }
   return "en";
