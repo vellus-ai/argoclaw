@@ -1,0 +1,35 @@
+{
+  "title": "Knoten",
+  "description": "Verwalte gepaarte Geräte und ausstehende Pairing-Anfragen",
+  "emptyTitle": "Keine Geräte",
+  "emptyDescription": "Keine geparten Geräte oder ausstehenden Pairing-Anfragen.",
+  "pendingRequests": "Ausstehende Anfragen ({{count}})",
+  "pairedDevices": "Geparte Geräte ({{count}})",
+  "sender": "Absender:",
+  "chat": "Chat:",
+  "columns": {
+    "channel": "Kanal",
+    "senderId": "Absender-ID",
+    "paired": "Gepart",
+    "by": "Von",
+    "actions": "Aktionen"
+  },
+  "approve": "Genehmigen",
+  "deny": "Ablehnen",
+  "revoke": "Widerrufen",
+  "confirmApprove": {
+    "title": "Pairing genehmigen",
+    "description": "Pairing-Anfrage von {{channel}}:{{senderId}} (Code: {{code}}) genehmigen? Dieses Gerät kann mit Agents interagieren.",
+    "confirmLabel": "Genehmigen"
+  },
+  "confirmDeny": {
+    "title": "Pairing ablehnen",
+    "description": "Pairing-Anfrage von {{channel}}:{{senderId}} (Code: {{code}}) ablehnen? Die Anfrage wird entfernt.",
+    "confirmLabel": "Ablehnen"
+  },
+  "confirmRevoke": {
+    "title": "Gerät widerrufen",
+    "description": "Pairing für {{channel}}:{{senderId}} widerrufen? Das Gerät muss erneut gepart werden.",
+    "confirmLabel": "Widerrufen"
+  }
+}

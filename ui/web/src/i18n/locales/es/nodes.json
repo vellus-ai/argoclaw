@@ -1,0 +1,35 @@
+{
+  "title": "Nodos",
+  "description": "Gestionar dispositivos emparejados y solicitudes de emparejamiento pendientes",
+  "emptyTitle": "Sin dispositivos",
+  "emptyDescription": "Sin dispositivos emparejados o solicitudes de emparejamiento pendientes.",
+  "pendingRequests": "Solicitudes Pendientes ({{count}})",
+  "pairedDevices": "Dispositivos Emparejados ({{count}})",
+  "sender": "Remitente:",
+  "chat": "Chat:",
+  "columns": {
+    "channel": "Canal",
+    "senderId": "ID de Remitente",
+    "paired": "Emparejado",
+    "by": "Por",
+    "actions": "Acciones"
+  },
+  "approve": "Aprobar",
+  "deny": "Rechazar",
+  "revoke": "Revocar",
+  "confirmApprove": {
+    "title": "Aprobar Emparejamiento",
+    "description": "¿Aprobar solicitud de emparejamiento desde {{channel}}:{{senderId}} (código: {{code}})? Este dispositivo podrá interactuar con agentes.",
+    "confirmLabel": "Aprobar"
+  },
+  "confirmDeny": {
+    "title": "Rechazar Emparejamiento",
+    "description": "¿Rechazar solicitud de emparejamiento desde {{channel}}:{{senderId}} (código: {{code}})? Se eliminará la solicitud.",
+    "confirmLabel": "Rechazar"
+  },
+  "confirmRevoke": {
+    "title": "Revocar Dispositivo",
+    "description": "¿Revocar emparejamiento para {{channel}}:{{senderId}}? El dispositivo necesitará volver a emparejar.",
+    "confirmLabel": "Revocar"
+  }
+}

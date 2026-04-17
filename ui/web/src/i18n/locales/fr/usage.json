@@ -1,0 +1,97 @@
+{
+  "title": "Utilisation",
+  "description": "Utilisation de tokens et coûts par agent",
+  "emptyTitle": "Aucune donnée d'utilisation",
+  "emptyDescription": "Les données d'utilisation apparaîtront ici après que les agents aient traité les demandes.",
+  "summary": {
+    "sessions": "{{count}} sessions",
+    "inputTokens": "Tokens d'entrée",
+    "outputTokens": "Tokens de sortie",
+    "total": "Total"
+  },
+  "recentRecords": "Enregistrements récents",
+  "columns": {
+    "agent": "Agent",
+    "model": "Modèle",
+    "provider": "Fournisseur",
+    "input": "Entrée",
+    "output": "Sortie",
+    "total": "Total",
+    "channel": "Canal",
+    "cost": "Coût",
+    "status": "Statut"
+  },
+  "analytics": {
+    "title": "Analyse d'utilisation",
+    "period24h": "24h",
+    "period7d": "7 jours",
+    "period30d": "30 jours",
+    "periodCustom": "Personnalisée",
+    "allAgents": "Tous les agents",
+    "allProviders": "Tous les fournisseurs",
+    "allChannels": "Tous les canaux",
+    "activeFilters": "Filtres actifs",
+    "clearAll": "Effacer tout",
+    "exportCsv": "Exporter CSV",
+    "requests": "Demandes",
+    "tokens": "Tokens",
+    "cost": "Coût",
+    "errors": "Erreurs",
+    "uniqueUsers": "Utilisateurs uniques",
+    "llmCalls": "Appels LLM",
+    "toolCalls": "Appels d'outils",
+    "trendUp": "+{{value}}%",
+    "trendDown": "{{value}}%",
+    "vsPrevious": "par rapport à la période précédente",
+    "configurePricing": "Configurer la tarification du modèle pour le suivi des coûts",
+    "noData": "Aucune donnée pour la période sélectionnée",
+    "tokenChart": {
+      "title": "Utilisation des tokens au fil du temps",
+      "input": "Tokens d'entrée",
+      "output": "Tokens de sortie",
+      "cache": "Tokens de lecture de cache",
+      "thinking": "Tokens de réflexion",
+      "total": "Total"
+    },
+    "requestChart": {
+      "title": "Volume de demandes et erreurs",
+      "requests": "Demandes",
+      "errors": "Erreurs",
+      "errorRate": "Taux d'erreur"
+    },
+    "distribution": {
+      "provider": "Distribution des fournisseurs",
+      "model": "Distribution des modèles",
+      "channel": "Distribution des canaux",
+      "other": "Autre",
+      "calls": "appels"
+    },
+    "durationChart": {
+      "title": "Durée et performance",
+      "avgDuration": "Durée moy.",
+      "errorRate": "Taux d'erreur %"
+    },
+    "knowledgeChart": {
+      "title": "Croissance de la mémoire et du graphe de connaissances",
+      "memoryDocs": "Documents de mémoire",
+      "memoryChunks": "Morceaux de mémoire",
+      "kgEntities": "Entités KG",
+      "kgRelations": "Relations KG"
+    },
+    "topModels": {
+      "title": "Meilleurs modèles",
+      "model": "Modèle",
+      "provider": "Fournisseur",
+      "llmCalls": "Appels LLM",
+      "inputTokens": "Tokens d'entrée",
+      "outputTokens": "Tokens de sortie",
+      "avgDuration": "Durée moy.",
+      "cost": "Coût"
+    },
+    "tooltip": {
+      "date": "Date",
+      "total": "Total",
+      "errorRate": "{{value}}% taux d'erreur"
+    }
+  }
+}

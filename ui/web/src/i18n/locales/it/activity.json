@@ -1,0 +1,26 @@
+{
+  "title": "Registro Attività",
+  "description": "Traccia di audit dei cambiamenti admin e configurazione.",
+  "filters": {
+    "action": "Azione",
+    "allActions": "Tutte le Azioni",
+    "agentCreated": "Agente Creato",
+    "agentUpdated": "Agente Aggiornato",
+    "agentDeleted": "Agente Eliminato",
+    "entityType": "Tipo Entità",
+    "allEntities": "Tutte le Entità",
+    "agent": "Agente"
+  },
+  "table": {
+    "action": "Azione",
+    "actor": "Attore",
+    "entity": "Entità",
+    "entityId": "ID Entità",
+    "ip": "Indirizzo IP",
+    "time": "Ora"
+  },
+  "empty": {
+    "title": "Nessun registro attività",
+    "description": "I registri attività appariranno qui quando verranno eseguite azioni admin."
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "title": "Utilizzo",
+  "description": "Utilizzo token e costi per agente",
+  "emptyTitle": "Nessun dato di utilizzo",
+  "emptyDescription": "I dati di utilizzo appariranno qui dopo che gli agenti elaborano richieste.",
+  "summary": {
+    "sessions": "{{count}} sessioni",
+    "inputTokens": "Token input",
+    "outputTokens": "Token output",
+    "total": "Totale"
+  },
+  "recentRecords": "Record Recenti",
+  "columns": {
+    "agent": "Agente",
+    "model": "Modello",
+    "provider": "Provider",
+    "input": "Input",
+    "output": "Output",
+    "total": "Totale",
+    "channel": "Canale",
+    "cost": "Costo",
+    "status": "Stato"
+  },
+  "analytics": {
+    "title": "Analitiche Utilizzo",
+    "period24h": "24h",
+    "period7d": "7 giorni",
+    "period30d": "30 giorni",
+    "periodCustom": "Personalizzato",
+    "allAgents": "Tutti gli Agenti",
+    "allProviders": "Tutti i Provider",
+    "allChannels": "Tutti i Canali",
+    "activeFilters": "Filtri attivi",
+    "clearAll": "Cancella tutti",
+    "exportCsv": "Esporta CSV",
+    "requests": "Richieste",
+    "tokens": "Token",
+    "cost": "Costo",
+    "errors": "Errori",
+    "uniqueUsers": "Utenti Unici",
+    "llmCalls": "Chiamate LLM",
+    "toolCalls": "Chiamate Tool",
+    "trendUp": "+{{value}}%",
+    "trendDown": "{{value}}%",
+    "vsPrevious": "vs periodo precedente",
+    "configurePricing": "Configura prezzi modello per tracciamento costi",
+    "noData": "Nessun dato per il periodo selezionato",
+    "tokenChart": {
+      "title": "Utilizzo Token Nel Tempo",
+      "input": "Token Input",
+      "output": "Token Output",
+      "cache": "Token Cache Read",
+      "thinking": "Token Pensiero",
+      "total": "Totale"
+    },
+    "requestChart": {
+      "title": "Volume Richieste e Errori",
+      "requests": "Richieste",
+      "errors": "Errori",
+      "errorRate": "Tasso Errore"
+    },
+    "distribution": {
+      "provider": "Distribuzione Provider",
+      "model": "Distribuzione Modello",
+      "channel": "Distribuzione Canale",
+      "other": "Altro",
+      "calls": "chiamate"
+    },
+    "durationChart": {
+      "title": "Durata e Performance",
+      "avgDuration": "Durata Media",
+      "errorRate": "Tasso Errore %"
+    },
+    "knowledgeChart": {
+      "title": "Crescita Memoria e Grafo della Conoscenza",
+      "memoryDocs": "Documenti Memoria",
+      "memoryChunks": "Chunk Memoria",
+      "kgEntities": "Entità KG",
+      "kgRelations": "Relazioni KG"
+    },
+    "topModels": {
+      "title": "Top Modelli",
+      "model": "Modello",
+      "provider": "Provider",
+      "llmCalls": "Chiamate LLM",
+      "inputTokens": "Token Input",
+      "outputTokens": "Token Output",
+      "avgDuration": "Durata Media",
+      "cost": "Costo"
+    },
+    "tooltip": {
+      "date": "Data",
+      "total": "Totale",
+      "errorRate": "{{value}}% tasso errore"
+    }
+  }
+}

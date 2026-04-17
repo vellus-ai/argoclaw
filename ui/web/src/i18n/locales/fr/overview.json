@@ -1,0 +1,80 @@
+{
+  "title": "Tableau de bord",
+  "description": "Aperçu de la passerelle et utilisation des quotas",
+  "tabs": {
+    "overview": "Aperçu",
+    "usage": "Utilisation"
+  },
+  "statCards": {
+    "requestsToday": "Demandes aujourd'hui",
+    "tokensToday": "Tokens aujourd'hui",
+    "costToday": "Coût aujourd'hui",
+    "agents": "Agents",
+    "channels": "Canaux",
+    "running": "en cours d'exécution",
+    "online": "en ligne",
+    "users": "{{count}} utilisateurs",
+    "inOut": "{{input}} entrée / {{output}} sortie"
+  },
+  "providers": {
+    "noProvidersTitle": "Aucun fournisseur LLM configuré",
+    "noEnabledTitle": "Aucun fournisseur LLM activé",
+    "noProvidersDesc": "Vous devez ajouter au moins un fournisseur LLM avant que les agents ne fonctionnent. ",
+    "noEnabledDesc": "Tous les fournisseurs sont actuellement désactivés. Activez au moins un pour commencer à utiliser les agents. ",
+    "goToSettings": "Aller aux paramètres du fournisseur"
+  },
+  "systemHealth": {
+    "title": "Santé du système",
+    "uptime": "Durée de disponibilité",
+    "database": "Base de données",
+    "providers": "Fournisseurs",
+    "tools": "Outils",
+    "sessions": "Sessions",
+    "clients": "Clients",
+    "channels": "Canaux",
+    "active": "{{count}} actif(s)",
+    "none": "aucun",
+    "runtimes": "Runtimes"
+  },
+  "connectedClients": {
+    "title": "Clients connectés",
+    "noClients": "Aucun client connecté",
+    "columns": {
+      "ip": "IP",
+      "user": "Utilisateur",
+      "role": "Rôle",
+      "connected": "Connecté"
+    },
+    "you": "vous"
+  },
+  "cronJobs": {
+    "title": "Tâches cron",
+    "manage": "Gérer",
+    "noJobs": "Aucune tâche cron configurée",
+    "disabled": "désactivée"
+  },
+  "recentRequests": {
+    "title": "Demandes récentes",
+    "viewAll": "Afficher tout",
+    "noRequests": "Aucune demande récente",
+    "columns": {
+      "time": "Heure",
+      "name": "Nom",
+      "user": "Utilisateur",
+      "channel": "Canal",
+      "tokens": "Tokens",
+      "duration": "Durée",
+      "status": "Statut"
+    }
+  },
+  "quotaUsage": {
+    "title": "Utilisation des quotas",
+    "columns": {
+      "userGroup": "Utilisateur / Groupe",
+      "hour": "Heure",
+      "day": "Jour",
+      "week": "Semaine"
+    },
+    "noLimit": "pas de limite"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "title": "Runtime & Pakete",
+  "description": "Verwalte System-Runtimes und installierte Pakete",
+  "runtimes": {
+    "title": "Runtimes",
+    "available": "Verfügbar",
+    "missing": "Fehlend"
+  },
+  "system": {
+    "title": "System-Pakete",
+    "placeholder": "Paket-Name (z.B. github-cli)"
+  },
+  "pip": {
+    "title": "Python-Pakete",
+    "placeholder": "Paket-Name (z.B. pandas)"
+  },
+  "npm": {
+    "title": "Node-Pakete",
+    "placeholder": "Paket-Name (z.B. typescript)"
+  },
+  "actions": {
+    "install": "Installieren",
+    "uninstall": "Deinstallieren",
+    "installing": "Wird installiert...",
+    "uninstalling": "Wird entfernt..."
+  },
+  "messages": {
+    "installSuccess": "{{name}} erfolgreich installiert",
+    "installError": "Fehler beim Installieren von {{name}}",
+    "uninstallSuccess": "{{name}} erfolgreich entfernt",
+    "uninstallError": "Fehler beim Entfernen von {{name}}"
+  },
+  "confirmUninstall": {
+    "title": "Deinstallation bestätigen",
+    "description": "Bist du sicher, dass du {{name}} entfernen möchtest? Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "table": {
+    "name": "Name",
+    "version": "Version",
+    "actions": "Aktionen",
+    "empty": "Keine Pakete installiert"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "title": "Storage",
+  "description": "Browser file workspace",
+  "descriptionWithPath": "{{path}} — {{size}}",
+  "sizeCacheInfo": "La dimensione dello storage è in cache per 60 minuti",
+  "unsupportedFile": "Questo tipo di file non è supportato per l'anteprima",
+  "download": "Scarica",
+  "delete": {
+    "fileTitle": "Elimina file",
+    "folderTitle": "Elimina cartella",
+    "description": "Sei sicuro di voler eliminare {{name}}?",
+    "folderWarning": " Tutti i contenuti verranno rimossi ricorsivamente.",
+    "undone": " Questa azione non può essere annullata.",
+    "deleting": "Eliminazione...",
+    "confirmLabel": "Elimina"
+  },
+  "toast": {
+    "deleted": "File eliminato",
+    "deleteFailed": "Errore nell'eliminazione del file"
+  }
+}

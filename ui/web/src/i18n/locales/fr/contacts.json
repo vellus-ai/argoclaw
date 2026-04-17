@@ -1,0 +1,32 @@
+{
+  "title": "Contacts",
+  "description": "Contacts auto-collectés à partir de toutes les interactions de canal.",
+  "searchPlaceholder": "Rechercher par nom, nom d'utilisateur ou ID...",
+  "filter": "Filtrer",
+  "emptyTitle": "Aucun contact",
+  "emptyDescription": "Les contacts apparaîtront ici à mesure que les utilisateurs interagissent avec vos agents via les canaux.",
+  "noMatchTitle": "Aucun contact correspondant",
+  "noMatchDescription": "Essayez un terme de recherche ou un filtre différent.",
+  "columns": {
+    "name": "Nom",
+    "username": "Nom d'utilisateur",
+    "senderId": "ID de l'expéditeur",
+    "channelType": "Canal",
+    "peerKind": "Type",
+    "lastSeen": "Dernière visite"
+  },
+  "permissionsNote": {
+    "title": "Permissions de canal pour les noms de contact",
+    "telegram": "Telegram — Les noms et noms d'utilisateur sont disponibles automatiquement.",
+    "discord": "Discord — Les noms d'affichage et les noms d'utilisateur sont disponibles automatiquement.",
+    "zalo": "Zalo — Les noms d'affichage sont disponibles automatiquement.",
+    "slack": "Slack — Les noms d'affichage sont résolus via l'API Slack (le bot doit être dans l'espace de travail).",
+    "feishu": "Feishu/Lark — Nécessite la permission contact:user.base:readonly. Sans celle-ci, les noms seront vides."
+  },
+  "filters": {
+    "allChannels": "Tous les canaux",
+    "allTypes": "Tous les types",
+    "direct": "Direct",
+    "group": "Groupe"
+  }
+}

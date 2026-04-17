@@ -1,0 +1,15 @@
+{
+  "title": "Journaux",
+  "description": "Lecture en direct de journaux",
+  "descriptionLive": "Lecture en direct au niveau {{level}}",
+  "live": "En direct",
+  "start": "Démarrer",
+  "stop": "Arrêter",
+  "clear": "Effacer",
+  "filterPlaceholder": "Filtrer les journaux...",
+  "logLevelTitle": "Niveau de journal",
+  "emptyWaiting": "En attente de journaux...",
+  "emptyFilter": "Aucun journal ne correspond au filtre.",
+  "emptyStart": "Cliquez sur « Démarrer » pour commencer la diffusion en direct.",
+  "count": "{{filtered}}/{{total}}"
+}

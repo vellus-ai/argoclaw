@@ -1,0 +1,50 @@
+{
+  "title": "Messaggi in Sospeso",
+  "description": "Messaggi canale bufferizzati in attesa di elaborazione agente",
+  "emptyTitle": "Nessun messaggio in sospeso",
+  "emptyDescription": "Nessun gruppo di messaggi bufferizzato trovato. I messaggi appaiono qui quando i canali bufferizzano i messaggi in entrata prima dell'elaborazione dell'agente.",
+  "howItWorks": {
+    "title": "Come Funziona",
+    "step1": "I messaggi da canali (Telegram, Discord, ecc.) vengono bufferizzati qui mentre l'agente è occupato o offline.",
+    "step2": "Quando il buffer raggiunge la soglia (default: 50 messaggi), entra in gioco la compattazione automatica — un LLM riassume i messaggi più vecchi, mantenendo solo i 15 più recenti.",
+    "step3": "Al prossimo turno dell'agente, il riassunto compattato + messaggi recenti vengono iniettati come contesto, così l'agente si recupera senza essere sopraffatto.",
+    "compactAction": "Compatta — Attiva manualmente il riassunto LLM ora. Utile quando vuoi che l'agente elabori un riassunto pulito invece di un diluvio di messaggi grezzi.",
+    "clearAction": "Cancella — Elimina permanentemente tutti i messaggi bufferizzati per un gruppo. Usa quando i messaggi non sono più rilevanti."
+  },
+  "columns": {
+    "channel": "Canale",
+    "group": "Gruppo",
+    "messages": "Messaggi",
+    "status": "Stato",
+    "lastActivity": "Ultima Attività",
+    "actions": "Azioni"
+  },
+  "status": {
+    "compacted": "Compattato",
+    "raw": "Grezzo"
+  },
+  "compact": "Compatta",
+  "compacting": "Compattazione…",
+  "clear": "Cancella",
+  "confirmClear": {
+    "title": "Cancellare messaggi?",
+    "description": "Questo eliminerà permanentemente tutti i messaggi in {{channel}} / {{key}}. Questa azione non può essere annullata.",
+    "cancel": "Annulla",
+    "confirm": "Cancella"
+  },
+  "dialog": {
+    "title": "Messaggi — {{name}}",
+    "noMessages": "Nessun messaggio trovato.",
+    "summary": "Riassunto"
+  },
+  "toast": {
+    "compacted": "Compattazione completata",
+    "compactedSummarized": "Riassunto a {{count}} messaggi",
+    "compactedDeleted": "Tutti i messaggi eliminati (nessun provider LLM disponibile)",
+    "compacting": "Compattazione…",
+    "compactingDesc": "Riassunto LLM in esecuzione in background. L'elenco si aggiornerà automaticamente.",
+    "failedCompact": "Compattazione fallita",
+    "cleared": "Messaggi cancellati",
+    "failedClear": "Errore nella cancellazione dei messaggi"
+  }
+}

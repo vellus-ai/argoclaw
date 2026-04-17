@@ -1,0 +1,190 @@
+{
+  "title": "Speicher",
+  "description": "Durchsuche und verwalte Agent-Speicherdokumente, Chunks und Embeddings",
+  "search": "Suche",
+  "create": "Erstellen",
+  "indexAll": "Alle indexieren",
+  "indexing": "Wird indexiert...",
+  "emptyTitle": "Keine Speicherdokumente",
+  "emptyAgentDescription": "Dieser Agent hat noch keine Speicherdokumente.",
+  "emptyGlobalDescription": "Keine Speicherdokumente gefunden über Agents.",
+  "filters": {
+    "agent": "Agent",
+    "allAgents": "Alle Agents",
+    "scope": "Umfang",
+    "allScope": "Alle (global + persönlich)",
+    "selectAgent": "Wähle einen Agent"
+  },
+  "tabs": {
+    "documents": "Dokumente",
+    "knowledgeGraph": "Wissens-Graph"
+  },
+  "columns": {
+    "path": "Pfad",
+    "agent": "Agent",
+    "scope": "Umfang",
+    "hash": "Hash",
+    "updated": "Aktualisiert",
+    "actions": "Aktionen"
+  },
+  "scopeLabel": {
+    "personal": "Persönlich",
+    "global": "Global"
+  },
+  "delete": {
+    "title": "Speicherdokument löschen",
+    "description": "Bist du sicher, dass du \"{{path}}\" löschen möchtest? Dies löscht auch alle zugehörigen Chunks und Embeddings.",
+    "confirmLabel": "Löschen"
+  },
+  "createDialog": {
+    "title": "Speicherdokument erstellen",
+    "path": "Pfad *",
+    "pathPlaceholder": "z.B. notes/project-overview.md",
+    "content": "Inhalt *",
+    "contentPlaceholder": "Dokument-Inhalt...",
+    "agentId": "Agent *",
+    "agentIdPlaceholder": "Agent auswählen...",
+    "scope": "Umfang",
+    "existingScope": "Existierender Umfang",
+    "customScope": "Benutzerdefiniert",
+    "selectGroupUser": "Wähle Gruppe/Benutzer...",
+    "scopeHint": "Global = über alle Benutzer geteilt. Persönlich = auf spezifischen Benutzer oder Gruppenchat scoped.",
+    "autoIndex": "Nach Erstellung auto-indexieren",
+    "agentRequired": "Bitte wähle einen Agent",
+    "pathRequired": "Pfad ist erforderlich",
+    "contentRequired": "Inhalt ist erforderlich",
+    "cancel": "Abbrechen",
+    "create": "Erstellen",
+    "creating": "Wird erstellt..."
+  },
+  "documentDialog": {
+    "title": "Speicherdokument",
+    "path": "Pfad:",
+    "agent": "Agent:",
+    "scope": "Umfang:",
+    "hash": "Hash:",
+    "updated": "Aktualisiert:",
+    "content": "Inhalt",
+    "chunks": "Chunks ({{count}})",
+    "chunkIndex": "Chunk {{index}}",
+    "noChunks": "Keine Chunks",
+    "embedded": "Eingebettet",
+    "noEmbedding": "Kein Embedding"
+  },
+  "searchDialog": {
+    "title": "Speicher durchsuchen",
+    "query": "Such-Abfrage",
+    "queryPlaceholder": "Such-Abfrage eingeben...",
+    "agentId": "Agent-ID",
+    "agentIdPlaceholder": "Nach Agent filtern...",
+    "limit": "Limit",
+    "search": "Suche",
+    "searching": "Wird gesucht...",
+    "results": "Ergebnisse",
+    "noResults": "Keine Ergebnisse gefunden",
+    "similarity": "Ähnlichkeit",
+    "path": "Pfad:"
+  },
+  "kg": {
+    "pageTitle": "Wissens-Graph",
+    "pageDescription": "Erkunde Entities und Beziehungen extrahiert aus Agent-Speicher.",
+    "selectAgentTitle": "Wähle einen Agent",
+    "selectAgentDescription": "Wähle einen Agent zum Anschauen seines Wissens-Graphen.",
+    "emptyTitle": "Keine Entities",
+    "emptyDescription": "Noch keine Wissens-Graph-Entities für diesen Agent.",
+    "emptySearchDescription": "Keine Entities entsprechen deiner Suche.",
+    "stats": {
+      "entities": "Entities: {{count}}",
+      "relations": "Relationen: {{count}}"
+    },
+    "search": {
+      "placeholder": "Entities durchsuchen...",
+      "button": "Suche",
+      "clear": "Löschen"
+    },
+    "refresh": "Aktualisieren",
+    "extract": "Extrahieren",
+    "columns": {
+      "name": "Name",
+      "type": "Typ",
+      "description": "Beschreibung",
+      "confidence": "Konfidenz",
+      "actions": "Aktionen",
+      "observations": "Beobachtungen",
+      "relations": "Relationen"
+    },
+    "deleteEntity": {
+      "title": "Entity löschen",
+      "description": "\"{{name}}\" löschen? Dies löscht auch alle zugehörigen Relationen.",
+      "confirmLabel": "Löschen"
+    },
+    "entity": {
+      "externalId": "Externe ID:",
+      "confidence": "Konfidenz:",
+      "description": "Beschreibung:",
+      "source": "Quelle:",
+      "properties": "Eigenschaften:",
+      "relations": "Relationen",
+      "traverse": "Traverse (2-hop)",
+      "traversing": "Wird traversiert...",
+      "loading": "Wird geladen...",
+      "noRelations": "Keine Relationen gefunden.",
+      "traversalResults": "Traversal-Ergebnisse ({{count}})",
+      "direction": {
+        "outgoing": "→ ausgehend",
+        "incoming": "← eingehend"
+      },
+      "columns": {
+        "direction": "Richtung",
+        "relation": "Relation",
+        "target": "Ziel",
+        "confidence": "Konfidenz"
+      }
+    },
+    "extractDialog": {
+      "title": "Extrahiere Entities aus Text",
+      "providerLabel": "Extraktions-Provider",
+      "modelLabel": "Extraktions-Modell",
+      "textLabel": "Text zum Extrahieren",
+      "textPlaceholder": "Füge Gesprächs-Text, Notizen oder Inhalt ein zum Extrahieren von Entities und Relationen...",
+      "extract": "Extrahieren",
+      "extracting": "Wird extrahiert...",
+      "cancel": "Abbrechen",
+      "agentId": "Agent-ID",
+      "agentIdPlaceholder": "Leer lassen für global"
+    },
+    "graphView": {
+      "loading": "Graph wird geladen...",
+      "empty": "Keine Entities zum Visualisieren",
+      "nodes": "{{count}} Knoten",
+      "edges": "{{count}} Kanten"
+    }
+  },
+  "toast": {
+    "created": "Speicherdokument erstellt",
+    "deleted": "Speicherdokument gelöscht",
+    "indexed": "Alle Dokumente indexiert",
+    "failedCreate": "Fehler beim Erstellen des Dokuments",
+    "failedDelete": "Fehler beim Löschen des Dokuments",
+    "failedIndex": "Fehler beim Indexieren von Dokumenten",
+    "entitySaved": "Entity gespeichert",
+    "entitySaveFailed": "Fehler beim Speichern der Entity",
+    "entityDeleted": "Entity gelöscht",
+    "entityDeleteFailed": "Fehler beim Löschen der Entity",
+    "extractionComplete": "Extraktion abgeschlossen",
+    "extractionFailed": "Extraktion fehlgeschlagen",
+    "traversalFailed": "Traversal fehlgeschlagen",
+    "unknownError": "Unbekannter Fehler",
+    "docCreated": "Dokument erstellt",
+    "docCreateFailed": "Fehler beim Erstellen des Dokuments",
+    "docUpdated": "Dokument aktualisiert",
+    "docUpdateFailed": "Fehler beim Aktualisieren des Dokuments",
+    "docDeleted": "Dokument gelöscht",
+    "docDeleteFailed": "Fehler beim Löschen des Dokuments",
+    "docIndexed": "Dokument indexiert",
+    "docIndexFailed": "Fehler beim Indexieren des Dokuments",
+    "allIndexed": "Alle Dokumente indexiert",
+    "allIndexFailed": "Fehler beim Indexieren aller",
+    "searchFailed": "Suche fehlgeschlagen"
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "title": "Dashboard",
+  "description": "Gateway-Übersicht und Kontingent-Nutzung",
+  "tabs": {
+    "overview": "Übersicht",
+    "usage": "Nutzung"
+  },
+  "statCards": {
+    "requestsToday": "Anfragen heute",
+    "tokensToday": "Tokens heute",
+    "costToday": "Kosten heute",
+    "agents": "Agents",
+    "channels": "Kanäle",
+    "running": "läuft",
+    "online": "online",
+    "users": "{{count}} Benutzer",
+    "inOut": "{{input}} in / {{output}} out"
+  },
+  "providers": {
+    "noProvidersTitle": "Keine LLM-Provider konfiguriert",
+    "noEnabledTitle": "Keine LLM-Provider aktiviert",
+    "noProvidersDesc": "Du brauchst mindestens einen LLM-Provider, bevor Agents funktionieren. ",
+    "noEnabledDesc": "Alle Provider sind derzeit deaktiviert. Aktiviere mindestens einen zum Starten. ",
+    "goToSettings": "Gehe zu Provider-Einstellungen"
+  },
+  "systemHealth": {
+    "title": "System-Gesundheit",
+    "uptime": "Betriebszeit",
+    "database": "Datenbank",
+    "providers": "Provider",
+    "tools": "Tools",
+    "sessions": "Sitzungen",
+    "clients": "Clients",
+    "channels": "Kanäle",
+    "active": "{{count}} aktiv",
+    "none": "keine",
+    "runtimes": "Runtimes"
+  },
+  "connectedClients": {
+    "title": "Verbundene Clients",
+    "noClients": "Keine Clients verbunden",
+    "columns": {
+      "ip": "IP",
+      "user": "Benutzer",
+      "role": "Rolle",
+      "connected": "Verbunden"
+    },
+    "you": "du"
+  },
+  "cronJobs": {
+    "title": "Cron-Jobs",
+    "manage": "Verwalten",
+    "noJobs": "Keine Cron-Jobs konfiguriert",
+    "disabled": "deaktiviert"
+  },
+  "recentRequests": {
+    "title": "Letzte Anfragen",
+    "viewAll": "Alle anschauen",
+    "noRequests": "Keine letzten Anfragen",
+    "columns": {
+      "time": "Zeit",
+      "name": "Name",
+      "user": "Benutzer",
+      "channel": "Kanal",
+      "tokens": "Tokens",
+      "duration": "Dauer",
+      "status": "Status"
+    }
+  },
+  "quotaUsage": {
+    "title": "Kontingent-Nutzung",
+    "columns": {
+      "userGroup": "Benutzer / Gruppe",
+      "hour": "Stunde",
+      "day": "Tag",
+      "week": "Woche"
+    },
+    "noLimit": "Kein Limit"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "title": "Log",
+  "description": "Tailing log live",
+  "descriptionLive": "Tailing live a livello {{level}}",
+  "live": "Live",
+  "start": "Avvia",
+  "stop": "Arresta",
+  "clear": "Cancella",
+  "filterPlaceholder": "Filtra log...",
+  "logLevelTitle": "Livello log",
+  "emptyWaiting": "In attesa di log...",
+  "emptyFilter": "Nessun log corrisponde al filtro.",
+  "emptyStart": "Clicca \"Avvia\" per iniziare lo streaming dei log.",
+  "count": "{{filtered}}/{{total}}"
+}

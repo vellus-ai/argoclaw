@@ -1,0 +1,17 @@
+{
+  "expandSidebar": "Seitenleiste erweitern",
+  "collapseSidebar": "Seitenleiste zusammenfalten",
+  "openMenu": "Menü öffnen",
+  "toggleTheme": "Design umschalten",
+  "logout": "Abmelden",
+  "language": "Sprache",
+  "timezone": "Zeitzone",
+  "pairingRequests": "Pairing-Anfragen",
+  "pendingPairingRequest": "{{count}} ausstehende Pairing-Anfrage",
+  "pendingPairingRequests": "{{count}} ausstehende Pairing-Anfragen",
+  "languages": {
+    "en": "English",
+    "vi": "Tiếng Việt",
+    "zh": "中文"
+  }
+}

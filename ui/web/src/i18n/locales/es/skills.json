@@ -1,0 +1,112 @@
+{
+  "title": "Skills",
+  "description": "Gestionar skills y capacidades del agente",
+  "searchPlaceholder": "Buscar skills...",
+  "emptyTitle": "Sin skills",
+  "emptyDescription": "Sin skills registrados aún.",
+  "noMatchTitle": "Sin skills coincidentes",
+  "noMatchDescription": "Intenta con un término de búsqueda diferente.",
+  "columns": {
+    "name": "Nombre",
+    "description": "Descripción",
+    "source": "Fuente",
+    "author": "Autor",
+    "visibility": "Visibilidad",
+    "status": "Estado",
+    "actions": "Acciones"
+  },
+  "noDescription": "Sin descripción",
+  "visibility": {
+    "clickToCycle": "Haz clic para cambiar visibilidad"
+  },
+  "delete": {
+    "title": "Eliminar Skill",
+    "description": "¿Estás seguro de que deseas eliminar \"{{name}}\"? Esta acción no se puede deshacer.",
+    "confirmLabel": "Eliminar"
+  },
+  "upload": {
+    "title": "Cargar Skills",
+    "description": "Carga archivos ZIP que contengan SKILL.md con frontmatter YAML (nombre, descripción, slug).",
+    "button": "Cargar",
+    "uploading": "Cargando...",
+    "dropOrClick": "Haz clic o arrastra y suelta archivos .zip",
+    "dropHere": "Suelta archivos .zip aquí",
+    "onlyZip": "Solo se aceptan archivos .zip",
+    "cancel": "Cancelar",
+    "done": "Listo",
+    "tooLarge": "El archivo excede el límite de 20MB",
+    "invalidZip": "Archivo ZIP inválido",
+    "noSkillMd": "ZIP debe contener SKILL.md en la raíz",
+    "emptySkillMd": "SKILL.md está vacío",
+    "noFrontmatter": "SKILL.md sin frontmatter YAML",
+    "nameRequired": "nombre requerido en frontmatter YAML de SKILL.md",
+    "invalidSlug": "Formato de slug inválido",
+    "failed": "Error al cargar",
+    "validating": "Validando...",
+    "validCount": "{{valid}} de {{total}} válidos",
+    "uploadCount": "Cargar ({{count}})",
+    "successCount": "{{success}} de {{total}} cargados exitosamente",
+    "remove": "Eliminar archivo"
+  },
+  "edit": {
+    "title": "Editar Skill",
+    "name": "Nombre",
+    "description": "Descripción",
+    "visibility": "Visibilidad",
+    "tags": "Etiquetas",
+    "addTag": "Añadir etiqueta...",
+    "add": "Añadir",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "privateOption": "Privado (solo propietario)",
+    "internalOption": "Interno (agentes/usuarios con permiso)",
+    "publicOption": "Público (todos los agentes)"
+  },
+  "system": "Sistema",
+  "tabs": {
+    "core": "Core",
+    "custom": "Personalizado"
+  },
+  "toggle": {
+    "enable": "Habilitar skill",
+    "disable": "Desabilitar skill",
+    "disabled": "Deshabilitado"
+  },
+  "deps": {
+    "rescan": "Rescan de Deps",
+    "rescanning": "Escaneando...",
+    "rescanSuccess": "Actualizado {{count}} skills",
+    "missing": "Faltantes: {{deps}}",
+    "install": "Instalar Dependencias",
+    "installing": "Instalando...",
+    "installSuccess": "Dependencias instaladas exitosamente",
+    "installPartial": "Algunas dependencias fallaron al instalarse",
+    "installItem": "Instalar",
+    "itemSuccess": "Instalado",
+    "itemError": "Error",
+    "missingTitle": "Dependencias Faltantes",
+    "systemLabel": "Sistema",
+    "pythonLabel": "Python",
+    "nodeLabel": "Node.js",
+    "statusActive": "Activo",
+    "statusArchived": "Deps faltantes",
+    "runtimeMissing": "Prerrequisitos de Tiempo de Ejecución Faltantes",
+    "runtimeMissingDesc": "Los skills centrales requieren tiempos de ejecución Python y/o Node.js. Recompila con ENABLE_PYTHON=true, ENABLE_NODE=true, o ENABLE_FULL_SKILLS=true, o instala manualmente.",
+    "runtimeRequired": "Instala tiempos de ejecución primero"
+  },
+  "detail": {
+    "title": "Detalle de Skill",
+    "content": "Contenido",
+    "files": "Archivos",
+    "version": "Versión:",
+    "current": "(actual)",
+    "noContent": "Sin contenido disponible."
+  },
+  "toast": {
+    "updated": "Skill actualizado",
+    "updateFailed": "Error al actualizar skill",
+    "deleted": "Skill eliminado",
+    "deleteFailed": "Error al eliminar skill"
+  }
+}

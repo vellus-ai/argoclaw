@@ -1,0 +1,63 @@
+{
+  "title": "API-Schlüssel",
+  "description": "Verwalte Gateway-API-Schlüssel mit differenzierten Berechtigungen.",
+  "addKey": "API-Schlüssel erstellen",
+  "searchPlaceholder": "Schlüssel durchsuchen...",
+  "emptyTitle": "Keine API-Schlüssel",
+  "emptyDescription": "Erstelle deinen ersten API-Schlüssel, um dich beim Gateway zu authentifizieren.",
+  "columns": {
+    "name": "Name",
+    "prefix": "Schlüssel",
+    "scopes": "Bereiche",
+    "lastUsed": "Zuletzt verwendet",
+    "created": "Erstellt",
+    "status": "Status",
+    "actions": "Aktionen"
+  },
+  "status": {
+    "active": "Aktiv",
+    "revoked": "Widerrufen",
+    "expired": "Abgelaufen"
+  },
+  "form": {
+    "title": "API-Schlüssel erstellen",
+    "name": "Name",
+    "namePlaceholder": "z.B. ci-deploy, dashboard-readonly",
+    "scopes": "Bereiche",
+    "scopeDescriptions": {
+      "operator.admin": "Vollständiger Admin-Zugriff",
+      "operator.read": "Nur-Lese-Zugriff",
+      "operator.write": "Lese- und Schreibzugriff",
+      "operator.approvals": "Genehmigungen verwalten",
+      "operator.pairing": "Gerätepairing verwalten"
+    },
+    "expiry": "Ablauf",
+    "expiryOptions": {
+      "never": "Nie",
+      "7d": "7 Tage",
+      "30d": "30 Tage",
+      "90d": "90 Tage"
+    },
+    "create": "Erstellen",
+    "creating": "Wird erstellt..."
+  },
+  "created": {
+    "title": "API-Schlüssel erstellt",
+    "description": "Kopiere diesen Schlüssel jetzt – er wird nicht mehr angezeigt.",
+    "copied": "Kopiert!",
+    "copy": "In Zwischenablage kopieren",
+    "done": "Fertig"
+  },
+  "revoke": {
+    "title": "API-Schlüssel widerrufen",
+    "description": "Möchtest du den Schlüssel \"{{name}}\" wirklich widerrufen? Dies kann nicht rückgängig gemacht werden.",
+    "confirmLabel": "Widerrufen"
+  },
+  "toast": {
+    "created": "API-Schlüssel erstellt",
+    "revoked": "API-Schlüssel widerrufen",
+    "failedCreate": "Fehler beim Erstellen des API-Schlüssels",
+    "failedRevoke": "Fehler beim Widerrufen des API-Schlüssels"
+  },
+  "never": "Nie"
+}

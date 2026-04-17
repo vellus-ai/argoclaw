@@ -1,0 +1,112 @@
+{
+  "title": "Compétences",
+  "description": "Gérer les compétences et capacités des agents",
+  "searchPlaceholder": "Rechercher des compétences...",
+  "emptyTitle": "Aucune compétence",
+  "emptyDescription": "Aucune compétence n'a été enregistrée pour le moment.",
+  "noMatchTitle": "Aucune compétence correspondante",
+  "noMatchDescription": "Essayez un terme de recherche différent.",
+  "columns": {
+    "name": "Nom",
+    "description": "Description",
+    "source": "Source",
+    "author": "Auteur",
+    "visibility": "Visibilité",
+    "status": "Statut",
+    "actions": "Actions"
+  },
+  "noDescription": "Aucune description",
+  "visibility": {
+    "clickToCycle": "Cliquer pour modifier la visibilité"
+  },
+  "delete": {
+    "title": "Supprimer la compétence",
+    "description": "Êtes-vous sûr de vouloir supprimer « {{name}} » ? Cette action ne peut pas être annulée.",
+    "confirmLabel": "Supprimer"
+  },
+  "upload": {
+    "title": "Télécharger des compétences",
+    "description": "Télécharger les fichiers ZIP contenant SKILL.md avec le préambule YAML (nom, description, slug).",
+    "button": "Télécharger",
+    "uploading": "Téléchargement...",
+    "dropOrClick": "Cliquez ou glissez-déposez les fichiers .zip",
+    "dropHere": "Déposez les fichiers .zip ici",
+    "onlyZip": "Seuls les fichiers .zip sont acceptés",
+    "cancel": "Annuler",
+    "done": "Terminé",
+    "tooLarge": "Le fichier dépasse la limite de 20 Mo",
+    "invalidZip": "Fichier ZIP invalide",
+    "noSkillMd": "Le ZIP doit contenir SKILL.md à la racine",
+    "emptySkillMd": "SKILL.md est vide",
+    "noFrontmatter": "SKILL.md manque le préambule YAML",
+    "nameRequired": "nom requis dans le préambule YAML de SKILL.md",
+    "invalidSlug": "Format de slug invalide",
+    "failed": "Échec du téléchargement",
+    "validating": "Validation...",
+    "validCount": "{{valid}} sur {{total}} valides",
+    "uploadCount": "Télécharger ({{count}})",
+    "successCount": "{{success}} sur {{total}} téléchargés avec succès",
+    "remove": "Supprimer le fichier"
+  },
+  "edit": {
+    "title": "Éditer la compétence",
+    "name": "Nom",
+    "description": "Description",
+    "visibility": "Visibilité",
+    "tags": "Tags",
+    "addTag": "Ajouter un tag...",
+    "add": "Ajouter",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "privateOption": "Privée (propriétaire uniquement)",
+    "internalOption": "Interne (agents/utilisateurs approuvés)",
+    "publicOption": "Publique (tous les agents)"
+  },
+  "system": "Système",
+  "tabs": {
+    "core": "Noyau",
+    "custom": "Personnalisée"
+  },
+  "toggle": {
+    "enable": "Activer la compétence",
+    "disable": "Désactiver la compétence",
+    "disabled": "Désactivée"
+  },
+  "deps": {
+    "rescan": "Rescanner les dépendances",
+    "rescanning": "Analyse...",
+    "rescanSuccess": "{{count}} compétences mises à jour",
+    "missing": "Manquant : {{deps}}",
+    "install": "Installer les dépendances",
+    "installing": "Installation...",
+    "installSuccess": "Dépendances installées avec succès",
+    "installPartial": "Certaines dépendances n'ont pas pu être installées",
+    "installItem": "Installer",
+    "itemSuccess": "Installé",
+    "itemError": "Échec",
+    "missingTitle": "Dépendances manquantes",
+    "systemLabel": "Système",
+    "pythonLabel": "Python",
+    "nodeLabel": "Node.js",
+    "statusActive": "Actif",
+    "statusArchived": "Dépendances manquantes",
+    "runtimeMissing": "Prérequis de runtime manquants",
+    "runtimeMissingDesc": "Les compétences noyau nécessitent les runtimes Python et/ou Node.js. Reconstruire avec ENABLE_PYTHON=true, ENABLE_NODE=true, ou ENABLE_FULL_SKILLS=true, ou installer manuellement.",
+    "runtimeRequired": "Installer les runtimes en premier"
+  },
+  "detail": {
+    "title": "Détail de la compétence",
+    "content": "Contenu",
+    "files": "Fichiers",
+    "version": "Version :",
+    "current": "(actuelle)",
+    "noContent": "Aucun contenu disponible."
+  },
+  "toast": {
+    "updated": "Compétence mise à jour",
+    "updateFailed": "Échec de la mise à jour de la compétence",
+    "deleted": "Compétence supprimée",
+    "deleteFailed": "Échec de la suppression de la compétence"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "title": "Synthèse vocale",
+  "description": "Configurer les fournisseurs TTS et appliquer automatiquement les paramètres",
+  "save": "Enregistrer",
+  "saving": "Enregistrement...",
+  "saveChanges": "Enregistrer les modifications",
+  "status": {
+    "title": "Statut",
+    "configured": "Configuré",
+    "disabled": "Désactivé",
+    "noProvider": "Aucun fournisseur TTS configuré",
+    "activeProvider": "Fournisseur principal : {{provider}}, Auto : {{auto}}"
+  },
+  "general": {
+    "title": "Paramètres généraux",
+    "primaryProvider": "Fournisseur principal",
+    "autoApplyMode": "Mode d'application automatique",
+    "replyMode": "Mode de réponse",
+    "maxTextLength": "Longueur max du texte",
+    "timeout": "Délai d'attente (ms)"
+  },
+  "providers": {
+    "none": "Aucun (Désactivé)",
+    "openai": "OpenAI",
+    "elevenlabs": "ElevenLabs",
+    "edge": "Edge (Gratuit)",
+    "minimax": "MiniMax"
+  },
+  "autoModes": {
+    "off": "Désactivé",
+    "offDesc": "L'agent peut utiliser l'outil TTS manuellement",
+    "always": "Toujours",
+    "alwaysDesc": "Toutes les réponses obtiennent l'audio",
+    "inbound": "Entrante",
+    "inboundDesc": "Uniquement lorsque l'utilisateur envoie de la voix/audio",
+    "tagged": "Tagué",
+    "taggedDesc": "Uniquement lorsque la réponse contient le tag [[tts]]"
+  },
+  "replyModes": {
+    "final": "Final uniquement",
+    "finalDesc": "Seulement les réponses finales",
+    "all": "Tous",
+    "allDesc": "Toutes les réponses incluant outil/bloc"
+  },
+  "providerSettings": "Paramètres {{provider}}",
+  "openai": {
+    "apiKey": "Clé API",
+    "apiBase": "URL de base API",
+    "model": "Modèle",
+    "voice": "Voix"
+  },
+  "elevenlabs": {
+    "apiKey": "Clé API",
+    "baseUrl": "URL de base",
+    "voiceId": "ID de voix",
+    "modelId": "ID de modèle"
+  },
+  "edge": {
+    "voice": "Voix",
+    "speechRate": "Vitesse de parole",
+    "hint": "Edge TTS est gratuit et ne nécessite pas de clé API. Installez avec : pip install edge-tts"
+  },
+  "minimax": {
+    "apiKey": "Clé API",
+    "groupId": "ID de groupe *",
+    "groupIdPlaceholder": "Requis pour MiniMax",
+    "apiBase": "Base API",
+    "model": "Modèle",
+    "voiceId": "ID de voix"
+  }
+}

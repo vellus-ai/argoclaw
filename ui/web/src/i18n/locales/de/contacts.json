@@ -1,0 +1,32 @@
+{
+  "title": "Kontakte",
+  "description": "Automatisch erfasste Kontakte aus allen Kanal-Interaktionen.",
+  "searchPlaceholder": "Nach Name, Benutzername oder ID durchsuchen...",
+  "filter": "Filter",
+  "emptyTitle": "Keine Kontakte",
+  "emptyDescription": "Kontakte erscheinen hier, wenn Benutzer mit deinen Agents über Kanäle interagieren.",
+  "noMatchTitle": "Keine passenden Kontakte",
+  "noMatchDescription": "Versuche einen anderen Suchbegriff oder Filter.",
+  "columns": {
+    "name": "Name",
+    "username": "Benutzername",
+    "senderId": "Absender-ID",
+    "channelType": "Kanal",
+    "peerKind": "Typ",
+    "lastSeen": "Zuletzt gesehen"
+  },
+  "permissionsNote": {
+    "title": "Kanal-Berechtigungen für Kontaktnamen",
+    "telegram": "Telegram — Namen und Benutzernamen verfügbar automatisch.",
+    "discord": "Discord — Anzeigenamen und Benutzernamen verfügbar automatisch.",
+    "zalo": "Zalo — Anzeigenamen verfügbar automatisch.",
+    "slack": "Slack — Anzeigenamen via Slack-API aufgelöst (Bot muss im Workspace sein).",
+    "feishu": "Feishu/Lark — Erfordert contact:user.base:readonly Berechtigung. Ohne dies sind Namen leer."
+  },
+  "filters": {
+    "allChannels": "Alle Kanäle",
+    "allTypes": "Alle Typen",
+    "direct": "Direkt",
+    "group": "Gruppe"
+  }
+}

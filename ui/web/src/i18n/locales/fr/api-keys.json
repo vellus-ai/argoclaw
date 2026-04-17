@@ -1,0 +1,63 @@
+{
+  "title": "Clés API",
+  "description": "Gérer les clés API de la passerelle avec des permissions granulaires.",
+  "addKey": "Créer une clé API",
+  "searchPlaceholder": "Rechercher des clés...",
+  "emptyTitle": "Aucune clé API",
+  "emptyDescription": "Créez votre première clé API pour authentifier la passerelle.",
+  "columns": {
+    "name": "Nom",
+    "prefix": "Clé",
+    "scopes": "Portées",
+    "lastUsed": "Dernière utilisation",
+    "created": "Créée",
+    "status": "Statut",
+    "actions": "Actions"
+  },
+  "status": {
+    "active": "Active",
+    "revoked": "Révoquée",
+    "expired": "Expirée"
+  },
+  "form": {
+    "title": "Créer une clé API",
+    "name": "Nom",
+    "namePlaceholder": "ex. ci-deploy, dashboard-readonly",
+    "scopes": "Portées",
+    "scopeDescriptions": {
+      "operator.admin": "Accès administrateur complet",
+      "operator.read": "Accès en lecture seule",
+      "operator.write": "Accès en lecture + écriture",
+      "operator.approvals": "Gérer les approbations d'exécution",
+      "operator.pairing": "Gérer l'appairage d'appareils"
+    },
+    "expiry": "Expiration",
+    "expiryOptions": {
+      "never": "Jamais",
+      "7d": "7 jours",
+      "30d": "30 jours",
+      "90d": "90 jours"
+    },
+    "create": "Créer",
+    "creating": "Création..."
+  },
+  "created": {
+    "title": "Clé API créée",
+    "description": "Copiez cette clé maintenant — elle ne sera plus affichée.",
+    "copied": "Copié !",
+    "copy": "Copier dans le presse-papiers",
+    "done": "Terminé"
+  },
+  "revoke": {
+    "title": "Révoquer la clé API",
+    "description": "Êtes-vous sûr de vouloir révoquer « {{name}} » ? Cette action ne peut pas être annulée.",
+    "confirmLabel": "Révoquer"
+  },
+  "toast": {
+    "created": "Clé API créée",
+    "revoked": "Clé API révoquée",
+    "failedCreate": "Échec de la création de la clé API",
+    "failedRevoke": "Échec de la révocation de la clé API"
+  },
+  "never": "Jamais"
+}

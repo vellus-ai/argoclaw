@@ -1,0 +1,45 @@
+{
+  "title": "Sitzungen",
+  "description": "Durchsuche Gesprächs-Sitzungen",
+  "searchPlaceholder": "Sitzungen durchsuchen...",
+  "emptyTitle": "Noch keine Sitzungen",
+  "emptyDescription": "Sitzungen erscheinen hier, sobald du anfängst zu chatten.",
+  "noMatchTitle": "Keine passenden Sitzungen",
+  "noMatchDescription": "Versuche einen anderen Suchbegriff.",
+  "columns": {
+    "session": "Sitzung",
+    "agent": "Agent",
+    "context": "Kontext",
+    "messages": "Nachrichten",
+    "updated": "Aktualisiert"
+  },
+  "contextBar": {
+    "compacted": "Kompakt {{count}} Zeit(en)"
+  },
+  "detail": {
+    "reset": "Zurücksetzen",
+    "delete": "Löschen",
+    "deleteTitle": "Sitzung löschen",
+    "deleteDescription": "Dies wird permanent alle Nachrichten in dieser Sitzung löschen.",
+    "resetTitle": "Sitzung zurücksetzen",
+    "resetDescription": "Dies löscht alle Nachrichten, aber behält die Sitzung.",
+    "confirmDelete": "Löschen",
+    "confirmReset": "Zurücksetzen",
+    "noMessages": "Keine Nachrichten in dieser Sitzung",
+    "summary": "Zusammenfassung",
+    "showMore": "Mehr anzeigen",
+    "showLess": "Weniger anzeigen",
+    "showDetails": "Details anzeigen",
+    "hide": "Verbergen",
+    "systemMessage": "System-Nachricht",
+    "messages": "Nachrichten"
+  },
+  "toast": {
+    "deleted": "Sitzung gelöscht",
+    "deleteFailed": "Fehler beim Löschen der Sitzung",
+    "reset": "Sitzung zurückgesetzt",
+    "resetFailed": "Fehler beim Zurücksetzen der Sitzung",
+    "updated": "Sitzung aktualisiert",
+    "updateFailed": "Fehler beim Aktualisieren der Sitzung"
+  }
+}

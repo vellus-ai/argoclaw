@@ -1,4 +1,111 @@
 {
+  "layout": {
+    "subtitle": "Lassen Sie uns Ihr Gateway in Betrieb nehmen"
+  },
+  "steps": {
+    "provider": "Provider",
+    "model": "Modell",
+    "agent": "Agent",
+    "channel": "Kanal",
+    "channelOptional": "(Optional)"
+  },
+  "complete": {
+    "title": "Setup abgeschlossen!",
+    "ready": "Ihr System ist einsatzbereit!",
+    "description": "Provider, Agent und Kanal wurden konfiguriert. Sie können sie jederzeit vom Dashboard aus verwalten.",
+    "goToDashboard": "Zum Dashboard"
+  },
+  "provider": {
+    "title": "LLM-Provider konfigurieren",
+    "descriptionCli": "Verbinden Sie sich mit Ihrer lokalen Claude CLI-Installation. Kein API-Schlüssel erforderlich.",
+    "descriptionOauth": "Melden Sie sich mit Ihrem ChatGPT-Konto an, um Ihr Abonnement über OAuth zu nutzen. Kein API-Schlüssel erforderlich.",
+    "description": "Verbinden Sie sich mit einem KI-Provider, um Ihre Agenten anzutreiben. Sie benötigen einen API-Schlüssel.",
+    "providerType": "Provider-Typ",
+    "providerTypeHint": "Der KI-Service, den Sie verbinden möchten. OpenRouter wird für den Zugriff auf mehrere Modelle empfohlen.",
+    "name": "Name",
+    "nameHint": "Interne Kennung für diesen Provider. Wird automatisch vom Provider-Typ generiert.",
+    "apiKey": "API-Schlüssel *",
+    "apiKeyHint": "Ihr Provider-Geheimschlüssel. Serverseitig verschlüsselt und nie in API-Antworten freigegeben.",
+    "apiKeyHintOAuth": "Führen Sie 'claude setup-token' in Ihrem Terminal aus, um ein OAuth-Token zu erhalten. Ihr Provider-Geheimschlüssel. Serverseitig verschlüsselt und nie in API-Antworten freigegeben.",
+    "setupToken": "Setup-Token",
+    "apiBase": "API-Basis-URL",
+    "apiBaseHint": "Die Endpunkt-URL für API-Anfragen. Wird automatisch basierend auf dem Provider-Typ ausgefüllt. Überschreiben Sie nur, wenn Sie einen benutzerdefinierten Proxy verwenden.",
+    "creating": "Wird erstellt...",
+    "create": "Provider erstellen",
+    "errors": {
+      "apiKeyRequired": "API-Schlüssel ist erforderlich",
+      "oauthProviderNotFound": "OAuth-Authentifizierung war erfolgreich, aber der Provider konnte nicht gefunden werden. Bitte versuchen Sie es erneut.",
+      "failedCreate": "Fehler beim Erstellen des Providers"
+    }
+  },
+  "model": {
+    "title": "Modell auswählen & verifizieren",
+    "description": "Wählen Sie ein Modell und überprüfen Sie, dass Ihre Provider-Verbindung funktioniert.",
+    "provider": "Provider:",
+    "model": "Modell *",
+    "modelHint": "Das zu verwendende KI-Modell. Wählen Sie aus der Liste oder geben Sie eine Modell-ID manuell ein, wenn nicht aufgelistet.",
+    "loadingModels": "Wird geladen...",
+    "selectModel": "Modell-ID auswählen oder eingeben",
+    "noModelsHint": "Dieser Provider listet keine Modelle auf — geben Sie die Modell-ID manuell ein.",
+    "verified": "Verifiziert",
+    "verify": "Verifizieren",
+    "verifying": "Wird verifiziert...",
+    "continue": "Fortfahren",
+    "modelVerified": "Modell verifiziert",
+    "modelVerifiedDesc": "{{model}} funktioniert korrekt",
+    "verificationFailed": "Verifizierung fehlgeschlagen. Überprüfen Sie Ihren API-Schlüssel und das Modell."
+  },
+  "agent": {
+    "title": "Erstellen Sie Ihren ersten Agenten",
+    "description": "Ein Agent ist Ihr KI-Assistent. Passen Sie seinen Namen und seine Persönlichkeit an.",
+    "provider": "Provider:",
+    "model": "Modell:",
+    "displayName": "Anzeigename",
+    "displayNameHint": "Wird während der Beschwörung basierend auf der Agent-Persönlichkeit automatisch generiert.",
+    "agentKey": "Agent-Schlüssel",
+    "agentKeyHint": "Eindeutige Kennung für den Agenten. Nur Kleinbuchstaben, Zahlen und Bindestriche.",
+    "agentKeyPlaceholder": "mein-agent",
+    "personality": "Agent-Persönlichkeit",
+    "personalityHint": "Beschreiben Sie die Rolle und das Verhalten Ihres Agenten. KI wird während der Beschwörung Kontextdateien daraus generieren.",
+    "personalityPlaceholder": "Beschreiben Sie die Persönlichkeit, den Zweck und das Verhalten Ihres Agenten...",
+    "personalityHintBottom": "Passen Sie diesen Prompt an, um die Persönlichkeit und Expertise Ihres Agenten zu prägen.",
+    "selfEvolve": "Selbstentwicklung",
+    "selfEvolveDesc": "Ermöglichen Sie dem Agenten, seinen Kommunikationsstil über SOUL.md zu weiterentwickeln",
+    "creating": "Wird erstellt...",
+    "create": "Agent erstellen",
+    "summoningFailed": "Beschwörung fehlgeschlagen. Bitte passen Sie Ihre Einstellungen an und versuchen Sie es erneut.",
+    "errors": {
+      "noProvider": "Kein Provider verfügbar",
+      "failedCreate": "Fehler beim Erstellen des Agenten"
+    }
+  },
+  "channel": {
+    "title": "Verbinden Sie einen Kanal",
+    "description": "Verbinden Sie eine Messaging-Plattform mit Ihrem Agenten. Sie können immer Kanäle später hinzufügen.",
+    "skip": "Überspringen",
+    "skipFinish": "Überspringen & Beenden",
+    "agent": "Agent:",
+    "channelType": "Kanal-Typ",
+    "channelTypeHint": "Die Messaging-Plattform zum Verbinden. Z. B. Telegram, Discord, Zalo.",
+    "name": "Name",
+    "nameHint": "Interne Kennung für diese Kanal-Instanz. Wird automatisch vom Kanal-Typ generiert.",
+    "namePlaceholder": "mein-telegram",
+    "displayName": "Anzeigename",
+    "displayNameHint": "Ein freundlicher Name, der in der Benutzeroberfläche angezeigt wird. Optional.",
+    "displayNamePlaceholder": "Verkaufs-Bot",
+    "credentials": "Anmeldedaten",
+    "credentialsHint": "Serverseitig verschlüsselt. Wird nie in API-Antworten zurückgegeben.",
+    "creating": "Wird erstellt...",
+    "create": "Kanal erstellen",
+    "errors": {
+      "noAgent": "Kein Agent verfügbar",
+      "requiredFields": "Erforderlich: {{fields}}",
+      "failedCreate": "Fehler beim Erstellen des Kanals"
+    }
+  },
+  "common": {
+    "back": "Zurück"
+  },
   "onboarding": {
     "welcome": {
       "greeting": "Hallo, {{displayName}}! Ich bin {{agentName}}, Ihr vertrauenswuerdiger Assistent.",

@@ -1,0 +1,28 @@
+{
+  "deleteChat": "Chat löschen",
+  "deleteChatConfirm": "Dies wird diesen Chat und alle seine Nachrichten dauerhaft löschen.",
+  "newChat": "Neuer Chat",
+  "openSessions": "Offene Sitzungen",
+  "readOnly": "Schreibgeschützt – diese Sitzung gehört einem anderen Benutzer",
+  "empty": {
+    "title": "Starten Sie ein Gespräch",
+    "description": "Senden Sie eine Nachricht, um mit dem Agenten zu chatten."
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Willkommen bei ARGO!",
+      "description": "Ich bin der First Mate, Ihr Steuermann. Lassen Sie uns Ihre Besatzung zusammenstellen."
+    }
+  },
+  "media": {
+    "image": "Bild",
+    "video": "Video",
+    "audio": "Audio",
+    "voice": "Sprachnachricht",
+    "document": "Dokument",
+    "animation": "Animation",
+    "attached": "angefügt"
+  },
+  "forwardedFrom": "Weitergeleitet von",
+  "replyingTo": "Antwortet auf"
+}

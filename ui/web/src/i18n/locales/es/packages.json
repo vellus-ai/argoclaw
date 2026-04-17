@@ -1,0 +1,43 @@
+{
+  "title": "Tiempo de Ejecución y Paquetes",
+  "description": "Gestionar tiempos de ejecución del sistema y paquetes instalados",
+  "runtimes": {
+    "title": "Tiempos de Ejecución",
+    "available": "Disponibles",
+    "missing": "Faltantes"
+  },
+  "system": {
+    "title": "Paquetes del Sistema",
+    "placeholder": "Nombre de paquete (p.ej. github-cli)"
+  },
+  "pip": {
+    "title": "Paquetes de Python",
+    "placeholder": "Nombre de paquete (p.ej. pandas)"
+  },
+  "npm": {
+    "title": "Paquetes de Node",
+    "placeholder": "Nombre de paquete (p.ej. typescript)"
+  },
+  "actions": {
+    "install": "Instalar",
+    "uninstall": "Desinstalar",
+    "installing": "Instalando...",
+    "uninstalling": "Desinstalando..."
+  },
+  "messages": {
+    "installSuccess": "{{name}} instalado exitosamente",
+    "installError": "Error al instalar {{name}}",
+    "uninstallSuccess": "{{name}} removido exitosamente",
+    "uninstallError": "Error al remover {{name}}"
+  },
+  "confirmUninstall": {
+    "title": "Confirmar Desinstalación",
+    "description": "¿Estás seguro de que deseas remover {{name}}? Esta acción no se puede deshacer."
+  },
+  "table": {
+    "name": "Nombre",
+    "version": "Versión",
+    "actions": "Acciones",
+    "empty": "Sin paquetes instalados"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "expandSidebar": "Développer la barre latérale",
+  "collapseSidebar": "Réduire la barre latérale",
+  "openMenu": "Ouvrir le menu",
+  "toggleTheme": "Basculer le thème",
+  "logout": "Déconnexion",
+  "language": "Langue",
+  "timezone": "Fuseau horaire",
+  "pairingRequests": "Demandes d'appairage",
+  "pendingPairingRequest": "{{count}} demande d'appairage en attente",
+  "pendingPairingRequests": "{{count}} demandes d'appairage en attente",
+  "languages": {
+    "en": "Anglais",
+    "vi": "Tiếng Việt",
+    "zh": "中文"
+  }
+}

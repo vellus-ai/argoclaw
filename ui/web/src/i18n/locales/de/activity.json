@@ -1,0 +1,26 @@
+{
+  "title": "Aktivitätsprotokoll",
+  "description": "Überwachungsprotokoll von Admin- und Konfigurationsänderungen.",
+  "filters": {
+    "action": "Aktion",
+    "allActions": "Alle Aktionen",
+    "agentCreated": "Agent erstellt",
+    "agentUpdated": "Agent aktualisiert",
+    "agentDeleted": "Agent gelöscht",
+    "entityType": "Entity-Typ",
+    "allEntities": "Alle Entities",
+    "agent": "Agent"
+  },
+  "table": {
+    "action": "Aktion",
+    "actor": "Akteur",
+    "entity": "Entity",
+    "entityId": "Entity-ID",
+    "ip": "IP-Adresse",
+    "time": "Zeit"
+  },
+  "empty": {
+    "title": "Keine Aktivitätsprotokolle",
+    "description": "Aktivitätsprotokolle erscheinen hier, wenn Admin-Aktionen durchgeführt werden."
+  }
+}

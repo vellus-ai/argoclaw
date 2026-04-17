@@ -41,6 +41,7 @@
     "cacheWrite": "写入",
     "cached": "已缓存",
     "copy": "复制",
+    "createdAt": "创建于：",
     "startTime": "开始：",
     "endTime": "结束：",
     "input": "输入：",
