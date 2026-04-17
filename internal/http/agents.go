@@ -25,12 +25,13 @@ type AgentsHandler struct {
 	msgBus           *bus.MessageBus   // for cache invalidation events (nil = no events)
 	summoner         *AgentSummoner    // LLM-based agent setup (nil = disabled)
 	isOwner          func(string) bool // checks if user ID is a system owner (nil = no owners configured)
+	tenantMw         *TenantMiddleware // injects tenant_id from JWT into context
 }
 
 // NewAgentsHandler creates a handler for agent management endpoints.
 // isOwner is a function that checks if a user ID is in ARGOCLAW_OWNER_IDS (nil = disabled).
-func NewAgentsHandler(agents store.AgentStore, token, defaultWorkspace string, msgBus *bus.MessageBus, summoner *AgentSummoner, isOwner func(string) bool) *AgentsHandler {
-	return &AgentsHandler{agents: agents, token: token, defaultWorkspace: defaultWorkspace, msgBus: msgBus, summoner: summoner, isOwner: isOwner}
+func NewAgentsHandler(agents store.AgentStore, token, defaultWorkspace string, msgBus *bus.MessageBus, summoner *AgentSummoner, isOwner func(string) bool, tenantMw *TenantMiddleware) *AgentsHandler {
+	return &AgentsHandler{agents: agents, token: token, defaultWorkspace: defaultWorkspace, msgBus: msgBus, summoner: summoner, isOwner: isOwner, tenantMw: tenantMw}
 }
 
 // isOwnerUser checks if the given user ID is a system owner.
@@ -51,24 +52,33 @@ func (h *AgentsHandler) emitCacheInvalidate(kind, key string) {
 
 // RegisterRoutes registers all agent management routes on the given mux.
 func (h *AgentsHandler) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /v1/agents", h.authMiddleware(h.handleList))
-	mux.HandleFunc("POST /v1/agents", h.authMiddleware(h.handleCreate))
-	mux.HandleFunc("GET /v1/agents/{id}", h.authMiddleware(h.handleGet))
-	mux.HandleFunc("PUT /v1/agents/{id}", h.authMiddleware(h.handleUpdate))
-	mux.HandleFunc("DELETE /v1/agents/{id}", h.authMiddleware(h.handleDelete))
-	mux.HandleFunc("GET /v1/agents/{id}/shares", h.authMiddleware(h.handleListShares))
-	mux.HandleFunc("POST /v1/agents/{id}/shares", h.authMiddleware(h.handleShare))
-	mux.HandleFunc("DELETE /v1/agents/{id}/shares/{userID}", h.authMiddleware(h.handleRevokeShare))
-	mux.HandleFunc("POST /v1/agents/{id}/regenerate", h.authMiddleware(h.handleRegenerate))
-	mux.HandleFunc("POST /v1/agents/{id}/resummon", h.authMiddleware(h.handleResummon))
-	mux.HandleFunc("GET /v1/agents/{id}/instances", h.authMiddleware(h.handleListInstances))
-	mux.HandleFunc("GET /v1/agents/{id}/instances/{userID}/files", h.authMiddleware(h.handleGetInstanceFiles))
-	mux.HandleFunc("PUT /v1/agents/{id}/instances/{userID}/files/{fileName}", h.authMiddleware(h.handleSetInstanceFile))
-	mux.HandleFunc("PATCH /v1/agents/{id}/instances/{userID}/metadata", h.authMiddleware(h.handleUpdateInstanceMetadata))
+	mux.HandleFunc("GET /v1/agents", h.withTenant(h.authMiddleware(h.handleList)))
+	mux.HandleFunc("POST /v1/agents", h.withTenant(h.authMiddleware(h.handleCreate)))
+	mux.HandleFunc("GET /v1/agents/{id}", h.withTenant(h.authMiddleware(h.handleGet)))
+	mux.HandleFunc("PUT /v1/agents/{id}", h.withTenant(h.authMiddleware(h.handleUpdate)))
+	mux.HandleFunc("DELETE /v1/agents/{id}", h.withTenant(h.authMiddleware(h.handleDelete)))
+	mux.HandleFunc("GET /v1/agents/{id}/shares", h.withTenant(h.authMiddleware(h.handleListShares)))
+	mux.HandleFunc("POST /v1/agents/{id}/shares", h.withTenant(h.authMiddleware(h.handleShare)))
+	mux.HandleFunc("DELETE /v1/agents/{id}/shares/{userID}", h.withTenant(h.authMiddleware(h.handleRevokeShare)))
+	mux.HandleFunc("POST /v1/agents/{id}/regenerate", h.withTenant(h.authMiddleware(h.handleRegenerate)))
+	mux.HandleFunc("POST /v1/agents/{id}/resummon", h.withTenant(h.authMiddleware(h.handleResummon)))
+	mux.HandleFunc("GET /v1/agents/{id}/instances", h.withTenant(h.authMiddleware(h.handleListInstances)))
+	mux.HandleFunc("GET /v1/agents/{id}/instances/{userID}/files", h.withTenant(h.authMiddleware(h.handleGetInstanceFiles)))
+	mux.HandleFunc("PUT /v1/agents/{id}/instances/{userID}/files/{fileName}", h.withTenant(h.authMiddleware(h.handleSetInstanceFile)))
+	mux.HandleFunc("PATCH /v1/agents/{id}/instances/{userID}/metadata", h.withTenant(h.authMiddleware(h.handleUpdateInstanceMetadata)))
 }
 
 func (h *AgentsHandler) authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return requireAuth(h.token, "", next)
+}
+
+// withTenant wraps a handler with TenantMiddleware to inject tenant_id from JWT into context.
+func (h *AgentsHandler) withTenant(next http.HandlerFunc) http.HandlerFunc {
+	if h.tenantMw == nil {
+		return next
+	}
+	wrapped := h.tenantMw.Wrap(next)
+	return wrapped.ServeHTTP
 }
 
 func (h *AgentsHandler) handleList(w http.ResponseWriter, r *http.Request) {
@@ -167,7 +177,7 @@ func (h *AgentsHandler) handleCreate(w http.ResponseWriter, r *http.Request) {
 
 	// Start LLM summoning in background if applicable
 	if req.Status == store.AgentStatusSummoning {
-		go h.summoner.SummonAgent(req.ID, req.Provider, req.Model, description)
+		go h.summoner.SummonAgent(store.TenantIDFromContext(r.Context()), req.ID, req.Provider, req.Model, description)
 	}
 
 	emitAudit(h.msgBus, r, "agent.created", "agent", req.ID.String())

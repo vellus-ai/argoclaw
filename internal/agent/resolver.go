@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/vellus-ai/argoclaw/internal/bootstrap"
@@ -94,8 +95,7 @@ type ResolverDeps struct {
 // NewManagedResolver creates a ResolverFunc that builds Loops from DB agent data.
 // Agents are defined in Postgres, not config.json.
 func NewManagedResolver(deps ResolverDeps) ResolverFunc {
-	return func(agentKey string, opts ResolveOpts) (Agent, error) {
-		ctx := context.Background()
+	return func(ctx context.Context, agentKey string, opts ResolveOpts) (Agent, error) {
 
 		// Support lookup by UUID (e.g. from cron jobs that store agent_id as UUID)
 		var ag *store.AgentData
@@ -368,11 +368,17 @@ func NewManagedResolver(deps ResolverDeps) ResolverFunc {
 }
 
 // InvalidateAgent removes an agent from the router cache, forcing re-resolution.
-// Used when agent config is updated via API.
+// Iterates all cache entries and removes those whose key ends with ":agentKey"
+// (any tenant). Used when agent config is updated via API.
 func (r *Router) InvalidateAgent(agentKey string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	delete(r.agents, agentKey)
+	suffix := ":" + agentKey
+	for key := range r.agents {
+		if strings.HasSuffix(key, suffix) {
+			delete(r.agents, key)
+		}
+	}
 	slog.Debug("invalidated agent cache", "agent", agentKey)
 }
 

@@ -391,7 +391,7 @@ func (r *MethodRouter) handleHealth(ctx context.Context, client *Client, req *pr
 }
 
 func (r *MethodRouter) handleStatus(ctx context.Context, client *Client, req *protocol.RequestFrame) {
-	agents := r.server.agents.ListInfo()
+	agents := r.server.agents.ListInfo(uuid.Nil)
 
 	sessionCount := 0
 	if r.server.sessions != nil {

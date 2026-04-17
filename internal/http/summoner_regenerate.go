@@ -20,8 +20,10 @@ import (
 // RegenerateAgent updates context files based on an edit prompt.
 // Reads existing files, sends them + edit instructions to LLM, stores results.
 // Synchronous — caller should run in goroutine if needed.
-func (s *AgentSummoner) RegenerateAgent(agentID uuid.UUID, providerName, model, editPrompt string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
+func (s *AgentSummoner) RegenerateAgent(tenantID, agentID uuid.UUID, providerName, model, editPrompt string) {
+	// background: RegenerateAgent runs in goroutine with tenantID propagated
+	ctx := store.WithTenantID(context.Background(), tenantID)
+	ctx, cancel := context.WithTimeout(ctx, 300*time.Second)
 	defer cancel()
 
 	s.ensureUserPredefined(ctx, agentID)

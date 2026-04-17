@@ -69,8 +69,10 @@ const singleCallTimeout = 300 * time.Second
 // On retry (resummon), skips files that were already generated (differ from template).
 // On success: stores generated files and sets agent status to "active".
 // On failure: keeps template files (already seeded) and sets status to store.AgentStatusSummonFailed.
-func (s *AgentSummoner) SummonAgent(agentID uuid.UUID, providerName, model, description string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
+func (s *AgentSummoner) SummonAgent(tenantID, agentID uuid.UUID, providerName, model, description string) {
+	// background: SummonAgent runs in goroutine with tenantID propagated
+	ctx := store.WithTenantID(context.Background(), tenantID)
+	ctx, cancel := context.WithTimeout(ctx, 600*time.Second)
 	defer cancel()
 
 	s.ensureUserPredefined(ctx, agentID)

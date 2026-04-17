@@ -108,7 +108,7 @@ func (m *PairingMethods) handleApprove(ctx context.Context, client *gateway.Clie
 	// Notify the user via channel (matching TS notifyPairingApproved).
 	// Use Background context: the CLI client may disconnect before the notification is sent.
 	if m.onApprove != nil && paired != nil {
-		go m.onApprove(context.Background(), paired.Channel, paired.ChatID, paired.SenderID)
+		go m.onApprove(context.Background(), paired.Channel, paired.ChatID, paired.SenderID) // background: onApprove notifies pairing asynchronously
 	}
 
 	if m.broadcaster != nil {

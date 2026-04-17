@@ -25,6 +25,12 @@
 - `operator_level` lido exclusivamente do banco de dados na autenticação — nunca derivado de JWT claims
 - Audit trail completo: `slog.Info("operator.access")` em todos os acessos, `slog.Warn("security.operator_access_denied")` em todas as rejeições
 - Endpoints operator são somente leitura — nenhuma operação write em tenants de clientes
+- fix(security): propagação de `tenant_id` no Agent Resolver — `ResolverFunc` e `Router.Get()` agora aceitam `context.Context`, eliminando queries sem filtro de tenant (cross-tenant data leak)
+- fix(security): cache do Agent Router scoped por tenant — cache key composta `tenantID:agentKey` impede cache poisoning cross-tenant
+- fix(security): `context.Background()` removido de 9 handlers WS — handlers agora usam `ctx` do `MethodRouter.Handle()` com `tenant_id`
+- fix(security): `TenantMiddleware` adicionado a `ProvidersHandler` e `AgentsHandler` HTTP — endpoints JWT agora propagam `tenant_id` corretamente
+- fix(security): `AgentSummoner` recebe `tenantID` para operações de store em goroutines de background
+- chore(security): lint check `make lint-ctx` previne futuros usos de `context.Background()` em handlers WS sem anotação
 
 ### Fixed
 - Corrigido loop infinito de login para usuarios autenticados por email e senha — conexao WebSocket agora reconhece JWT e atribui a role correta (#44)

@@ -17,7 +17,7 @@ import (
 // It reuses mockProviderStore and mockSecretsStore defined in oauth_test.go.
 func newTestProvidersHandler(ps *mockProviderStore, reg *providers.Registry) *ProvidersHandler {
 	ss := newMockSecretsStore()
-	return NewProvidersHandler(ps, ss, "test-token", reg, "")
+	return NewProvidersHandler(ps, ss, "test-token", reg, "", nil)
 }
 
 // makeAuthRequest wraps an httptest request with the gateway token bearer.
@@ -35,7 +35,7 @@ func TestHandleListProviders_NoRegistry(t *testing.T) {
 	dbProvider.ID = dbID
 	ps.providers["my-provider"] = dbProvider
 
-	h := NewProvidersHandler(ps, newMockSecretsStore(), "test-token", nil, "")
+	h := NewProvidersHandler(ps, newMockSecretsStore(), "test-token", nil, "", nil)
 
 	w := httptest.NewRecorder()
 	h.handleListProviders(w, makeAuthRequest("GET", "/v1/providers"))

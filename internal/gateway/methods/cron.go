@@ -217,7 +217,7 @@ func (m *CronMethods) handleRun(ctx context.Context, client *gateway.Client, req
 	emitAudit(m.eventBus, client, "cron.run", "cron", jobID)
 
 	go func() {
-		if _, _, err := m.service.RunJob(context.Background(), jobID, force); err != nil {
+		if _, _, err := m.service.RunJob(context.Background(), jobID, force); err != nil { // background: RunJob executes cron job independently
 			slog.Warn("cron.run background error", "jobId", jobID, "error", err)
 		}
 	}()

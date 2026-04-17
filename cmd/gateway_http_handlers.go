@@ -10,7 +10,7 @@ import (
 )
 
 // wireHTTP creates HTTP handlers (agents + skills + traces + MCP + custom tools + channel instances + providers + delegations + builtin tools + pending messages + projects + team events + secure CLI + plugins).
-func wireHTTP(stores *store.Stores, token, defaultWorkspace string, msgBus *bus.MessageBus, toolsReg *tools.Registry, providerReg *providers.Registry, isOwner func(string) bool, gatewayAddr string, mcpToolLister httpapi.MCPToolLister) (*httpapi.AgentsHandler, *httpapi.SkillsHandler, *httpapi.TracesHandler, *httpapi.MCPHandler, *httpapi.CustomToolsHandler, *httpapi.ChannelInstancesHandler, *httpapi.ProvidersHandler, *httpapi.DelegationsHandler, *httpapi.BuiltinToolsHandler, *httpapi.PendingMessagesHandler, *httpapi.ProjectHandler, *httpapi.TeamEventsHandler, *httpapi.SecureCLIHandler) {
+func wireHTTP(stores *store.Stores, token, defaultWorkspace string, msgBus *bus.MessageBus, toolsReg *tools.Registry, providerReg *providers.Registry, isOwner func(string) bool, gatewayAddr string, mcpToolLister httpapi.MCPToolLister, tenantMw *httpapi.TenantMiddleware) (*httpapi.AgentsHandler, *httpapi.SkillsHandler, *httpapi.TracesHandler, *httpapi.MCPHandler, *httpapi.CustomToolsHandler, *httpapi.ChannelInstancesHandler, *httpapi.ProvidersHandler, *httpapi.DelegationsHandler, *httpapi.BuiltinToolsHandler, *httpapi.PendingMessagesHandler, *httpapi.ProjectHandler, *httpapi.TeamEventsHandler, *httpapi.SecureCLIHandler) {
 	var agentsH *httpapi.AgentsHandler
 	var skillsH *httpapi.SkillsHandler
 	var tracesH *httpapi.TracesHandler
@@ -29,7 +29,7 @@ func wireHTTP(stores *store.Stores, token, defaultWorkspace string, msgBus *bus.
 		if providerReg != nil {
 			summoner = httpapi.NewAgentSummoner(stores.Agents, providerReg, msgBus)
 		}
-		agentsH = httpapi.NewAgentsHandler(stores.Agents, token, defaultWorkspace, msgBus, summoner, isOwner)
+		agentsH = httpapi.NewAgentsHandler(stores.Agents, token, defaultWorkspace, msgBus, summoner, isOwner, tenantMw)
 	}
 
 	if stores != nil && stores.Skills != nil {
@@ -58,7 +58,7 @@ func wireHTTP(stores *store.Stores, token, defaultWorkspace string, msgBus *bus.
 	}
 
 	if stores != nil && stores.Providers != nil {
-		providersH = httpapi.NewProvidersHandler(stores.Providers, stores.ConfigSecrets, token, providerReg, gatewayAddr)
+		providersH = httpapi.NewProvidersHandler(stores.Providers, stores.ConfigSecrets, token, providerReg, gatewayAddr, tenantMw)
 		providersH.SetMessageBus(msgBus)
 		if stores.MCP != nil {
 			providersH.SetMCPServerLookup(buildMCPServerLookup(stores.MCP))
